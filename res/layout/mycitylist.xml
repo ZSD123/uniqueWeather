@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    >
+
+    <RelativeLayout 
+       android:id="@+id/mycitylistrelative"
+       android:layout_width="match_parent"
+       android:layout_height="135dp"
+       android:layout_centerHorizontal="true">
+        <TextView 
+    android:id="@+id/myCityName"
+    android:layout_width="100dp"
+    android:layout_height="60dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginTop="10dp"
+    android:text="武汉市"
+    android:layout_centerVertical="true"
+    android:textSize="25sp"
+    />
+
+<TextView
+    android:id="@+id/myCityTemp"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:layout_alignBaseline="@+id/myCityName"
+    android:layout_alignBottom="@+id/myCityName"
+    android:layout_alignParentRight="true"
+    android:layout_marginRight="3dp"
+    android:text="25"
+    android:layout_centerVertical="true"
+    android:textSize="25sp" />
+
+<ImageView
+    android:id="@+id/myCityWeather"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:layout_alignTop="@+id/myCityName"
+    android:layout_centerHorizontal="true"
+    android:layout_centerVertical="true" />
+        
+        </RelativeLayout>
+
+</RelativeLayout>
