@@ -114,20 +114,66 @@ public class myCityAction extends Activity {
          {   Http.sendjingdiancityRequest(new HttpCallbackListener() {   //获得景点城市的情况，目的是获取相应的id
 			
 			@Override
-			public void onFinish(String response) {
-				
+			public void onFinish(String response) {                        //通常不等到onFinish的数据返回就转向下面的程序                          
 				if(!response.isEmpty())
 				{editor.putBoolean("myjingdiancityflag",true);
 				 editor.commit();
 				  Utility.handlejingdiancity(response,myCityAction.this);
+                   if(!myjingdianflag)
+		        	{
+		        	   Log.d("Main", c);
+		        	   Log.d("Main",dJingdianDB.loadjingdianCity(c).getjingdiancityid());
+		        	   Http.sendjingdianRequest(dJingdianDB.loadjingdianCity(c).getjingdiancityid(), new HttpCallbackListener() {
+							
+							@Override
+							public void onFinish(String response) 
+							{   Log.d("Main",response);
+								Utility.handlejingdian(response, myCityAction.this);
+								jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
+								List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);
+								 if(jingdians.size()>0)
+					    		 {   editor.putBoolean("myjingdianflag", true);
+					    		     editor.commit();
+					    			 jingdian selectedJingdian=jingdians.get(0);
+					    			 Bitmap bitmap=Utility.getPicture(selectedJingdian.getImageUrl());
+					    			 savePicture(album1, bitmap);
+					    			    runOnUiThread(new Runnable(){
+						 				    @Override
+						 				    public void run(){
+						 				    	mycity1=new myCity(citynsString,weather_info.ALBUM_PATH , temp,album1);
+				                                dataList.add(mycity1);
+						 				    	adapter.notifyDataSetChanged();
+						 				    }});
+					    		  	
+					    		 }	
+							}
+						});
+		         }
+		         else {
+		        	 jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
+		        	 List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);//载入相应的城市的景点
+		        		 if(jingdians.size()>0)//如果已经有相应城市的景点列表
+		        		 {  
+		    			    final jingdian jingdian2=jingdians.get(0);
+		    				bitmap1=Utility.getPicture(jingdian2.getImageUrl());
+		    				 if(bitmap1!=null)
+		    		           savePicture(album1, bitmap1);
+		    			  	 myCity mycity=new myCity(citynsString,weather_info.ALBUM_PATH , temp,album1);//第二个参数应该一致，都是本地地址
+		    		    	 dataList.add(mycity);
+		    		    	 adapter.notifyDataSetChanged();
+		                  }	
+				      }
 				}
-				
+				                                                    
 			}
 		    });
          }
-           
-           if(!myjingdianflag)
-        	{Http.sendjingdianRequest(dJingdianDB.loadjingdianCity(c).getjingdiancityid(), new HttpCallbackListener() {
+
+       else if(!myjingdianflag)
+      	{  
+      	   Log.d("Main", c);
+      	   Log.d("Main",dJingdianDB.loadjingdianCity(c).getjingdiancityid());
+      	   Http.sendjingdianRequest(dJingdianDB.loadjingdianCity(c).getjingdiancityid(), new HttpCallbackListener() {
 					
 					@Override
 					public void onFinish(String response) 
@@ -143,27 +189,26 @@ public class myCityAction extends Activity {
 			    			 savePicture(album1, bitmap);
 			    		  	 myCity mycity=new myCity(citynsString,weather_info.ALBUM_PATH , temp,album1);
 			    	    	 dataList.add(mycity);
-
+                             adapter.notifyDataSetChanged();
 			    		 }	
 					}
 				});
-         }
-         else {
-        	 jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
-        	 List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);//载入相应的城市的景点
-        		 if(jingdians.size()>0)//如果已经有相应城市的景点列表
-        		 {  
-    			    final jingdian jingdian2=jingdians.get(0);
-    				bitmap1=Utility.getPicture(jingdian2.getImageUrl());
-    				 if(bitmap1!=null)
-    		           savePicture(album1, bitmap1);
-    			  	 myCity mycity=new myCity(citynsString,weather_info.ALBUM_PATH , temp,album1);//第二个参数应该一致，都是本地地址
-    		    	 dataList.add(mycity);
- 
-                  }	
+       }
+       else {
+      	 jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
+      	 List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);//载入相应的城市的景点
+      		 if(jingdians.size()>0)//如果已经有相应城市的景点列表
+      		 {  
+  			    final jingdian jingdian2=jingdians.get(0);
+  				bitmap1=Utility.getPicture(jingdian2.getImageUrl());
+  				 if(bitmap1!=null)
+  		           savePicture(album1, bitmap1);
+  			  	 myCity mycity=new myCity(citynsString,weather_info.ALBUM_PATH , temp,album1);//第二个参数应该一致，都是本地地址
+  		    	 dataList.add(mycity);
+  		    	 adapter.notifyDataSetChanged();
+                 }	
 		      }
-    	
-    		showAllMyCity();//进入后显示数据表中所有的城市
+         showAllMyCity();//进入后显示数据表中所有的城市
 		}
     	 
     	 
