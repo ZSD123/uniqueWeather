@@ -65,7 +65,6 @@ public class weather_info extends Activity {
     public SharedPreferences.Editor editor;
     public static String l="1";
     public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
-    public static String ALBUM_PATH1=Environment.getExternalStorageDirectory()+"/download/"+"weather"+l+".png";
 	public static String address3="http://route.showapi.com/9-2";
 	@Override
 	public void onCreate(Bundle savedInstance)
@@ -89,7 +88,7 @@ public class weather_info extends Activity {
 		editor=PreferenceManager.getDefaultSharedPreferences(weather_info.this).edit();
 		pre=PreferenceManager.getDefaultSharedPreferences(weather_info.this);
 		flag=pre.getInt("flag", 0);
-		accountName=pre.getString("accountName", null);
+		accountName=pre.getString("accountName","");
 		if(!accountName.isEmpty())
 		{Toast.makeText(this,accountName + ",»¶Ó­Äú", Toast.LENGTH_SHORT).show();
 		 userName.setText(accountName);
@@ -235,12 +234,15 @@ public class weather_info extends Activity {
 						accountName=editText.getText().toString(); 
 						editor.putString("accountName", accountName);
 						editor.commit();
+						if(!accountName.isEmpty())
+							userName.setText(accountName);
 					}
 				});
 				builder.show();
 				chenhuonce=1;
 				editor.putInt("chenhuonce",chenhuonce);
-				editor.commit();}
+				editor.commit();
+				}
 				countyName=data.getStringExtra("countyName");
 				countyname.setText(countyName);
                 queryWeather();

@@ -56,7 +56,6 @@ public class Http {
                  final String res=new ShowApiRequest(address,appid,secret)
                                     .addTextPara("area", area)
                                     .post();
-                 System.out.print(res);
                  if(listener!=null)
                 	 listener.onFinish(res);
 			}
@@ -98,7 +97,7 @@ public class Http {
 			}).start();
     	
     }
-    public static void sendjingdianRequest(final String cid,final HttpCallbackListener listener)
+    public static void sendjingdianRequest(final String cid,final HttpCallbackListener listener)//获得cid城市的景点情况
     {
     	new Thread(new  Runnable() {
     			@Override

@@ -40,7 +40,7 @@ public class jingdianDB {
     		db.insert("jingdianCity", null, values);
     	}
     }
-    public jingdiancity loadjingdianCity(String name)
+    public jingdiancity loadjingdianCity(String name)     //找到相应的景点城市从而得到id
     {
     	jingdiancity city=new jingdiancity();
     	Cursor cursor=db.query("jingdianCity",null,"jingdianCityName=?", new String []{name}, null,null, null);

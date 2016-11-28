@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.myCity;
+import android.R.integer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -37,7 +38,7 @@ public class mycityDB {
 			values.put("myCityWeather",mycity.getMyCityWeather());
 			values.put("myCityTemp", mycity.getMyCityTemp());
 			values.put("myCityPic",mycity.getMyCityPic());
-			values.put("myCityBack", mycity.getMyCityBack());
+			db.insert("mycity", null, values);
 		}
 	}
 	public List<myCity> loadMyCity()
@@ -47,7 +48,7 @@ public class mycityDB {
 		if(cursor.moveToFirst())
 		{
 			do{
-				myCity mycity=new myCity(cursor.getString(cursor.getColumnIndex("myCityName")),cursor.getString(cursor.getColumnIndex("myCityWeather")),cursor.getString(cursor.getColumnIndex("myCityTemp")), cursor.getString(cursor.getColumnIndex("myCityPic")),cursor.getString(cursor.getColumnIndex("myCityBack")));
+				myCity mycity=new myCity(cursor.getString(cursor.getColumnIndex("myCityName")),cursor.getString(cursor.getColumnIndex("myCityWeather")),cursor.getString(cursor.getColumnIndex("myCityTemp")), cursor.getString(cursor.getColumnIndex("myCityPic")));
 				datalist.add(mycity);
 			}while(cursor.moveToNext());
 		}
@@ -78,6 +79,19 @@ public class mycityDB {
 		}
 		return pic;
 		
+	}
+	public String[] loadmycityName()
+	{   int i=0;
+		String[] myCityName = null;
+		Cursor cursor=db.query("mycity",null ,null, null, null,null, null);
+		if(cursor.moveToFirst())
+		{
+			do{
+				myCityName[i]=cursor.getString(cursor.getColumnIndex("myCityName"));
+				i++;
+			}while(cursor.moveToNext());
+		}
+		return myCityName;
 	}
 
 }

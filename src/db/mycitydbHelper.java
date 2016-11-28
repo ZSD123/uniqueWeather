@@ -12,8 +12,7 @@ public class mycitydbHelper extends SQLiteOpenHelper {
 			+ "myCityName Text,"
 			+ "myCityWeather Text,"
 			+ "myCityTemp Text,"
-			+ "myCityPic Text,"
-			+ "myCityBack Text)";
+			+ "myCityPic Text)";
 	
 	
 	public mycitydbHelper(Context context, String name, CursorFactory factory,
