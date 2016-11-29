@@ -42,9 +42,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class myCityAction extends Activity {
 	 public List<myCity> dataList=new ArrayList<myCity>();
@@ -79,7 +82,7 @@ public class myCityAction extends Activity {
     	 super.onCreate(savedInstancestate);
     	 requestWindowFeature(Window.FEATURE_NO_TITLE);
     	 setContentView(R.layout.mycity);
-    	 ListView listView=(ListView)findViewById(R.id.myCityList);
+    	 final ListView listView=(ListView)findViewById(R.id.myCityList);
     	 adapter=new myCityAdapter(myCityAction.this,R.layout.mycitylist, dataList);
     	 listView.setAdapter(adapter);
     	 buttonadd=(Button)findViewById(R.id.add);
@@ -101,6 +104,25 @@ public class myCityAction extends Activity {
 				 
 			}
 		});
+    	 buttonjian.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) 
+			{ 
+				Toast.makeText(myCityAction.this,"请长按您要删除的城市",Toast.LENGTH_SHORT).show();
+			 
+			}
+		});
+    	 listView.setOnItemLongClickListener(new OnItemLongClickListener() 
+    	 {
+    		public boolean onItemLongClick(AdapterView<?> arg0,View arg1,int arg2,long arg3)
+    		{ int nIndex=listView.getId();
+    		  if(nIndex!=0)
+    		     listView.removeViewAt(nIndex);
+    		  return false;
+    		}
+		});
+		
     	
      }
      public void init(final String c)
@@ -354,12 +376,11 @@ public class myCityAction extends Activity {
 								
 								@Override
 								public void run() {
-									 mycity1=new myCity(name,mycity1.getMyCityWeatherWeb(), weatherPicPath,temp1,mycity1.getMyCityPicWeb(),cityPicPath);    //weatherPicPath和后面的是本地路径
+									   mycity1=new myCity(name,mycity1.getMyCityWeatherWeb(), weatherPicPath,temp1,mycity1.getMyCityPicWeb(),cityPicPath);    //weatherPicPath和后面的是本地路径
 					 				   mycitydb.saveMyCity(mycity1);
 			                           dataList.add(mycity1);
 					 				   adapter.notifyDataSetChanged();
 					 				   dismissProgressDialog();
-									
 								}
 							});
 		 				  
@@ -396,5 +417,9 @@ public class myCityAction extends Activity {
      {
     	 if(progressDialog!=null)
     		 progressDialog.dismiss();
+     }
+     public void deleteMyCity()
+     {
+    	 
      }
 }
