@@ -79,7 +79,6 @@ public class Utility {
         	e.printStackTrace();
         }
 
-   	    Log.d("Main", "getPicture");
         return bitmap;
 	}
      public static void handlejingdiancity(String response,Context context)

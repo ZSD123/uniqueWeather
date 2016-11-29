@@ -50,10 +50,10 @@ public class myCityAdapter extends android.widget.ArrayAdapter<model.myCity> {
 			viewHolder=(ViewHolder)view.getTag();
 		}
 		viewHolder.myCityNameTextView.setText(mycity.getMyCityName());
-		Uri uri=Uri.parse(mycity.getMyCityWeather());
+		Uri uri=Uri.parse(mycity.getMyCityWeatherLocal());
         viewHolder.myCityWeatherImageView.setImageURI(uri);
 		viewHolder.myCityTemp.setText(mycity.getMyCityTemp());
-		BitmapDrawable drawable=new BitmapDrawable(mycity.getMyCityPic());
+		BitmapDrawable drawable=new BitmapDrawable(mycity.getMyCityPicLocal());
 		if(drawable!=null)
 		{ 
 		  viewHolder.mycityRelativeLayout.setBackgroundDrawable(drawable);

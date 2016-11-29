@@ -35,9 +35,11 @@ public class mycityDB {
 		{
 			ContentValues values=new ContentValues();
 			values.put("myCityName",mycity.getMyCityName());
-			values.put("myCityWeather",mycity.getMyCityWeather());
+			values.put("myCityWeatherWeb",mycity.getMyCityWeatherWeb());
+			values.put("myCityWeatherLocal", mycity.getMyCityWeatherLocal());
 			values.put("myCityTemp", mycity.getMyCityTemp());
-			values.put("myCityPic",mycity.getMyCityPic());
+			values.put("myCityPicWeb",mycity.getMyCityPicWeb());
+			values.put("myCityPicLocal", mycity.getMyCityPicLocal());
 			db.insert("mycity", null, values);
 		}
 	}
@@ -48,7 +50,7 @@ public class mycityDB {
 		if(cursor.moveToFirst())
 		{
 			do{
-				myCity mycity=new myCity(cursor.getString(cursor.getColumnIndex("myCityName")),cursor.getString(cursor.getColumnIndex("myCityWeather")),cursor.getString(cursor.getColumnIndex("myCityTemp")), cursor.getString(cursor.getColumnIndex("myCityPic")));
+				myCity mycity=new myCity(cursor.getString(cursor.getColumnIndex("myCityName")),cursor.getString(cursor.getColumnIndex("myCityWeatherWeb")),cursor.getString(cursor.getColumnIndex("myCityWeatherLocal")), cursor.getString(cursor.getColumnIndex("myCityTemp")),cursor.getString(cursor.getColumnIndex("myCityPicWeb")),cursor.getString(cursor.getColumnIndex("myCityPicLocal")));
 				datalist.add(mycity);
 			}while(cursor.moveToNext());
 		}

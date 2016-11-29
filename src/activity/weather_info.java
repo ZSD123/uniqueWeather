@@ -127,8 +127,10 @@ public class weather_info extends Activity {
 		    realtime.setText(pre.getString("realtime", ""));
 		    String publishTime=pre.getString("time", "");
 		    char[]b=publishTime.toCharArray();
-		    String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
+		    if(b.length>0)
+		    { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
 		    time.setText(c);
+		    }
 			queryWeather();
 		}
 		button_switch.setOnClickListener(new OnClickListener()
@@ -201,8 +203,10 @@ public class weather_info extends Activity {
 	     realtime.setText(pre.getString("realtime", ""));
 	     String publishTime=pre.getString("time", "");
 	     char[]b=publishTime.toCharArray();
-	     String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
+	     if(b.length>0)
+	     { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
 	     time.setText(c);
+	     }
 	     if(bitmap!=null)
 	         pic.setImageBitmap(bitmap);
 	     Intent intent=new Intent(this,autoUqdateService.class);

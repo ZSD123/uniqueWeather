@@ -5,32 +5,44 @@ import android.widget.TextView;
 
 public class myCity {
      public String myCityName;
-     public String myCityWeather;
+     public String myCityWeatherWeb;
+     public String myCityWeatherLocal;
      public String myCityTemp;
-     public String myCityPic;
-     public  myCity(String name,String weather,String temp,String pic)
+     public String myCityPicWeb;
+     public String myCityPicLocal;
+     public  myCity(String name,String weatherWeb,String weatherLocal,String temp,String picWeb,String picLocal)
      {
     	 this.myCityName=name;
-    	 this.myCityWeather=weather;
+    	 this.myCityWeatherWeb=weatherWeb;
+    	 this.myCityWeatherLocal=weatherLocal;
     	 this.myCityTemp=temp;
-    	 this.myCityPic=pic;
+    	 this.myCityPicWeb=picWeb;
+    	 this.myCityPicLocal=picLocal;
 
      }
      public  String getMyCityName()
      {
     	 return myCityName;
      }
-     public String getMyCityWeather()
+     public String getMyCityWeatherWeb()
      {
-    	 return myCityWeather;
+    	 return myCityWeatherWeb;
+     }
+     public String getMyCityWeatherLocal()
+     {
+    	 return myCityWeatherLocal;
      }
      public String getMyCityTemp()
      {
     	 return myCityTemp;
      }
-     public String getMyCityPic()
+     public String getMyCityPicWeb()
      {
-    	 return myCityPic;
+    	 return myCityPicWeb;
+     }
+     public String getMyCityPicLocal()
+     {
+    	 return myCityPicLocal;
      }
 
 }

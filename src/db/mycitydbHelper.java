@@ -10,9 +10,11 @@ public class mycitydbHelper extends SQLiteOpenHelper {
 	public static String CREATE_MYCITY="create table mycity("
 			+ "id integer primary key autoincrement,"
 			+ "myCityName Text,"
-			+ "myCityWeather Text,"
+			+ "myCityWeatherWeb Text,"    //网络地址
+			+ "myCityWeatherLocal Text,"   //本地地址
 			+ "myCityTemp Text,"
-			+ "myCityPic Text)";
+			+ "myCityPicWeb Text,"
+			+ "myCityPicLocal Text)";
 	
 	
 	public mycitydbHelper(Context context, String name, CursorFactory factory,
