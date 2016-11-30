@@ -72,7 +72,7 @@ public class Utility {
              connection.setUseCaches(true);
              if(connection.getResponseCode()==HttpURLConnection.HTTP_OK)
              {  InputStream in=connection.getInputStream();
-             bitmap=BitmapFactory.decodeStream(in);
+                 bitmap=BitmapFactory.decodeStream(in);
              }
         }catch(Exception e)
         {
