@@ -1,5 +1,6 @@
 package db;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +95,21 @@ public class mycityDB {
 			}while(cursor.moveToNext());
 		}
 		return myCityName;
+	}
+	public void deleteMyCity(List<myCity> myCities)
+	{
+		for(int i=0;i<myCities.size();i++)
+		{
+			myCity mycity1=myCities.get(i);
+			db.delete("mycity", "myCityName=?", new String[]{mycity1.getMyCityName()});
+			File file=new File(mycity1.getMyCityPicLocal());
+			if(file.isFile())
+				file.delete();
+			File file2=new File(mycity1.getMyCityWeatherLocal());
+			if(file2.isFile())
+				file2.delete();
+		}
+		
 	}
 
 }

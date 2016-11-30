@@ -23,6 +23,7 @@ import Util.Http;
 import Util.HttpCallbackListener;
 import Util.Utility;
 import adapter.myCityAdapter;
+import android.R.color;
 import android.R.integer;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -31,6 +32,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -74,6 +76,9 @@ public class myCityAction extends Activity {
 	 public ProgressDialog progressDialog;
 	 String mycityPic;//我的城市背景图URL
 	 public String weather_pic;
+	 public View viewitem;
+	 public List<myCity> myCityDeleted=new ArrayList<myCity>();
+	 public ListView listView; 
 	 public static String album1=Environment.getExternalStorageDirectory()+"/download/"+"jingdian"+".png";
 	
      @Override
@@ -82,7 +87,7 @@ public class myCityAction extends Activity {
     	 super.onCreate(savedInstancestate);
     	 requestWindowFeature(Window.FEATURE_NO_TITLE);
     	 setContentView(R.layout.mycity);
-    	 final ListView listView=(ListView)findViewById(R.id.myCityList);
+    	 listView=(ListView)findViewById(R.id.myCityList);
     	 adapter=new myCityAdapter(myCityAction.this,R.layout.mycitylist, dataList);
     	 listView.setAdapter(adapter);
     	 buttonadd=(Button)findViewById(R.id.add);
@@ -108,18 +113,36 @@ public class myCityAction extends Activity {
 			
 			@Override
 			public void onClick(View v) 
-			{ 
+			{  if(myCityDeleted.size()==0)
 				Toast.makeText(myCityAction.this,"请长按您要删除的城市",Toast.LENGTH_SHORT).show();
-			 
-			}
-		});
+			  else 
+			     {
+				   mycitydb.deleteMyCity(myCityDeleted);
+				   for(int i=1;i<adapter.getCount();i++)
+				   {     for (int j = 0; j < myCityDeleted.size(); j++) 
+				       {
+						    if(adapter.getItem(i).getMyCityName()==myCityDeleted.get(j).getMyCityName())
+						    { 
+						    	adapter.remove(adapter.getItem(i));
+						    	i--;
+						    }
+					   
+				       }
+		
+			       }
+				   myCityDeleted.clear();
+				   listView.setCacheColorHint(0);
+			    }
+		}});
     	 listView.setOnItemLongClickListener(new OnItemLongClickListener() 
-    	 {
+    	 {  @Override
     		public boolean onItemLongClick(AdapterView<?> arg0,View arg1,int arg2,long arg3)
-    		{ int nIndex=listView.getId();
-    		  if(nIndex!=0)
-    		     listView.removeViewAt(nIndex);
-    		  return false;
+    		{   Log.d("Main", String.valueOf(arg2));
+    		    viewitem=listView.getChildAt(arg2);
+    		    viewitem.setBackgroundColor(Color.parseColor("#00FFFF"));//点击的项目变颜色
+    		    myCityDeleted.add(dataList.get(arg2));//加入要删除的城市列表
+    		    return true;
+    		  
     		}
 		});
 		
@@ -418,8 +441,17 @@ public class myCityAction extends Activity {
     	 if(progressDialog!=null)
     		 progressDialog.dismiss();
      }
-     public void deleteMyCity()
+     @Override
+     public void onBackPressed()
      {
-    	 
+    	 if(myCityDeleted.size()!=0)
+    	 {
+    		 myCityDeleted.clear();
+    		 viewitem.setBackgroundColor(0);
+    	 }
+      else {
+			super.onBackPressed();
+		   }
      }
+   
 }
