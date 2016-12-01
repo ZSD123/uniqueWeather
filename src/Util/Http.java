@@ -127,5 +127,22 @@ public class Http {
 			}).start();
     	
     }
+	public static void queryAreaById(final String id,final String address,final HttpCallbackListener listener )
+	{
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run(){
+				 String appid="26715";
+                 String secret="bbd0cdd1a7b94310a4e66baf37c9ce0d";
+                 final String res=new ShowApiRequest(address,appid,secret)
+                                    .addTextPara("id", id)
+                                    .post();
+                 if(listener!=null)
+                	 listener.onFinish(res);
+			}
+		}).start();
+		
+	}  
 
 }

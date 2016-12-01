@@ -23,6 +23,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Adapter;
@@ -75,13 +76,23 @@ public class chooseAreaActivity extends Activity {
         	 if(currentlevel==provinceLevel)
         	 {
         		 selectedProvince=provinceList.get(index);
-        		queryCity(selectedProvince.getProvinceName());
+        		 queryCity(selectedProvince.getProvinceName());
         	 }
         	 else if(currentlevel==cityLevel)
-        	 {
-        		 selectedCity=cityList.get(index);
-        		 queryCounty(selectedCity.getCityName());
-        	 }
+        	 {   selectedCity=cityList.get(index);
+        		 if(selectedCity.getProvinceName().equals("Ì¨ž³")||selectedCity.getProvinceName().equals("Ïã¸Û")||selectedCity.getProvinceName().equals("°ÄÃÅ"))
+        	        {
+        		     Intent intent=new Intent();
+        		     intent.putExtra("countyName",selectedCity.getCityName());
+        		     intent.putExtra("selectedCityName", selectedCity.getCityName());
+        		     setResult(RESULT_OK,intent);
+        		     finish();
+        	        }
+        	    else {
+        	    	
+           		    queryCounty(selectedCity.getCityName());
+				   }
+        	  }
         	 else if(currentlevel==countyLevel)
         	 {   selectedCounty=countyList.get(index);
         		 Intent intent=new Intent();
@@ -191,7 +202,7 @@ public class chooseAreaActivity extends Activity {
 		 }
 		 else
 		 {   showProgressDialog();
-			 Http.sendHttpRequest(provinceName,address1,"2",new HttpCallbackListener(){
+			 Http.sendHttpRequest(provinceName,address2,"1",new HttpCallbackListener(){
 	        	   boolean flag;
 	    			@Override
 	    			public void onFinish(String response)
@@ -199,14 +210,20 @@ public class chooseAreaActivity extends Activity {
 	    				JSONObject jsonobject=new JSONObject(response);
 	    				JSONObject jsonobject1=jsonobject.getJSONObject("showapi_res_body");
 	    				 JSONArray jsonarray=jsonobject1.getJSONArray("data");
+	    				 JSONObject jsonObject2=jsonarray.getJSONObject(0);
+	    				 JSONArray jsonArray2=jsonObject2.getJSONArray("children");
 	    				 flag=jsonobject1.getBoolean("flag");
-	    				 if(jsonarray.length()>0)
-	    				 {
-	    					 for(int i=0;i<jsonarray.length();i++)
-	    					 {
-	    						 city.setCityCode(jsonarray.getJSONObject(i).getString("areaCode"));
-	    						 city.setCityName(jsonarray.getJSONObject(i).getString("areaName"));
-	    						 city.setProvinceName(jsonarray.getJSONObject(i).getString("provinceName"));
+	    				 if(jsonArray2.length()>0)
+	    				 {   Log.d("length",String.valueOf(jsonArray2.length()));
+	    					 for(int i=0;i<jsonArray2.length();i++)
+	    					 {  
+	    						 city.setCityCode(jsonArray2.getJSONObject(i).getString("id"));
+	    						 city.setCityName(jsonArray2.getJSONObject(i).getString("areaName"));
+	    						 if(!jsonArray2.getJSONObject(i).optString("provinceName").equals(""))
+	    						     city.setProvinceName(jsonArray2.getJSONObject(i).getString("provinceName"));
+	    						 else {
+									    city.setProvinceName(jsonObject2.getString("areaName"));
+							          }
 	    						 weatherDB.saveCity(city);
 	    					 }
 	    				 }

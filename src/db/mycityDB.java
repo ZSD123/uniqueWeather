@@ -102,12 +102,16 @@ public class mycityDB {
 		{
 			myCity mycity1=myCities.get(i);
 			db.delete("mycity", "myCityName=?", new String[]{mycity1.getMyCityName()});
-			File file=new File(mycity1.getMyCityPicLocal());
+			if(mycity1.getMyCityPicLocal()!=null)
+			{File file=new File(mycity1.getMyCityPicLocal());
 			if(file.isFile())
 				file.delete();
-			File file2=new File(mycity1.getMyCityWeatherLocal());
+			}
+			if(mycity1.getMyCityWeatherLocal()!=null)
+			{File file2=new File(mycity1.getMyCityWeatherLocal());
 			if(file2.isFile())
 				file2.delete();
+			}
 		}
 		
 	}

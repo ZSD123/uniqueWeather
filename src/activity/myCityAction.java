@@ -7,6 +7,8 @@ import java.net.URL;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONObject;
 
@@ -81,20 +83,28 @@ public class myCityAction extends Activity {
 	 String mycityPic;//我的城市背景图URL
 	 public String weather_pic;
 	 public View viewitem;
-	 public boolean changeLocalCity=false;
+	 public boolean existCityPic=false;
+	 public boolean changeLocalCity=false;                                 //存在背景图片
+	 public String lastLocalCity;
 	 public List<myCity> myCityDeleted=new ArrayList<myCity>();
 	 public ListView listView; 
+	 public List<myCity> myCities=new ArrayList<myCity>(); //加载我的城市列表
 	 public boolean localcityflag=false;   //当点击本地城市的时候按下返回就会取消锁定
 	 public List<Integer> deletedInt=new ArrayList<Integer>();//选定的城市的id
 	 public static String album1=Environment.getExternalStorageDirectory()+"/download/"+"jingdian"+".png";
 	 public Handler handler=new Handler(){
 			@Override
 			public void handleMessage(Message msg)
-			{
+			{   
 				switch (msg.what) {
-				case 0:
-					adapter.notifyDataSetChanged();
-					break;
+				case 0: 
+					 adapter.remove(adapter.getItem(0));
+					 adapter.insert(mycity1, 0);
+				     adapter.notifyDataSetChanged();
+			    	 break;
+			    case 1:
+			    	adapter.notifyDataSetChanged();
+			    	dismissProgressDialog();
 
 				default:
 					break;
@@ -103,7 +113,7 @@ public class myCityAction extends Activity {
 		 };
      @Override
      public void onCreate(Bundle savedInstancestate)
-     {   
+     {   Log.d("Main", "116行");
     	 super.onCreate(savedInstancestate);
     	 requestWindowFeature(Window.FEATURE_NO_TITLE);
     	 setContentView(R.layout.mycity);
@@ -116,13 +126,20 @@ public class myCityAction extends Activity {
     	 buttonjian=(Button)findViewById(R.id.jian);
     	 citynsString=getIntent().getStringExtra("selectedCityName");
     	 temp=getIntent().getStringExtra("temp");
+    	 lastLocalCity=pre.getString("lastLocalCity", "");
+    	 if(!lastLocalCity.equals(citynsString))
+    	 {
+    		 changeLocalCity=true;
+    		 editor.putString("lastLocalCity",citynsString);
+    		 editor.commit();
+    	 }
     	 char b[]=citynsString.toCharArray();
     	 for(int i=0;i<b.length-1;i++)
     	 {       		  
     	     c=""+c+b[i];
     	 }
-    	 init(c);
-    	 buttonadd.setOnClickListener(new OnClickListener() {
+         init(c);
+         buttonadd.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -181,7 +198,6 @@ public class myCityAction extends Activity {
      {  
     	 dJingdianDB=jingdianDB.getInstance(this);
     	 mycitydb=mycityDB.getInstance(this);
-    	 i=mycitydb.loadmycityId();   //获得最后一个城市的id
          myjingdiancityflag=pre.getBoolean("myjingdiancityflag",false);
          try{
              jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);     //判断数据库里是否相应城市的景点数据
@@ -199,12 +215,11 @@ public class myCityAction extends Activity {
         	 e.printStackTrace();
 
          }
-         
-		 myjingdianflag=pre.getBoolean("myjingdianflag",false);
-		  Log.d("cityflag",String.valueOf(myjingdiancityflag));
-		  Log.d("jingdianflag", String.valueOf(myjingdianflag));//这些都是加载本地城市的
- 		   if(!myjingdiancityflag)                                                   
-         {   showProgressDialog();
+         myjingdianflag=pre.getBoolean("myjingdianflag",false);
+         firstShowLocalCity();                            //先简单地加载本地城市，防止等待时间过长                 
+         if(!existCityPic||changeLocalCity) 
+      {   if(!myjingdiancityflag)                                                   
+         {   
              Log.d("Main","这里4");
         	 Http.sendjingdiancityRequest(new HttpCallbackListener() {   //获得景点城市的情况，目的是获取相应的id
 			@Override
@@ -220,7 +235,8 @@ public class myCityAction extends Activity {
 							{   
 								Utility.handlejingdian(response, myCityAction.this);
 								jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
-								List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);
+								if(myJingdiancity.getjingdiancityName()!=null)
+								{List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);
 								 if(jingdians.size()>0)
 					    		 {   editor.putBoolean("myjingdianflag", true);
 					    		     editor.commit();
@@ -231,16 +247,23 @@ public class myCityAction extends Activity {
 					 						bitmap1=Utility.getPicture(selectedJingdian.getImageUrl());
 					 		  				 if(bitmap1!=null)
 					 		  		           savePicture(album1, bitmap1);
-					 		  			  	 myCity mycity=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,album1);//第二个参数应该一致，都是本地地址
-					 		  		    	 dataList.add(mycity);
+					 		  			  	 mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,album1);//第二个参数应该一致，都是本地地址
 					 		  		    	 Message message=new Message();
 					 		  		    	 message.what=0;
 					 		  		    	 handler.sendMessage(message);
-					 		  		    	 dismissProgressDialog();
+					 		  		
 					 		  		    	 }
 					 				}).start();
 					    		  	
 					    		 }	
+								}
+							     else {
+						        	     mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,null);//第二个参数应该一致，都是本地地址
+								    	 Message message=new Message();
+								    	 message.what=0;
+								    	 handler.sendMessage(message);
+							
+								      }
 							}
 						});
 		         }
@@ -251,8 +274,7 @@ public class myCityAction extends Activity {
          }
 
        else if(!myjingdianflag)               //之前是否加载了相应的城市的景点
-      	{  showProgressDialog();
-      	   Log.d("Main","这里3");
+      	{ 
       	   Http.sendjingdianRequest(dJingdianDB.loadjingdianCity(c).getjingdiancityid(), new HttpCallbackListener() {
 					
 					@Override
@@ -260,9 +282,10 @@ public class myCityAction extends Activity {
 					{ 
 						Utility.handlejingdian(response, myCityAction.this);
 						jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
-						List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);
+						if(myJingdiancity.getjingdiancityName()!=null)
+						{List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);
 						 if(jingdians.size()>0)
-			    		 {   Log.d("Main","这里1");
+			    		 {  
 							 editor.putBoolean("myjingdianflag", true);
 			    		     editor.commit();
 			    			 final jingdian selectedJingdian=jingdians.get(0);
@@ -272,21 +295,30 @@ public class myCityAction extends Activity {
 			 						bitmap1=Utility.getPicture(selectedJingdian.getImageUrl());
 			 		  				 if(bitmap1!=null)
 			 		  		           savePicture(album1, bitmap1);
-			 		  			  	 myCity mycity=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,album1);//第二个参数应该一致，都是本地地址
-			 		  		    	 dataList.add(mycity);
+			 		  			  	 mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,album1);//第二个参数应该一致，都是本地地址
 			 		  		    	 Message message=new Message();
 			 		  		    	 message.what=0;
 			 		  		    	 handler.sendMessage(message);
-			 		  		    	 dismissProgressDialog();
+			 		
 			 		  		    	 }
 			 				}).start();
-			    		 }	
+			    		 }
+						}
+						   else {
+				        	     mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,null);//第二个参数应该一致，都是本地地址
+						    	 Message message=new Message();
+						    	 message.what=0;
+						    	 handler.sendMessage(message);
+						
+						      }
 					}
 				});
        }
        else {
+    	
       	 jingdiancity myJingdiancity1=dJingdianDB.loadjingdianCity(c);
-      	 List<jingdian> jingdians1=dJingdianDB.loadjingdian(myJingdiancity1);//载入相应的城市的景点
+         if(myJingdiancity1.getjingdiancityName()!=null)
+         {   List<jingdian> jingdians1=dJingdianDB.loadjingdian(myJingdiancity1);//载入相应的城市的景点
       		 if(jingdians1.size()>0)//如果已经有相应城市的景点列表
       		 {  Log.d("Main","这里2");
   			    final jingdian jingdian2=jingdians1.get(0);
@@ -296,21 +328,46 @@ public class myCityAction extends Activity {
 						bitmap1=Utility.getPicture(jingdian2.getImageUrl());
 		  				 if(bitmap1!=null)
 		  		           savePicture(album1, bitmap1);
-		  			  	 myCity mycity=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,album1);//第二个参数应该一致，都是本地地址
-		  		    	 dataList.add(mycity);
+		  			  	 mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,album1);//第二个参数应该一致，都是本地地址
 		  		    	 Message message=new Message();
 		  		    	 message.what=0;
 		  		    	 handler.sendMessage(message);
+		  	
 		  		    	 }
 				}).start();
   			   }
 		    }
-         showAllMyCity();//进入后显示数据表中所有的城市
-		}
+         else {
+        	     mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,null);//第二个参数应该一致，都是本地地
+		    	 Log.d("Main","加载本地城市");
+		    	 Message message=new Message();
+		    	 message.what=0;
+		    	 handler.sendMessage(message);
+	
+		      }
+       }
+      }
+     showAllMyCity();//进入后显示数据表中所有的城市
+   }
     	 
     	 
      
-     public void savePicture(String address,Bitmap bitmap)
+     private void firstShowLocalCity()            //先简单加载
+     {   File file=new File(album1);
+         if(file.exists())
+	        {mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH,temp,null,album1);
+	         existCityPic=true;
+	        }
+         else 
+         {
+        	 mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH,temp,null,null);
+        	 existCityPic=false;
+		 }
+		 dataList.add(mycity1);
+		 adapter.notifyDataSetChanged();
+	 }
+     
+	public void savePicture(String address,Bitmap bitmap)
      {
     	 File file=new File(address);
     	 try {
@@ -345,7 +402,7 @@ public class myCityAction extends Activity {
 		 			{
 		 				@Override
 		 				public void onFinish(String response)
-		 				{   
+		 				{   Log.d("Main","handleWeatherByTable");
 		 					handleWeatherByTable(response,name);
 		 			    }
 		 			});
@@ -359,7 +416,7 @@ public class myCityAction extends Activity {
      }
      public void handleWeatherByTable(String response,String name)//赋值我的城市的一些参数
      {
-    	 try {
+    	 try {   Log.d("Main", "3");
     			JSONObject jsonobject=new JSONObject(response);
     			JSONObject obj1=jsonobject.getJSONObject("showapi_res_body");
     			JSONObject obj2=obj1.getJSONObject("now");
@@ -371,15 +428,25 @@ public class myCityAction extends Activity {
    	    	    {       		  
    	    	     c=""+c+b[i];
    	    	    }
+   	    	    Log.d("Main","2");
    	    	    jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
+   	    	if(myJingdiancity.getjingdiancityName()!=null)
+   	    	    {
    				List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);//载入该城市的所有景点
-   				 if(jingdians.size()>0)                        //如果已经有相应的城市的景点数据
+   				Log.d("Main", String.valueOf(jingdians.size())); 
+   		          if(jingdians.size()>0)                        //如果已经有相应的城市的景点数据
    				     {   jingdian jingdian3=jingdians.get(0);
    			    		 mycityPic=jingdian3.getImageUrl();
+   			    		 Log.d("Main","1");
    			    	 }
-   				 else {
-					getMyCityPic(name);
-				      }
+   		          else {
+   		        	      getMyCityPic(name);
+				       }
+   	    	    }
+   			else {
+   			     Log.d("Main","getMyCityPci");
+			     getMyCityPic(name);
+			     }
    	    	    
 		      } catch (Exception e) {
 			    e.printStackTrace();
@@ -409,6 +476,36 @@ public class myCityAction extends Activity {
     	 {       		  
     	     c=""+c+b[i];
     	 }
+    	 Log.d("Main","time");
+    	 final Timer timer=new Timer();            //计时，防止用户等太久
+    	 TimerTask myTask=new TimerTask() {
+			
+			@Override
+			public void run() 
+			{     
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+					
+				         Bitmap bitmap=null;
+					     bitmap=Utility.getPicture(weather_pic);
+					      if(bitmap!=null)
+					          savePicture(getWeatherPicPath(),bitmap);
+					  	  mycity1=new myCity(name,weather_pic,weatherPicPath,temp1,null,null);
+					      mycitydb.saveMyCity(mycity1);
+                          dataList.add(mycity1);
+						  Message message=new Message();
+						  message.what=1;
+						  handler.sendMessage(message);
+						  timer.cancel();
+					}
+				}).start();
+			
+			  
+			}
+		};
+     	 timer.schedule(myTask, 5000);
     	  Http.sendjingdianRequest(dJingdianDB.loadjingdianCity(c).getjingdiancityid(), new HttpCallbackListener() {
 				
 				@Override
@@ -418,7 +515,7 @@ public class myCityAction extends Activity {
                     jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
 					List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);
 					 if(jingdians.size()>0)
-					 {   Log.d("Main","jingdian>0");
+					 {   
 						 jingdian jingdian3=jingdians.get(0);
 		    		     mycityPic=jingdian3.getImageUrl();
 		    		     mycity1=new myCity(name,weather_pic,null,temp1,mycityPic,null);
@@ -435,7 +532,7 @@ public class myCityAction extends Activity {
 								public void run() {
 									   mycity1=new myCity(name,mycity1.getMyCityWeatherWeb(), weatherPicPath,temp1,mycity1.getMyCityPicWeb(),cityPicPath);    //weatherPicPath和后面的是本地路径
 					 				   mycitydb.saveMyCity(mycity1);
-			                           dataList.add(mycity1);
+			                           dataList.add(mycity1);                             
 					 				   adapter.notifyDataSetChanged();
 					 				   dismissProgressDialog();
 								}
@@ -450,14 +547,14 @@ public class myCityAction extends Activity {
      }
      public void showAllMyCity()              //加载所有我的城市
      {
-    	 List<myCity> myCities=new ArrayList<myCity>();
+    	 
     	 myCities=mycitydb.loadMyCity();
     	 for(int m=0;m<myCities.size();m++)
     	 {   
     		 myCity city=myCities.get(m);
     		 dataList.add(city); 
-    		 adapter.notifyDataSetChanged();
     	 }
+         Log.d("Main", "其他城市");
     	 
      }
      public void showProgressDialog()  
