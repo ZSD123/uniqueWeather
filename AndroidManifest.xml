@@ -35,7 +35,7 @@
         android:theme="@style/AppTheme" >
         
         <activity
-            android:name="activity.MainActivity"
+            android:name="activity.weather_info"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,9 +48,6 @@
             ></activity>
         <activity 
             android:name="activity.myCityAction"
-            ></activity>
-        <activity 
-            android:name="activity.weather_info"
             ></activity>
         <service
             android:name="service.autoUqdateService"/>

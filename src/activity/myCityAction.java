@@ -113,7 +113,7 @@ public class myCityAction extends Activity {
 		 };
      @Override
      public void onCreate(Bundle savedInstancestate)
-     {   Log.d("Main", "116ÐÐ");
+     {  
     	 super.onCreate(savedInstancestate);
     	 requestWindowFeature(Window.FEATURE_NO_TITLE);
     	 setContentView(R.layout.mycity);

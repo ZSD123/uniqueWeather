@@ -2,6 +2,8 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import service.autoUqdateService;
 
@@ -30,6 +32,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,16 +48,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class weather_info extends Activity {
+public class weather_info extends FragmentActivity {
 	private int chenhuonce=0;
-	private TextView time;
-	private TextView realtime;
-	private static RelativeLayout weather_layout;
-	private TextView weather;
-	private TextView temper;
-	private ImageView userPicture;
-	private TextView userName;
-	private TextView myCity;
+
 	private int flag=0;
 	private TextView countyname;
 	private Button button_switch;
@@ -66,26 +65,29 @@ public class weather_info extends Activity {
     public static String l="1";
     public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	public static String address3="http://route.showapi.com/9-2";
+	
+	 private ViewPager mViewPager;
+	 private List<fragmentPart> fragList=new ArrayList<fragmentPart>();
+	 private String [] title=new String[]{
+	    		"weather","map"
+	         };
+	 private Button button1;
+	 private Button button2;
+	 private FragmentPagerAdapter mAdapter;
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.connection);
-		userName=(TextView)findViewById(R.id.userName);
-        time=(TextView)findViewById(R.id.time);
-        userPicture=(ImageView)findViewById(R.id.userPicture);
-		realtime=(TextView)findViewById(R.id.realTime);
-		weather_layout=(RelativeLayout)findViewById(R.id.weather_info);
-		weather=(TextView)findViewById(R.id.weather);
-		temper=(TextView)findViewById(R.id.temper);
-		userName=(TextView)findViewById(R.id.userName);
-		myCity=(TextView)findViewById(R.id.myCity);
-		button_switch=(Button)findViewById(R.id.switch_city);
-		button_refresh=(Button)findViewById(R.id.refresh);
-		countyname=(TextView)findViewById(R.id.countyName);
-		pic=(ImageView)findViewById(R.id.weather_pic);
-		editor=PreferenceManager.getDefaultSharedPreferences(weather_info.this).edit();
+		setContentView(R.layout.main);
+		
+		button1=(Button)findViewById(R.id.button_weather);
+		button2=(Button)findViewById(R.id.button_map);
+	    init();	
+	    mViewPager.setAdapter(mAdapter);
+	
+		
+	    editor=PreferenceManager.getDefaultSharedPreferences(weather_info.this).edit();
 		pre=PreferenceManager.getDefaultSharedPreferences(weather_info.this);
 		flag=pre.getInt("flag", 0);
 		accountName=pre.getString("accountName","");
@@ -194,6 +196,36 @@ public class weather_info extends Activity {
 			}
 		});
 		}
+	private void init() 
+	{
+	   mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
+	   for (int i=0;i<title.length;i++)                     //¼ÓÔØfragmentPart
+	      {
+		      fragmentPart fragP=new fragmentPart();
+		      Bundle bundle =new Bundle();
+		      bundle.putString(fragmentPart.keyToGet,title[i]);
+		      bundle.putString("", value);
+		      fragP.setArguments(bundle);
+		      fragList.add(fragP);
+	      }
+	   mAdapter=new FragmentPagerAdapter(getSupportFragmentManager()) {
+		
+		@Override
+		public int getCount() 
+		{
+			
+			return fragList.size();
+		}
+		
+		@Override
+		public android.support.v4.app.Fragment getItem(int position) 
+		{
+			return fragList.get(position);
+			
+		}
+	   };
+		
+	}
 	public void showWeather()
 	{
 	     SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(this);
