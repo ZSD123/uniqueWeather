@@ -272,7 +272,7 @@ public class myCityAction extends Activity {
 				                                                    
 			});
          }
-
+      
        else if(!myjingdianflag)               //之前是否加载了相应的城市的景点
       	{ 
       	   Http.sendjingdianRequest(dJingdianDB.loadjingdianCity(c).getjingdiancityid(), new HttpCallbackListener() {
