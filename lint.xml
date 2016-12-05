@@ -2,4 +2,5 @@
 <lint>
     <issue id="NewApi" severity="ignore" />
     <issue id="UseValueOf" severity="ignore" />
+    <issue id="ValidFragment" severity="ignore" />
 </lint>

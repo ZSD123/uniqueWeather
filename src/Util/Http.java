@@ -38,7 +38,6 @@ public class Http {
                         .addTextPara("level", level)
                         .addTextPara("areaName",areaName)
                         .post();
-                        System.out.print(res);
                         if(listener!=null)
                         	listener.onFinish(res);
 					}	

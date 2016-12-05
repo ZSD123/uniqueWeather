@@ -2,6 +2,7 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,20 +50,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class weather_info extends FragmentActivity {
-	private int chenhuonce=0;
-
-	private int flag=0;
-	private TextView countyname;
-	private Button button_switch;
-    private Button button_refresh;
-    public String countyName;
-    private ImageView pic;
-    private Bitmap bitmap;
-    private String uriUserPicture;
     public String accountName;
     public SharedPreferences pre;
     public SharedPreferences.Editor editor;
-    public static String l="1";
     public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	public static String address3="http://route.showapi.com/9-2";
 	
@@ -86,125 +76,16 @@ public class weather_info extends FragmentActivity {
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
 	
-		
-	    editor=PreferenceManager.getDefaultSharedPreferences(weather_info.this).edit();
-		pre=PreferenceManager.getDefaultSharedPreferences(weather_info.this);
-		flag=pre.getInt("flag", 0);
-		accountName=pre.getString("accountName","");
-		if(!accountName.isEmpty())
-		{Toast.makeText(this,accountName + ",欢迎您", Toast.LENGTH_SHORT).show();
-		 userName.setText(accountName);
-		}
-		else {
-			userName.setText("未命名");
-		}
-		uriUserPicture=pre.getString("userPicture",null);
-		if(uriUserPicture!=null)
-		{  
-		    Uri uri=Uri.parse(uriUserPicture);
-		    try{ContentResolver cResolver=this.getContentResolver();
-			Bitmap bitmap=BitmapFactory.decodeStream(cResolver.openInputStream(uri));
-			userPicture.setImageBitmap(bitmap);
-		    }catch(Exception e)
-		    {
-		    	e.printStackTrace();
-		    	Toast.makeText(weather_info.this, "未找到相应图片", Toast.LENGTH_SHORT).show();
-		    }
-		}
-		weather_layout.setVisibility(View.INVISIBLE);
-		if(flag==0)
-		{   Toast.makeText(this, "请选择城市", Toast.LENGTH_SHORT).show();
-			Intent intent=new Intent();
-			intent.setClass(weather_info.this,chooseAreaActivity.class);
-			startActivityForResult(intent,1);
-			
-		}
-		else{
-			countyName=pre.getString("countyName","");
-		    pic.setImageBitmap(getPicture());
-	        countyname.setText(countyName);
-		    weather_layout.setVisibility(View.VISIBLE);
-		    weather.setText(pre.getString("weatherInfo", ""));
-		    temper.setText(pre.getString("temperature", ""));
-		    realtime.setText(pre.getString("realtime", ""));
-		    String publishTime=pre.getString("time", "");
-		    char[]b=publishTime.toCharArray();
-		    if(b.length>0)
-		    { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
-		    time.setText(c);
-		    }
-			queryWeather();
-		}
-		button_switch.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				Intent intent=new Intent();
-				intent.setClass(weather_info.this,chooseAreaActivity.class);
-				startActivityForResult(intent,1);
-			}
-		});
-		button_refresh.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{   queryWeather();
-			    Toast.makeText(weather_info.this, "刷新中...", Toast.LENGTH_SHORT).show();
-			}
-		});
-		userPicture.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View V) {
-				Intent intent = new Intent(Intent.ACTION_PICK, null);
-	            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-	                    "image/*");
-				startActivityForResult(intent, 2);
-			}
-		});
-		userName.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				final EditText editText=new EditText(weather_info.this);
-				AlertDialog.Builder builder=new AlertDialog.Builder(weather_info.this);
-				builder.setTitle("请输入对您的尊称").setNegativeButton("取消", null).setView(editText);
-				builder.setPositiveButton("确定",new DialogInterface.OnClickListener() 
-				{ @Override
-					public void onClick(DialogInterface dialogInterface, int which) 
-				    {
-						
-					    String accountNameString=editText.getText().toString();
-						editor.putString("accountName",accountNameString );
-						editor.commit();
-						userName.setText(accountNameString);
-					}
-				});
-				builder.show();
-			}
-		});
-		myCity.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent intent=new Intent(weather_info.this,myCityAction.class);
-				intent.putExtra("selectedCityName",pre.getString("selectedCityName", "") );
-				intent.putExtra("temp", pre.getString("temperature",""));
-				startActivity(intent);
-				
-			}
-		});
-		}
+	
+	}		
 	private void init() 
 	{
 	   mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
 	   for (int i=0;i<title.length;i++)                     //加载fragmentPart
 	      {
-		      fragmentPart fragP=new fragmentPart();
+		      fragmentPart fragP=new fragmentPart(weather_info.this);
 		      Bundle bundle =new Bundle();
 		      bundle.putString(fragmentPart.keyToGet,title[i]);
-		      bundle.putString("", value);
 		      fragP.setArguments(bundle);
 		      fragList.add(fragP);
 	      }
@@ -226,39 +107,22 @@ public class weather_info extends FragmentActivity {
 	   };
 		
 	}
-	public void showWeather()
-	{
-	     SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(this);
-	     weather_layout.setVisibility(View.VISIBLE);
-	     weather.setText(pre.getString("weatherInfo", ""));
-	     temper.setText(pre.getString("temperature", ""));
-	     realtime.setText(pre.getString("realtime", ""));
-	     String publishTime=pre.getString("time", "");
-	     char[]b=publishTime.toCharArray();
-	     if(b.length>0)
-	     { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
-	     time.setText(c);
-	     }
-	     if(bitmap!=null)
-	         pic.setImageBitmap(bitmap);
-	     Intent intent=new Intent(this,autoUqdateService.class);
-	     startService(intent);
-	}
-	
+
+	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent data)
-	{
+	{   Toast.makeText(this, "tou", Toast.LENGTH_SHORT).show();
 		switch(requestCode)
 		{
 		case 1:
 			if(resultCode==RESULT_OK)
-			{
-				flag=1;
+			{   Log.d("Main", "回来了");
+				fragmentPart.flag=1;
 				editor.putString("countyName", data.getStringExtra("countyName"));
-				editor.putInt("flag", flag);
+				editor.putInt("flag", fragmentPart.flag);
 				editor.putString("selectedCityName", data.getStringExtra("selectedCityName"));
 				editor.commit();
-				chenhuonce=pre.getInt("chenhuonce",0);
-				if(chenhuonce==0)
+				fragmentPart.chenhuonce=pre.getInt("chenhuonce",0);
+				if(fragmentPart.chenhuonce==0)
 				{
 				final EditText editText=new EditText(this);
 				AlertDialog.Builder builder=new AlertDialog.Builder(this);
@@ -271,17 +135,19 @@ public class weather_info extends FragmentActivity {
 						editor.putString("accountName", accountName);
 						editor.commit();
 						if(!accountName.isEmpty())
-							userName.setText(accountName);
+							{
+						       fragmentPart.refreshUserName(accountName);
+							}
 					}
 				});
 				builder.show();
-				chenhuonce=1;
-				editor.putInt("chenhuonce",chenhuonce);
+				fragmentPart.chenhuonce=1;
+				editor.putInt("chenhuonce",fragmentPart.chenhuonce);
 				editor.commit();
 				}
-				countyName=data.getStringExtra("countyName");
-				countyname.setText(countyName);
-                queryWeather();
+				String countyName = data.getStringExtra("countyName");
+				fragmentPart.refreshCountyName(countyName);
+                fragmentPart.queryWeather(weather_info.this);
 				Toast.makeText(weather_info.this, "刷新中...", Toast.LENGTH_SHORT).show();
 				
 			} 
@@ -294,54 +160,20 @@ public class weather_info extends FragmentActivity {
 			editor.commit();
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
-				userPicture.setImageBitmap(bitmap);
+				fragmentPart.refreshUserPicture(bitmap);
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
-			break;}
+			break;
+			}
 		default:
+			Toast.makeText(this,"moren",Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
-	public void queryWeather()
-	{
-		  Http.sendWeatherRequest(countyName,address3, new HttpCallbackListener()
-			{
-				@Override
-				public void onFinish(String response)
-				{   
-					Utility.handleWeather(response,weather_info.this);
-					bitmap=Utility.getPicture(pre.getString("weather_pic", ""));
-					if(bitmap!=null)
-					    savePicture(bitmap,ALBUM_PATH);
-				    runOnUiThread(new Runnable(){
-				    @Override
-				    public void run(){
-				    	showWeather();
-				    }});
-						
-				}
-			});
-	}
-	public void savePicture(Bitmap bitmap,String path)
-	{
-		File file=new File(path);
-		try{
-		FileOutputStream out=new FileOutputStream(file);
-		bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-		out.flush();
-		out.close();
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+
 	
-    public Bitmap getPicture()
-    {
-    	Bitmap bitmap=null;
-    	bitmap=BitmapFactory.decodeFile(ALBUM_PATH);
-    	return bitmap;
-    }
-    
+	
+  
+  
 }
