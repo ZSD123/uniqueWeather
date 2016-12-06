@@ -57,8 +57,8 @@ public class fragmentPart extends Fragment
     private static ImageView pic;
     private static TextView userName;
     private static TextView countyname;
-    private SharedPreferences.Editor editor;
-    private static SharedPreferences pre;
+    public static SharedPreferences.Editor editor;
+    public static SharedPreferences pre;
     private String accountName;
     private View view;
     private String uriUserPicture;
@@ -66,6 +66,7 @@ public class fragmentPart extends Fragment
     private static Bitmap bitmap;
     public static int chenhuonce=0;
     public Context context;
+    public Button button1;
     public fragmentPart(Context context)
     {
     	this.context=context;
@@ -94,8 +95,8 @@ public class fragmentPart extends Fragment
 			button_refresh=(Button)view.findViewById(R.id.refresh);
 			countyname=(TextView)view.findViewById(R.id.countyName);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
+			button1=(Button)view.findViewById(R.id.button_map);
 			
-			Log.d("Main", context.getClass().getSimpleName());
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
 		    flag=pre.getInt("flag", 0);
@@ -122,14 +123,14 @@ public class fragmentPart extends Fragment
 				    }
 				}
 				weather_layout.setVisibility(View.INVISIBLE);
-				if(flag==0)
+			if(flag==0)
 				{   Toast.makeText(context, "«Î—°‘Ò≥« –", Toast.LENGTH_SHORT).show();
 					Intent intent=new Intent();
 					intent.setClass(context,chooseAreaActivity.class);
-					startActivityForResult(intent,1);
+					((Activity)context).startActivityForResult(intent,1);
 					
 				}
-				else{
+			else{
 					countyName=pre.getString("countyName","");
 				    pic.setImageBitmap(getPicture());
 			        countyname.setText(countyName);
@@ -205,10 +206,18 @@ public class fragmentPart extends Fragment
 						
 					}
 				});
+			    button1.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						weather_info.mViewPager.setCurrentItem(1);
+						
+					}
+				});
 		}
 		else if(theKey.equals("map"))
 		{
-			view=inflater.inflate(R.layout.map,container,false);
+			view=inflater.inflate(R. layout.map,container,false);
 		}
 	
 		return view;
@@ -220,9 +229,9 @@ public class fragmentPart extends Fragment
 	    	return bitmap;
 	    }
 	  public static void queryWeather(final Context context)
-		{
+		{     
 			  Http.sendWeatherRequest(countyName,weather_info.address3, new HttpCallbackListener()
-				{
+				{   
 					@Override
 					public void onFinish(String response)
 					{   
@@ -254,7 +263,7 @@ public class fragmentPart extends Fragment
 		}
 	  public static void showWeather(Context context)
 		{
-		     SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(context);
+		    
 		     weather_layout.setVisibility(View.VISIBLE);
 		     weather.setText(pre.getString("weatherInfo", ""));
 		     temper.setText(pre.getString("temperature", ""));
@@ -268,7 +277,7 @@ public class fragmentPart extends Fragment
 		     if(bitmap!=null)
 		         pic.setImageBitmap(bitmap);
 		     Intent intent=new Intent(context,autoUqdateService.class);
-		     context.startService(intent);
+			 context.startService(intent);
 		}
         public static void refreshUserName(String response)
         {   

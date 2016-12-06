@@ -51,18 +51,14 @@ import android.widget.Toast;
 
 public class weather_info extends FragmentActivity {
     public String accountName;
-    public SharedPreferences pre;
-    public SharedPreferences.Editor editor;
     public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	public static String address3="http://route.showapi.com/9-2";
 	
-	 private ViewPager mViewPager;
+	 public static ViewPager mViewPager;
 	 private List<fragmentPart> fragList=new ArrayList<fragmentPart>();
 	 private String [] title=new String[]{
 	    		"weather","map"
 	         };
-	 private Button button1;
-	 private Button button2;
 	 private FragmentPagerAdapter mAdapter;
 	@Override
 	public void onCreate(Bundle savedInstance)
@@ -70,12 +66,8 @@ public class weather_info extends FragmentActivity {
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
-		
-		button1=(Button)findViewById(R.id.button_weather);
-		button2=(Button)findViewById(R.id.button_map);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	
 	
 	}		
 	private void init() 
@@ -110,18 +102,20 @@ public class weather_info extends FragmentActivity {
 
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent data)
-	{   Toast.makeText(this, "tou", Toast.LENGTH_SHORT).show();
+	{  Log.d("Main", "tou");
+	   Log.d("Main",String.valueOf(requestCode));
 		switch(requestCode)
 		{
 		case 1:
 			if(resultCode==RESULT_OK)
 			{   Log.d("Main", "回来了");
 				fragmentPart.flag=1;
-				editor.putString("countyName", data.getStringExtra("countyName"));
-				editor.putInt("flag", fragmentPart.flag);
-				editor.putString("selectedCityName", data.getStringExtra("selectedCityName"));
-				editor.commit();
-				fragmentPart.chenhuonce=pre.getInt("chenhuonce",0);
+				fragmentPart.editor.putString("countyName", data.getExtras().getString("countyName"));
+				fragmentPart.editor.putInt("flag", fragmentPart.flag);
+				fragmentPart.editor.putString("selectedCityName", data.getExtras().getString("selectedCityName"));
+				fragmentPart.editor.commit();
+				Log.d("Main", String.valueOf(fragmentPart.pre.getInt("flag",144)));
+				fragmentPart.chenhuonce=fragmentPart.pre.getInt("chenhuonce",0);
 				if(fragmentPart.chenhuonce==0)
 				{
 				final EditText editText=new EditText(this);
@@ -132,8 +126,8 @@ public class weather_info extends FragmentActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						accountName=editText.getText().toString(); 
-						editor.putString("accountName", accountName);
-						editor.commit();
+						fragmentPart.editor.putString("accountName", accountName);
+						fragmentPart.editor.commit();
 						if(!accountName.isEmpty())
 							{
 						       fragmentPart.refreshUserName(accountName);
@@ -142,11 +136,11 @@ public class weather_info extends FragmentActivity {
 				});
 				builder.show();
 				fragmentPart.chenhuonce=1;
-				editor.putInt("chenhuonce",fragmentPart.chenhuonce);
-				editor.commit();
+				fragmentPart.editor.putInt("chenhuonce",fragmentPart.chenhuonce);
+				fragmentPart.editor.commit();
 				}
-				String countyName = data.getStringExtra("countyName");
-				fragmentPart.refreshCountyName(countyName);
+				fragmentPart.countyName = data.getStringExtra("countyName");
+				fragmentPart.refreshCountyName(fragmentPart.countyName);
                 fragmentPart.queryWeather(weather_info.this);
 				Toast.makeText(weather_info.this, "刷新中...", Toast.LENGTH_SHORT).show();
 				
@@ -156,8 +150,8 @@ public class weather_info extends FragmentActivity {
 			if(resultCode==RESULT_OK)
 			{Uri uri=data.getData();
 			ContentResolver cr=this.getContentResolver();
-			editor.putString("userPicture", uri.toString());
-			editor.commit();
+			fragmentPart.editor.putString("userPicture", uri.toString());
+			fragmentPart.editor.commit();
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
 				fragmentPart.refreshUserPicture(bitmap);
@@ -167,7 +161,6 @@ public class weather_info extends FragmentActivity {
 			break;
 			}
 		default:
-			Toast.makeText(this,"moren",Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}

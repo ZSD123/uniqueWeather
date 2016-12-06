@@ -1,8 +1,11 @@
 package activity;
 
+import com.nineoldandroids.view.ViewHelper;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -65,4 +68,12 @@ public class MyHorizontalView extends HorizontalScrollView {
    }
 	  return super.onTouchEvent(ev); 
 }
+@Override
+protected void onScrollChanged(int l, int t, int oldl, int oldt) 
+{   
+	ViewHelper.setTranslationX(mMenu, l);
+	super.onScrollChanged(l, t, oldl, oldt);
+}
+   
+  
 }

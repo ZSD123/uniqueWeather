@@ -86,7 +86,7 @@ public class chooseAreaActivity extends Activity {
         		     Intent intent=new Intent();
         		     intent.putExtra("countyName",selectedCity.getCityName());
         		     intent.putExtra("selectedCityName", selectedCity.getCityName());
-        		     setResult(RESULT_OK,intent);
+        		     setResult(1,intent);
         		     finish();
         	        }
         	    else {
@@ -96,10 +96,12 @@ public class chooseAreaActivity extends Activity {
         	  }
         	 else if(currentlevel==countyLevel)
         	 {   selectedCounty=countyList.get(index);
-        		 Intent intent=new Intent();
-        		 intent.putExtra("countyName",selectedCounty.getCountyName());
-        		 intent.putExtra("selectedCityName", selectedCity.getCityName());
-        		 setResult(RESULT_OK,intent);
+        		 Intent intent=new Intent(chooseAreaActivity.this,weather_info.class);
+        		 Bundle bundle=new Bundle();
+        		 bundle.putString("countyName", selectedCounty.getCountyName());
+        		 bundle.putString("selectedCityName", selectedCity.getCityName());
+        	     intent.putExtras(bundle);
+        	     setResult(RESULT_OK,intent);
         		 finish();
         	 }
          }
@@ -386,12 +388,10 @@ public class chooseAreaActivity extends Activity {
 			 queryProvince();
 		 }
 		 else
-		 {
+		 {   Intent intent=new Intent(chooseAreaActivity.this,weather_info.class);
+		     setResult(RESULT_CANCELED, intent);
 			 finish();
 		 }
 	 }
-	 
-	 
 
-	
 }

@@ -9,23 +9,5 @@
      android:layout_height="0dp"
      android:layout_weight="1">
    </android.support.v4.view.ViewPager>
- <LinearLayout 
-     android:layout_width="match_parent"
-     android:layout_height="60dp"
-     android:orientation="horizontal">
-     <Button 
-         android:id="@+id/button_weather"
-         android:layout_width="0dp"
-         android:layout_height="match_parent"
-         android:layout_weight="1"
-         android:text="天气"
-         />
-     <Button 
-         android:id="@+id/button_map"
-         android:layout_width="0dp"
-         android:layout_height="match_parent"
-         android:layout_weight="1"
-         android:text="地图"
-         />
- </LinearLayout>
+
 </LinearLayout>
