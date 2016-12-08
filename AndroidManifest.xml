@@ -28,6 +28,21 @@
     <uses-permission 
         android:name="android.permission.ACCESS_WIFI_STATE"
         />
+    <uses-permission 
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        />
+    <uses-permission 
+        android:name="android.permission.CHANGE_WIFI_STATE"
+        />
+    <uses-permission 
+        android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"
+        />
+    <uses-permission 
+        android:name="android.permission.BLUETOOTH"
+        />
+    <uses-permission 
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        />
     <application
         android:allowBackup="true"
         android:icon="@drawable/log"
@@ -51,9 +66,16 @@
             ></activity>
         <service
             android:name="service.autoUqdateService"/>
+        <service 
+            android:name="com.amap.api.location.APSService">
+         </service>
         <receiver 
             android:name="receiver.uqdateReceive"
             ></receiver>
+        <meta-data 
+            android:name="com.amap.api.v2.apikey"
+            android:value="6542302695f67952ee25f1a984dd6ccd"
+            ></meta-data>
     </application>
 
 </manifest>

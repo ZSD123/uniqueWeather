@@ -19,7 +19,7 @@ public class MyHorizontalView extends HorizontalScrollView {
     private ViewGroup mContent;
     private LinearLayout mWapper;
     private int mScreenRight=50;
-    private int mMenuWidth;
+    public static  int mMenuWidth;
     private boolean once=false;
 	public MyHorizontalView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -64,14 +64,24 @@ public class MyHorizontalView extends HorizontalScrollView {
 			   this.smoothScrollTo(0, 0);
 		   }
 		  return true;
+	case MotionEvent.ACTION_DOWN:
+		   int x1=getScrollX();
+		   float x2=ev.getX();
+		   if(x1==0&&x2>mMenuWidth)
+		   {   Log.d("Main", "½øÈë");
+			   this.smoothScrollTo(mMenuWidth, 0);
+		   }
+		  return true;
 	    
-   }
+          }
 	  return super.onTouchEvent(ev); 
 }
 @Override
 protected void onScrollChanged(int l, int t, int oldl, int oldt) 
-{   
-	ViewHelper.setTranslationX(mMenu, l);
+{   float scale=l*1.0f/mMenuWidth;    //1~0
+    
+	ViewHelper.setAlpha(mMenu,(1-scale)*0.7f+0.3f);  
+    ViewHelper.setTranslationX(mMenu, l*((1-scale)*0.7f+0.3f));
 	super.onScrollChanged(l, t, oldl, oldt);
 }
    

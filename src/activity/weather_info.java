@@ -8,6 +8,7 @@ import java.util.List;
 
 import service.autoUqdateService;
 
+import com.amap.api.maps2d.MapView;
 import com.uniqueweather.app.R;
 
 import Util.Http;
@@ -163,6 +164,19 @@ public class weather_info extends FragmentActivity {
 		default:
 			break;
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		fragmentPart.mMapView.onDestroy();
+	}
+	@Override
+	public void onPause(){
+		super.onPause();
+		fragmentPart.mMapView.onPause();
+		
+		
 	}
 
 	

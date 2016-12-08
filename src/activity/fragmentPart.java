@@ -3,15 +3,33 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 import service.autoUqdateService;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.CameraUpdate;
+import com.amap.api.maps2d.CameraUpdateFactory;
+import com.amap.api.maps2d.LocationSource;
+import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.UiSettings;
+import com.amap.api.maps2d.model.BitmapDescriptorFactory;
+import com.amap.api.maps2d.model.CameraPosition;
+import com.amap.api.maps2d.model.LatLng;
+import com.amap.api.maps2d.model.MarkerOptions;
 import com.uniqueweather.app.R;
 
 
 import Util.Http;
 import Util.HttpCallbackListener;
 import Util.Utility;
+import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
@@ -21,6 +39,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -31,17 +51,19 @@ import android.support.v4.view.ViewPager;
 import android.text.LoginFilter.UsernameFilterGeneric;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view .ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class fragmentPart extends Fragment 
+public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource
 {   public static String keyToGet="begin";
     private String theKey;
 	private static TextView time;
@@ -67,6 +89,15 @@ public class fragmentPart extends Fragment
     public static int chenhuonce=0;
     public Context context;
     public Button button1;
+    public MyHorizontalView horizontalView;
+    
+    public static MapView mMapView;
+    public AMap aMap;
+    public AMapLocationClient mLocationClient;
+    public AMapLocationClientOption mLocationClientOption;
+    public CameraUpdate cameraUpdate;
+    public int dingweionce=0;
+    private ImageButton locButton;
     public fragmentPart(Context context)
     {
     	this.context=context;
@@ -96,6 +127,7 @@ public class fragmentPart extends Fragment
 			countyname=(TextView)view.findViewById(R.id.countyName);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
+			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
@@ -150,10 +182,18 @@ public class fragmentPart extends Fragment
 				{
 					@Override
 					public void onClick(View v)
-					{
-						Intent intent=new Intent();
+					{   int[] location=new int[2];
+					    v.getLocationOnScreen(location);
+					    int x=location[0];
+					    if(x<100)
+					  { Intent intent=new Intent();
 						intent.setClass(context,chooseAreaActivity.class);
 						((Activity)context).startActivityForResult(intent,1);
+					  }
+					    else 
+					    {
+							horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
+						}
 					}
 				});
 				button_refresh.setOnClickListener(new OnClickListener()
@@ -216,8 +256,32 @@ public class fragmentPart extends Fragment
 				});
 		}
 		else if(theKey.equals("map"))
-		{
+		{   
 			view=inflater.inflate(R. layout.map,container,false);
+			mMapView=(MapView)view.findViewById(R.id.map);
+			locButton=(ImageButton)view.findViewById(R.id.locationButton);
+			mMapView.onCreate(savedInstanceState);
+			if(aMap==null)
+			{
+				aMap=mMapView.getMap();
+			}
+		    aMap.setMyLocationEnabled(true);
+			mLocationClient=new AMapLocationClient(context);
+			mLocationClientOption=new AMapLocationClientOption();
+			mLocationClient.setLocationListener( this);
+			mLocationClientOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
+			mLocationClientOption.setInterval(2000);
+			mLocationClient.setLocationOption(mLocationClientOption);
+			mLocationClient.startLocation();
+			locButton.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) 
+				{
+					dingweionce=0;
+					
+				}
+			});
 		}
 	
 		return view;
@@ -291,6 +355,46 @@ public class fragmentPart extends Fragment
         {
         	userPicture.setImageBitmap(bitmap);
         }
+	
+		@Override
+		public void onLocationChanged(AMapLocation amaplocation) 
+		{   
+			if(amaplocation!=null)
+			{  
+				if(dingweionce==0)
+				{if(amaplocation.getErrorCode()==0)
+				   {
+					amaplocation.getLocationType();
+					double lat=amaplocation.getLatitude();
+					double lon=amaplocation.getLongitude();
+					LatLng latlng=new LatLng(lat, lon);
+					cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latlng,20 ,0, 0));
+	                aMap.moveCamera(cameraUpdate);
+	                aMap.invalidate();
+	                aMap.clear();
+	                aMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+	                dingweionce=1;
+	                }
+				else 
+			     	{
+				  	Log.e("error", "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo());
+					Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
+					dingweionce=1;
+			     	}
+				}
+			}
+			
+		}
+		@Override
+		public void activate(OnLocationChangedListener arg0) {
+			
+			
+		}
+		@Override
+		public void deactivate() {
+			// TODO Auto-generated method stub
+			
+		}
 
 
 }
