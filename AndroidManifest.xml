@@ -8,6 +8,15 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
     <uses-permission 
+        android:name="android.permission.ACCESS_MOCK_LOCATION"
+        />
+    <uses-permission 
+        android:name="android.permission.ACCESS_GPS"
+        />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission 
         android:name="android.permission.INTERNET"
         />
     <uses-permission 
@@ -48,7 +57,10 @@
         android:icon="@drawable/log"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
+         <meta-data 
+            android:name="com.amap.api.v2.apikey"
+            android:value="6542302695f67952ee25f1a984dd6ccd"
+            />
         <activity
             android:name="activity.weather_info"
             android:label="@string/app_name" >
@@ -72,10 +84,6 @@
         <receiver 
             android:name="receiver.uqdateReceive"
             ></receiver>
-        <meta-data 
-            android:name="com.amap.api.v2.apikey"
-            android:value="6542302695f67952ee25f1a984dd6ccd"
-            ></meta-data>
     </application>
 
 </manifest>

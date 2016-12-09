@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,6 +29,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -60,6 +63,7 @@ public class weather_info extends FragmentActivity {
 	 private String [] title=new String[]{
 	    		"weather","map"
 	         };
+	 public static String provider;
 	 private FragmentPagerAdapter mAdapter;
 	@Override
 	public void onCreate(Bundle savedInstance)
@@ -70,6 +74,8 @@ public class weather_info extends FragmentActivity {
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
 	
+	    
+	  
 	}		
 	private void init() 
 	{
@@ -170,12 +176,13 @@ public class weather_info extends FragmentActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		fragmentPart.mMapView.onDestroy();
+		fragmentPart.dingweionce=0;
 	}
 	@Override
 	public void onPause(){
 		super.onPause();
 		fragmentPart.mMapView.onPause();
-		
+		fragmentPart.dingweionce=0;
 		
 	}
 

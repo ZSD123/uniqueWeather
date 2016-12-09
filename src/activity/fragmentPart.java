@@ -14,6 +14,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMapOptions;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
@@ -23,6 +24,13 @@ import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.MarkerOptions;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.nearby.NearbySearch;
+import com.amap.api.services.nearby.NearbySearch.NearbyListener;
+import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
+import com.amap.api.services.nearby.NearbySearchResult;
+import com.amap.api.services.nearby.UploadInfo;
+import com.amap.api.services.nearby.UploadInfoCallback;
 import com.uniqueweather.app.R;
 
 
@@ -41,6 +49,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -63,7 +72,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource
+public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener
 {   public static String keyToGet="begin";
     private String theKey;
 	private static TextView time;
@@ -91,13 +100,18 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public Button button1;
     public MyHorizontalView horizontalView;
     
+    public  static LocationManager locationManager;
     public static MapView mMapView;
-    public AMap aMap;
+    public static AMap aMap;
     public AMapLocationClient mLocationClient;
     public AMapLocationClientOption mLocationClientOption;
-    public CameraUpdate cameraUpdate;
-    public int dingweionce=0;
+    public static CameraUpdate cameraUpdate;
+    public int dingwei=0;
+    public static int dingweionce=0;
     private ImageButton locButton;
+    private LatLonPoint latlng;
+    private AMapOptions options;
+    private LatLng latLng1;
     public fragmentPart(Context context)
     {
     	this.context=context;
@@ -266,20 +280,36 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				aMap=mMapView.getMap();
 			}
 		    aMap.setMyLocationEnabled(true);
+		    
 			mLocationClient=new AMapLocationClient(context);
 			mLocationClientOption=new AMapLocationClientOption();
-			mLocationClient.setLocationListener( this);
+			mLocationClient.setLocationListener(this);
+			
 			mLocationClientOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
 			mLocationClientOption.setInterval(2000);
+			mLocationClientOption.setMockEnable(true);
+			options.camera(new CameraPosition(latLng1,18,0, 0));
 			mLocationClient.setLocationOption(mLocationClientOption);
 			mLocationClient.startLocation();
+			NearbySearch mNearbySearch=NearbySearch.getInstance(context);
+			mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
+				
+				@Override
+				public UploadInfo OnUploadInfoCallback() {
+					UploadInfo loadiInfo=new UploadInfo();
+					loadiInfo.setCoordType(NearbySearch.AMAP);
+					loadiInfo.setPoint(latlng);
+					loadiInfo.setUserID(accountName);
+					return loadiInfo;
+				}
+			}, 10000);
+			mNearbySearch.addNearbyListener(this);
 			locButton.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) 
 				{
-					dingweionce=0;
-					
+					dingwei=0;
 				}
 			});
 		}
@@ -360,33 +390,47 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		public void onLocationChanged(AMapLocation amaplocation) 
 		{   
 			if(amaplocation!=null)
-			{  
-				if(dingweionce==0)
-				{if(amaplocation.getErrorCode()==0)
+			  {  
+				
+				if(amaplocation.getErrorCode()==0)
 				   {
 					amaplocation.getLocationType();
 					double lat=amaplocation.getLatitude();
 					double lon=amaplocation.getLongitude();
-					LatLng latlng=new LatLng(lat, lon);
-					cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latlng,20 ,0, 0));
-	                aMap.moveCamera(cameraUpdate);
-	                aMap.invalidate();
+					latlng=new LatLonPoint(lat, lon);
+					latLng1=new LatLng(lat, lon);
+					if(dingwei==0)
+				    	{	 float zoom;
+					     zoom=pre.getFloat("zoom",18);
+					     if(dingweionce!=0)
+					     { CameraPosition cameraPosition=aMap.getCameraPosition();
+					      if(aMap.getCameraPosition()!=null)
+						    zoom=cameraPosition.zoom;
+						  editor.putFloat("zoom",zoom);
+						  editor.commit();
+					     }
+						 cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
+	                     aMap.moveCamera(cameraUpdate);
+	                     aMap.invalidate();
+	                     dingwei=1;
+	                     dingweionce=1;
+				        }
 	                aMap.clear();
-	                aMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-	                dingweionce=1;
-	                }
-				else 
+	                aMap.addMarker(new MarkerOptions().position(latLng1).icon(BitmapDescriptorFactory.fromResource(R.drawable.melocate)));
+				   }
+				else if(dingwei==0)
 			     	{
 				  	Log.e("error", "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo());
 					Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
-					dingweionce=1;
+					dingwei=1;
 			     	}
-				}
-			}
+			  }
+			
 			
 		}
 		@Override
-		public void activate(OnLocationChangedListener arg0) {
+		public void activate(OnLocationChangedListener arg0) 
+		{
 			
 			
 		}
@@ -395,6 +439,21 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			// TODO Auto-generated method stub
 			
 		}
-
+		@Override
+		public void onNearbyInfoSearched(NearbySearchResult arg0, int arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void onNearbyInfoUploaded(int arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void onUserInfoCleared(int arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+	
 
 }
