@@ -9,6 +9,7 @@ import java.util.List;
 import service.autoUqdateService;
 
 import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.SupportMapFragment;
 import com.uniqueweather.app.R;
 
 import Util.Http;
@@ -106,16 +107,14 @@ public class weather_info extends FragmentActivity {
 	   };
 		
 	}
-
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent data)
-	{  Log.d("Main", "tou");
-	   Log.d("Main",String.valueOf(requestCode));
+	{ 
 		switch(requestCode)
 		{
 		case 1:
 			if(resultCode==RESULT_OK)
-			{   Log.d("Main", "ªÿ¿¥¡À");
+			{  
 				fragmentPart.flag=1;
 				fragmentPart.editor.putString("countyName", data.getExtras().getString("countyName"));
 				fragmentPart.editor.putInt("flag", fragmentPart.flag);
@@ -171,23 +170,12 @@ public class weather_info extends FragmentActivity {
 			break;
 		}
 	}
-
 	@Override
-	protected void onDestroy() {
+	public void onDestroy()
+	{
 		super.onDestroy();
-		fragmentPart.mMapView.onDestroy();
-		fragmentPart.dingweionce=0;
+		Log.d("Main","onDestroy");
 	}
-	@Override
-	public void onPause(){
-		super.onPause();
-		fragmentPart.mMapView.onPause();
-		fragmentPart.dingweionce=0;
-		
-	}
-
-	
-	
-  
+ 
   
 }
