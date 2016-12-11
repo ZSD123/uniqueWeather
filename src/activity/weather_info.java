@@ -170,12 +170,6 @@ public class weather_info extends FragmentActivity {
 			break;
 		}
 	}
-	@Override
-	public void onDestroy()
-	{
-		super.onDestroy();
-		Log.d("Main","onDestroy");
-	}
- 
+
   
 }

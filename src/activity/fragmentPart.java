@@ -14,6 +14,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMap.OnMapLoadedListener;
 import com.amap.api.maps2d.AMapOptions;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
@@ -107,13 +108,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public AMapLocationClient mLocationClient;
     public AMapLocationClientOption mLocationClientOption;
     public static CameraUpdate cameraUpdate;
-    public boolean dingwei=true;       //第一次运行代码
     private ImageButton locButton;
     private LatLonPoint latlng;
     private AMapOptions options=new AMapOptions();
     private LatLng latLng1;
     public float zoom;
     public int chucuoonce=0;
+    public double lat;
+    public double lon;
     public fragmentPart(Context context)
     {
     	this.context=context;
@@ -266,7 +268,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 					@Override
 					public void onClick(View v) {
-						weather_info.mViewPager.setCurrentItem(1);
+					    	weather_info.mViewPager.setCurrentItem(1);
 						
 					}
 				});
@@ -274,19 +276,28 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		else if(theKey.equals("map"))
 		{   
 			view=inflater.inflate(R. layout.map,container,false);
+			lat=pre.getFloat("lat", 39);
+			lon=pre.getFloat("lon",116);
+			zoom=pre.getFloat("zoom", 18);
+			latLng1=new LatLng(lat, lon);
+			options.camera(new CameraPosition(latLng1,zoom,0, 0));
+			
+			mMapView=new MapView(context, options);
 			mMapView=(MapView)view.findViewById(R.id.map);
+			 Log.d("zoom1",String.valueOf(zoom));
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			mMapView.onCreate(savedInstanceState);
 			if(aMap==null)
-			{
+			{   
 				aMap=mMapView.getMap();
+				if(aMap==null)
+					Toast.makeText(context, "初始化失败，请退出后再试一次", Toast.LENGTH_LONG).show();
 			}
 			else {
-				Log.d("1",String.valueOf(dingwei));
-				dingwei=true;
 				aMap.clear();
 				aMap=mMapView.getMap();     // Fragment嵌套高德地图，当再次进入Fragment的时候，                           //会出现奇怪的现象。嵌套的地图会出现无法定位的现象。                           //这个问题出现的原因在于，fragment在被移除时，不会执行onDestroy（）方法，而是执行onDestroyView（）方法。fragment中的数据已经在第一次操作时完成了初始化了，所以以下代码中，aMap不为null,无法执行getMap()正常初始化，故无法正常开启定位功能。
-                
+				if(aMap==null)
+					Toast.makeText(context, "初始化失败，请退出后再试一次", Toast.LENGTH_LONG).show();
 			   }
 		    aMap.setMyLocationEnabled(true); 
 			mLocationClient=new AMapLocationClient(context);
@@ -296,13 +307,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mLocationClientOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
 			mLocationClientOption.setInterval(2000);
 			mLocationClientOption.setMockEnable(true);
+			mLocationClientOption.setKillProcess(true);
 			mLocationClient.setLocationOption(mLocationClientOption);
 			mLocationClient.startLocation();
-			float lat=pre.getFloat("lat", 39);
-			float lon=pre.getFloat("lon",116);
-			latLng1=new LatLng(lat, lon);
-			Log.d("4", String.valueOf(dingwei));
-			options.camera(new CameraPosition(latLng1,18,0, 0));
 			NearbySearch mNearbySearch=NearbySearch.getInstance(context);
 			mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
 				
@@ -316,27 +323,34 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				}
 			}, 10000);
 			mNearbySearch.addNearbyListener(this);
-			Log.d("2", String.valueOf(dingwei));
 			locButton.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) 
-				{    float lat=pre.getFloat("lat", 39);
-					 float lon=pre.getFloat("lon", 116);
-					 float zoom=pre.getFloat("zoom",18);
-					 CameraPosition cameraPosition=aMap.getCameraPosition();
-					 if(aMap.getCameraPosition()!=null)
-					 {  zoom=cameraPosition.zoom;
-					    editor.putFloat("zoom", zoom);
-					    editor.commit();
-					 }
+				{    lat=pre.getFloat("lat", 39);
+					 lon=pre.getFloat("lon", 116);
+					 zoom=pre.getFloat("zoom",18);
+					 editor.putFloat("zoom", aMap.getCameraPosition().zoom);
+					 editor.commit();
 					 latLng1=new LatLng(lat, lon);
 					 cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
                      aMap.animateCamera(cameraUpdate);
                      aMap.invalidate();
-                     Log.d("5", String.valueOf(dingwei));
 				}
 			});
+			aMap.setOnMapLoadedListener(new OnMapLoadedListener() {
+				
+				@Override
+				public void onMapLoaded() {
+					  zoom=pre.getFloat("zoom",18);
+					  Log.d("zoom2",String.valueOf( zoom));
+				      cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
+                      aMap.moveCamera(cameraUpdate);
+                      aMap.invalidate();
+					
+				}
+			});
+			
 		}
 	
 		return view;
@@ -418,34 +432,20 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			  {  
 				
 				if(amaplocation.getErrorCode()==0)
-				   {Log.d("3", String.valueOf(dingwei));
+				   {
 					amaplocation.getLocationType();
-					double lat=amaplocation.getLatitude();
-					double lon=amaplocation.getLongitude();	
+				    lat=amaplocation.getLatitude();
+				    lon=amaplocation.getLongitude();	
 					editor.putFloat("lat",(float) lat);
 					editor.putFloat("lon", (float)lon);
+					editor.putFloat("zoom", aMap.getCameraPosition().zoom);
 					editor.commit();
 					latlng=new LatLonPoint(lat, lon);
 					latLng1=new LatLng(lat, lon);
-					Log.d("dingwei", String.valueOf(dingwei));
-					if(dingwei)      //第一次定位运行的代码
-				    	{	 
-					         zoom=pre.getFloat("zoom",18);
-					         cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
-	                         aMap.moveCamera(cameraUpdate);
-	                         aMap.invalidate();
-	                         dingwei=false;
-				        }
-					CameraPosition cameraPosition=aMap.getCameraPosition();
-			        if(aMap.getCameraPosition()!=null)      //保存当前缩放级别
-			        {   zoom=cameraPosition.zoom;       
-					    editor.putFloat("zoom",zoom);
-				        editor.commit();
-			        }
 	                aMap.clear();
 	                aMap.addMarker(new MarkerOptions().position(latLng1).icon(BitmapDescriptorFactory.fromResource(R.drawable.melocate)));
 				   }
-				else if(dingwei&&chucuoonce==0)
+				else if(chucuoonce==0)
 			     	{
 				  	Log.e("error", "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo());
 					Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
@@ -484,24 +484,27 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		@Override
 		public void onPause() {
 			super.onPause();
-			mMapView.onPause();
+			if(mMapView!=null)
+			   mMapView.onPause();
 		}
 		@Override
 		public void onDestroy()
 		{
 			super.onDestroy();
-			mMapView.onDestroy();
+			if (mMapView!=null) 
+			  mMapView.onDestroy();
 		}
 		@Override
 		public void onResume() {
 			super.onResume();
 			if(mMapView!=null)
-			mMapView.onResume();
+			  mMapView.onResume();
 		}
 		@Override
 		public void onSaveInstanceState(Bundle outState) {
 			super.onSaveInstanceState(outState);
-			mMapView.onSaveInstanceState(outState);
+			if(mMapView!=null)
+			  mMapView.onSaveInstanceState(outState);
 		}
 	
 	
