@@ -110,7 +110,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public static CameraUpdate cameraUpdate;
     private ImageButton locButton;
     private LatLonPoint latlng;
-    private AMapOptions options=new AMapOptions();
     private LatLng latLng1;
     public float zoom;
     public int chucuoonce=0;
@@ -280,13 +279,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			lon=pre.getFloat("lon",116);
 			zoom=pre.getFloat("zoom", 18);
 			latLng1=new LatLng(lat, lon);
-			options.camera(new CameraPosition(latLng1,zoom,0, 0));
-			
-			mMapView=new MapView(context, options);
 			mMapView=(MapView)view.findViewById(R.id.map);
-			 Log.d("zoom1",String.valueOf(zoom));
-			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			mMapView.onCreate(savedInstanceState);
+			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			if(aMap==null)
 			{   
 				aMap=mMapView.getMap();
@@ -299,6 +294,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				if(aMap==null)
 					Toast.makeText(context, "初始化失败，请退出后再试一次", Toast.LENGTH_LONG).show();
 			   }
+		
 		    aMap.setMyLocationEnabled(true); 
 			mLocationClient=new AMapLocationClient(context);
 			mLocationClientOption=new AMapLocationClientOption();
@@ -310,6 +306,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mLocationClientOption.setKillProcess(true);
 			mLocationClient.setLocationOption(mLocationClientOption);
 			mLocationClient.startLocation();
+		    cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
+            aMap.moveCamera(cameraUpdate);
+            aMap.invalidate();
 			NearbySearch mNearbySearch=NearbySearch.getInstance(context);
 			mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
 				
@@ -336,18 +335,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					 cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
                      aMap.animateCamera(cameraUpdate);
                      aMap.invalidate();
-				}
-			});
-			aMap.setOnMapLoadedListener(new OnMapLoadedListener() {
-				
-				@Override
-				public void onMapLoaded() {
-					  zoom=pre.getFloat("zoom",18);
-					  Log.d("zoom2",String.valueOf( zoom));
-				      cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
-                      aMap.moveCamera(cameraUpdate);
-                      aMap.invalidate();
-					
 				}
 			});
 			
@@ -381,7 +368,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					}
 				});
 		}
-	  public static void savePicture(Bitmap bitmap,String path)
+
+	public static void savePicture(Bitmap bitmap,String path)
 		{
 			File file=new File(path);
 			try{
