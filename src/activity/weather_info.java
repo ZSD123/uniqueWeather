@@ -55,9 +55,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class weather_info extends FragmentActivity {
-    public String accountName;
-    public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
-	public static String address3="http://route.showapi.com/9-2";
+     public String accountName;
+     public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
+	 public static String address3="http://route.showapi.com/9-2";
 	
 	 public static ViewPager mViewPager;
 	 private List<fragmentPart> fragList=new ArrayList<fragmentPart>();

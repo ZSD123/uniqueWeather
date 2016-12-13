@@ -21,10 +21,15 @@ import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
 import com.amap.api.maps2d.UiSettings;
+import com.amap.api.maps2d.model.BitmapDescriptor;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
+import com.amap.api.maps2d.model.Circle;
+import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
+import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
+import com.amap.api.maps2d.model.MyLocationStyle;
 import com.amap.api.services.a.bo;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.nearby.NearbySearch;
@@ -38,6 +43,7 @@ import com.uniqueweather.app.R;
 
 import Util.Http;
 import Util.HttpCallbackListener;
+import Util.SensorEventHelper;
 import Util.Utility;
 import android.R.integer;
 import android.app.Activity;
@@ -49,6 +55,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -115,6 +124,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public int chucuoonce=0;
     public double lat;
     public double lon;
+    private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
+	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
+    private SensorEventHelper mSensorEventHelper;
+	private Circle mCircle;
+	private Marker mLocMarker;
+	private OnLocationChangedListener mListener;
+	private boolean mFirstFix = false;
     public fragmentPart(Context context)
     {
     	this.context=context;
@@ -271,6 +287,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						
 					}
 				});
+			    
 		}
 		else if(theKey.equals("map"))
 		{   
@@ -294,22 +311,19 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				if(aMap==null)
 					Toast.makeText(context, "初始化失败，请退出后再试一次", Toast.LENGTH_LONG).show();
 			   }
-		
+		    aMap.setLocationSource(this);
 		    aMap.setMyLocationEnabled(true); 
-			mLocationClient=new AMapLocationClient(context);
-			mLocationClientOption=new AMapLocationClientOption();
-			mLocationClient.setLocationListener(this);
-			
-			mLocationClientOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
-			mLocationClientOption.setInterval(2000);
-			mLocationClientOption.setMockEnable(true);
-			mLocationClientOption.setKillProcess(true);
-			mLocationClient.setLocationOption(mLocationClientOption);
-			mLocationClient.startLocation();
-		    cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
-            aMap.moveCamera(cameraUpdate);
+		    
+		    mSensorEventHelper = new SensorEventHelper(context);
+			if (mSensorEventHelper != null) {
+				mSensorEventHelper.registerSensorListener();
+			}
+		    
+			cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
+            aMap.moveCamera(cameraUpdate);       //初始化到相应的位置
             aMap.invalidate();
-			NearbySearch mNearbySearch=NearbySearch.getInstance(context);
+			
+            NearbySearch mNearbySearch=NearbySearch.getInstance(context);
 			mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
 				
 				@Override
@@ -342,6 +356,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 		return view;
 	}
+	
 	  public Bitmap getPicture()
 	    {
 	    	Bitmap bitmap=null;
@@ -421,7 +436,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				
 				if(amaplocation.getErrorCode()==0)
 				   {
-					amaplocation.getLocationType();
 				    lat=amaplocation.getLatitude();
 				    lon=amaplocation.getLongitude();	
 					editor.putFloat("lat",(float) lat);
@@ -430,8 +444,16 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					editor.commit();
 					latlng=new LatLonPoint(lat, lon);
 					latLng1=new LatLng(lat, lon);
-	                aMap.clear();
-	                aMap.addMarker(new MarkerOptions().position(latLng1).icon(BitmapDescriptorFactory.fromResource(R.drawable.melocate)));
+					if (!mFirstFix) {
+						mFirstFix = true;
+						addCircle(latLng1, amaplocation.getAccuracy());//添加定位精度圆
+						addMarker(latLng1);//添加定位图标
+						mSensorEventHelper.setCurrentMarker(mLocMarker);//定位图标旋转
+					} else {
+						mCircle.setCenter(latLng1);
+						mCircle.setRadius(amaplocation.getAccuracy());
+						mLocMarker.setPosition(latLng1);
+					    }
 				   }
 				else if(chucuoonce==0)
 			     	{
@@ -444,14 +466,29 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 		}
 		@Override
-		public void activate(OnLocationChangedListener arg0) 
+		public void activate(OnLocationChangedListener listener) 
 		{
+			mListener = listener;
+			if (mLocationClient == null) {
+			mLocationClient=new AMapLocationClient(context);
+			mLocationClientOption=new AMapLocationClientOption();
+			mLocationClient.setLocationListener(this);
 			
-			
+			mLocationClientOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
+			mLocationClientOption.setInterval(2000);
+			mLocationClientOption.setMockEnable(true);
+			mLocationClient.setLocationOption(mLocationClientOption);
+			mLocationClient.startLocation();
+			}
 		}
 		@Override
 		public void deactivate() {
-			
+			mListener = null;
+			if (mLocationClient != null) {
+				mLocationClient.stopLocation();
+				mLocationClient.onDestroy();
+			}
+			mLocationClient = null;
 			
 		}
 		@Override
@@ -474,6 +511,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			super.onPause();
 			if(mMapView!=null)
 			   mMapView.onPause();
+			if (mSensorEventHelper != null) {
+				mSensorEventHelper.unRegisterSensorListener();
+				mSensorEventHelper.setCurrentMarker(null);
+				mSensorEventHelper = null;
+			}
+			deactivate();
+			mFirstFix=false;
 		}
 		@Override
 		public void onDestroy()
@@ -481,12 +525,20 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			super.onDestroy();
 			if (mMapView!=null) 
 			  mMapView.onDestroy();
+			mMapView=null;
+			if(null != mLocationClient)
+			{   mLocationClient.stopLocation();
+				mLocationClient.onDestroy();
+			}
 		}
 		@Override
 		public void onResume() {
 			super.onResume();
 			if(mMapView!=null)
 			  mMapView.onResume();
+			if (mSensorEventHelper != null) {
+				mSensorEventHelper.registerSensorListener();
+			}
 		}
 		@Override
 		public void onSaveInstanceState(Bundle outState) {
@@ -494,7 +546,31 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			if(mMapView!=null)
 			  mMapView.onSaveInstanceState(outState);
 		}
-	
+		private void addCircle(LatLng latlng, double radius) {
+			CircleOptions options = new CircleOptions();
+			options.strokeWidth(1f);
+			options.fillColor(FILL_COLOR);
+			options.strokeColor(STROKE_COLOR);
+			options.center(latlng);
+			options.radius(radius);
+			mCircle = aMap.addCircle(options);
+		}
+		private void addMarker(LatLng latlng) {
+			
+			BitmapFactory.Options options1=new BitmapFactory.Options();
+			options1.inSampleSize=2;
+			Bitmap bitmap=BitmapFactory.decodeResource(this.getResources(), R.drawable.zhuanxiang, options1);
+			Log.d("Main",String.valueOf(bitmap.getHeight()));
+			Log.d("Main",String.valueOf(bitmap.getWidth()));
+			BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+			
+//			BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
+			MarkerOptions options = new MarkerOptions();
+			options.icon(des);
+			options.anchor(0.5f, 0.5f);
+			options.position(latlng);
+			mLocMarker = aMap.addMarker(options);
+		}
 	
 
 }
