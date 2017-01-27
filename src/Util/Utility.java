@@ -6,7 +6,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import model.jingdian;
 import model.jingdiancity;
@@ -15,15 +14,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import db.jingdianDB;
-import db.jingdiandbHelper;
-
-import android.R.integer;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class Utility {
 	public static jingdiancity jingdiancity1;
@@ -115,6 +110,24 @@ public class Utility {
     			 jingdian1.seturlString(jsonArray.getJSONObject(0).getString("url"));
     			 jingdiandb.savejingdian(jingdian1);
     		 }
+    	 }catch(Exception e)
+    	 {
+    		 e.printStackTrace();
+    	 }
+     }
+     public static void handleAreaByXY(String response,Context context)
+     {   SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
+    	 try{
+    		 JSONObject jsonObject=new JSONObject(response);
+    		 JSONObject jsonObject2=jsonObject.getJSONObject("showapi_res_body");
+    		 JSONObject jsonObject3=jsonObject2.getJSONObject("addressComponent");
+    		 String locProvince=jsonObject3.getString("province");
+    		 String locCity=jsonObject3.getString("city");
+    		 String locDistrict=jsonObject3.getString("district");
+    		 editor.putString("locProvice", locProvince);
+    		 editor.putString("locCity", locCity);
+    		 editor.putString("locDistrict",locDistrict);
+    		 editor.commit();
     	 }catch(Exception e)
     	 {
     		 e.printStackTrace();

@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 
 public class autoUqdateService extends Service {
@@ -41,7 +42,7 @@ public class autoUqdateService extends Service {
 	public void uqdateWeather()
 	{
 		SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(this);
-		String coName=pre.getString("countyName", "");
+		String coName=pre.getString("locDistrict", "");
 		Http.sendWeatherRequest(coName,weather_info.address3,new HttpCallbackListener()
 		{
 			@Override

@@ -5,10 +5,5 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/nineoldandroids-2.4.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/Amap_2DMap_V2.9.2_20161026.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/AMap_Location_V2.4.1_20160414.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/AMap_Search_V3.6.1_20161122.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/Volley.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

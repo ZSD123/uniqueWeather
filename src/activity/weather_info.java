@@ -1,56 +1,32 @@
 package activity;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
-import service.autoUqdateService;
+import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobConfig;
+import cn.bmob.v3.BmobConfig.Builder;
 
-import com.amap.api.maps2d.MapView;
-import com.amap.api.maps2d.SupportMapFragment;
 import com.uniqueweather.app.R;
 
-import Util.Http;
-import Util.HttpCallbackListener;
-import Util.Utility;
 
-import android.R.integer;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,21 +41,57 @@ public class weather_info extends FragmentActivity {
 	    		"weather","map"
 	         };
 	 public static String provider;
+	 public String yuanLocation;
+	 public String xianLocation;
+	 public  int chenhuonce=0;
+	 public SharedPreferences.Editor editor1;
+	 public  SharedPreferences pref;
 	 private FragmentPagerAdapter mAdapter;
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.main);
+		setContentView(R.layout.weather_layout);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	
+	    editor1=PreferenceManager.getDefaultSharedPreferences(this).edit();
+	    pref=PreferenceManager.getDefaultSharedPreferences(this);
+	    chenhuonce=pref.getInt("chenhuonce",0);
+		if(chenhuonce==0)
+		{
+		final EditText editText=new EditText(this);
+		AlertDialog.Builder builder=new AlertDialog.Builder(this);
+		builder.setTitle("请输入对您的称呼").setNegativeButton("取消", null).setView(editText);
+		builder.setPositiveButton("确定",new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				accountName=editText.getText().toString(); 
+				fragmentPart.editor.putString("accountName", accountName);
+				fragmentPart.editor.commit();
+				if(!accountName.isEmpty())
+					{
+				       fragmentPart.refreshUserName(accountName);
+					}
+			}
+		});
+		builder.show();
+		chenhuonce=1;
+	    editor1.putInt("chenhuonce",chenhuonce);
+		editor1.commit();
+		}
 	    
-	  
-	}		
+	 }		
 	private void init() 
-	{
+	{  Bmob.initialize(this,"f3065817051f7c298d2e49d9329a2a6b");
+	   BmobConfig config=new BmobConfig.Builder(this)
+	                     .setApplicationId("f3065817051f7c298d2e49d9329a2a6b")
+	                     .setConnectTimeout(30)
+	                     .setUploadBlockSize(1024*1024)
+	                     .setFileExpiration(2500)
+	                     .build();
+	   Bmob.initialize(config);
 	   mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
 	   for (int i=0;i<title.length;i++)                     //加载fragmentPart
 	      {
@@ -113,44 +125,6 @@ public class weather_info extends FragmentActivity {
 		switch(requestCode)
 		{
 		case 1:
-			if(resultCode==RESULT_OK)
-			{  
-				fragmentPart.flag=1;
-				fragmentPart.editor.putString("countyName", data.getExtras().getString("countyName"));
-				fragmentPart.editor.putInt("flag", fragmentPart.flag);
-				fragmentPart.editor.putString("selectedCityName", data.getExtras().getString("selectedCityName"));
-				fragmentPart.editor.commit();
-				Log.d("Main", String.valueOf(fragmentPart.pre.getInt("flag",144)));
-				fragmentPart.chenhuonce=fragmentPart.pre.getInt("chenhuonce",0);
-				if(fragmentPart.chenhuonce==0)
-				{
-				final EditText editText=new EditText(this);
-				AlertDialog.Builder builder=new AlertDialog.Builder(this);
-				builder.setTitle("请输入对您的称呼").setNegativeButton("取消", null).setView(editText);
-				builder.setPositiveButton("确定",new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						accountName=editText.getText().toString(); 
-						fragmentPart.editor.putString("accountName", accountName);
-						fragmentPart.editor.commit();
-						if(!accountName.isEmpty())
-							{
-						       fragmentPart.refreshUserName(accountName);
-							}
-					}
-				});
-				builder.show();
-				fragmentPart.chenhuonce=1;
-				fragmentPart.editor.putInt("chenhuonce",fragmentPart.chenhuonce);
-				fragmentPart.editor.commit();
-				}
-				fragmentPart.countyName = data.getStringExtra("countyName");
-				fragmentPart.refreshCountyName(fragmentPart.countyName);
-                fragmentPart.queryWeather(weather_info.this);
-				Toast.makeText(weather_info.this, "刷新中...", Toast.LENGTH_SHORT).show();
-				
-			} 
 			break;
 		case 2:
 			if(resultCode==RESULT_OK)
@@ -170,6 +144,6 @@ public class weather_info extends FragmentActivity {
 			break;
 		}
 	}
-
+   
   
 }

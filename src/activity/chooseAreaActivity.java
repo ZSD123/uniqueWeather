@@ -68,7 +68,6 @@ public class chooseAreaActivity extends Activity {
          listview.setAdapter(adapter);
          weatherDB=WeatherDB.getInstance(this);
          queryProvince();
-         Log.d("Main", getCallingActivity().getClass().getSimpleName());
          listview.setOnItemClickListener(new OnItemClickListener(){
          @Override
          public void onItemClick(AdapterView<?> arg0,View view,int index,long arg3)

@@ -32,9 +32,11 @@ import com.amap.api.maps2d.model.MarkerOptions;
 import com.amap.api.maps2d.model.MyLocationStyle;
 import com.amap.api.services.a.bo;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.nearby.NearbyInfo;
 import com.amap.api.services.nearby.NearbySearch;
 import com.amap.api.services.nearby.NearbySearch.NearbyListener;
 import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
+import com.amap.api.services.nearby.NearbySearchFunctionType;
 import com.amap.api.services.nearby.NearbySearchResult;
 import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
@@ -93,7 +95,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private static TextView temper;
 	private static ImageView userPicture;
 	private TextView myCity;
-	private Button button_switch;
     private Button button_refresh;
     public static String countyName;
     private static ImageView pic;
@@ -104,9 +105,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private String accountName;
     private View view;
     private String uriUserPicture;
-    public static int flag;
     private static Bitmap bitmap;
-    public static int chenhuonce=0;
     public Context context;
     public Button button1;
     public MyHorizontalView horizontalView;
@@ -131,7 +130,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private Marker mLocMarker;
 	private OnLocationChangedListener mListener;
 	private boolean mFirstFix = false;
-    public fragmentPart(Context context)
+	private String yuanLocation;     //原来的地理位置，用于比对
+	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
+    private String userId;
+	public fragmentPart(Context context)
     {
     	this.context=context;
     }
@@ -155,7 +157,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
 			myCity=(TextView)view.findViewById(R.id.myCity);
-			button_switch=(Button)view.findViewById(R.id.switch_city);
 			button_refresh=(Button)view.findViewById(R.id.refresh);
 			countyname=(TextView)view.findViewById(R.id.countyName);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
@@ -164,7 +165,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
-		    flag=pre.getInt("flag", 0);
 			accountName=pre.getString("accountName","");
 			if(!accountName.isEmpty())
 			{Toast.makeText(context,accountName + ",欢迎您", Toast.LENGTH_SHORT).show();
@@ -187,53 +187,40 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    	Toast.makeText(context, "未找到相应图片", Toast.LENGTH_SHORT).show();
 				    }
 				}
-				weather_layout.setVisibility(View.INVISIBLE);
-			if(flag==0)
-				{   Toast.makeText(context, "请选择城市", Toast.LENGTH_SHORT).show();
-					Intent intent=new Intent();
-					intent.setClass(context,chooseAreaActivity.class);
-					((Activity)context).startActivityForResult(intent,1);
-					
-				}
-			else{
-					countyName=pre.getString("countyName","");
-				    pic.setImageBitmap(getPicture());
-			        countyname.setText(countyName);
-				    weather_layout.setVisibility(View.VISIBLE);
-				    weather.setText(pre.getString("weatherInfo", ""));
-				    temper.setText(pre.getString("temperature", ""));
-				    realtime.setText(pre.getString("realtime", ""));
-				    String publishTime=pre.getString("time", "");
-				    char[]b=publishTime.toCharArray();
+		        countyName=pre.getString("locDistrict","");
+				pic.setImageBitmap(getPicture());
+			    countyname.setText(pre.getString("locCity","")+countyName);
+				weather.setText(pre.getString("weatherInfo", ""));
+				temper.setText(pre.getString("temperature", ""));
+				realtime.setText(pre.getString("realtime", ""));
+				String publishTime=pre.getString("time", "");
+				char[]b=publishTime.toCharArray();
 				    if(b.length>0)
 				    { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
 				    time.setText(c);
 				    }
-					queryWeather(context);
-				}
-				button_switch.setOnClickListener(new OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{   int[] location=new int[2];
-					    v.getLocationOnScreen(location);
-					    int x=location[0];
-					    if(x<100)
-					  { Intent intent=new Intent();
-						intent.setClass(context,chooseAreaActivity.class);
-						((Activity)context).startActivityForResult(intent,1);
-					  }
-					    else 
-					    {
-							horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
-						}
-					}
-				});
+				
+		
 				button_refresh.setOnClickListener(new OnClickListener()
 				{
 					@Override
 					public void onClick(View v)
-					{   queryWeather(context);
+					{   
+					    Http.queryAreaByXY(pre.getFloat("lat", 0),pre.getFloat("lon",0), address, new HttpCallbackListener() {
+						   @Override
+						    public void onFinish(String response) {
+						    Utility.handleAreaByXY(response, context);
+						    queryWeather(context);
+							   ((Activity) context).runOnUiThread(new Runnable(){
+							    @Override
+							    public void run(){
+							    	countyname.setText(pre.getString("locCity","")+pre.getString("locDistrict",""));
+							    	yuanLocation=pre.getString("locCity","")+pre.getString("locDistrict","");
+				            }});
+					       
+						}
+					  });
+					    
 					    Toast.makeText(getActivity(), "刷新中...", Toast.LENGTH_SHORT).show();
 					}
 				});
@@ -273,7 +260,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					@Override
 					public void onClick(View v) {
 						Intent intent=new Intent(context,myCityAction.class);
-						intent.putExtra("selectedCityName",pre.getString("selectedCityName", "") );
+						intent.putExtra("selectedCityName",pre.getString("locCity", "") );
 						intent.putExtra("temp", pre.getString("temperature",""));
 						startActivity(intent);
 						
@@ -322,29 +309,46 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
             aMap.moveCamera(cameraUpdate);       //初始化到相应的位置
             aMap.invalidate();
-			
+		    
             NearbySearch mNearbySearch=NearbySearch.getInstance(context);
-			mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
-				
-				@Override
-				public UploadInfo OnUploadInfoCallback() {
-					UploadInfo loadiInfo=new UploadInfo();
-					loadiInfo.setCoordType(NearbySearch.AMAP);
-					loadiInfo.setPoint(latlng);
-					loadiInfo.setUserID(accountName);
-					return loadiInfo;
-				}
-			}, 10000);
-			mNearbySearch.addNearbyListener(this);
-			locButton.setOnClickListener(new OnClickListener() {
+            mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
+            	//设置自动上传数据和上传的间隔时间
+            	@Override
+            	public UploadInfo OnUploadInfoCallback() {
+            	       UploadInfo loadInfo = new UploadInfo();
+            	       loadInfo.setCoordType(NearbySearch.AMAP);
+            	       //位置信息
+            	       loadInfo.setPoint(latlng);
+            	       //用户id信息
+            	       loadInfo.setUserID(String.valueOf((int)lat*10));
+            	       Log.d("Main",String.valueOf((int)lat*10));
+            	       Log.d("Main","load");
+            	       
+            	       return loadInfo;
+            	}
+            	},20000);
+            
+            mNearbySearch.addNearbyListener(this);
+          //设置搜索条件
+            NearbyQuery query = new NearbyQuery();
+            //设置搜索的中心点
+            query.setCenterPoint(new LatLonPoint(lat, lon));
+            //设置搜索的坐标体系
+            query.setCoordType(NearbySearch.AMAP);
+            //设置搜索半径
+            query.setRadius(10000);
+            //设置查询的时间
+            query.setTimeRange(10000);
+            //调用异步查询接口
+            mNearbySearch.searchNearbyInfoAsyn(query);
+
+		    locButton.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) 
 				{    lat=pre.getFloat("lat", 39);
 					 lon=pre.getFloat("lon", 116);
 					 zoom=pre.getFloat("zoom",18);
-					 editor.putFloat("zoom", aMap.getCameraPosition().zoom);
-					 editor.commit();
 					 latLng1=new LatLng(lat, lon);
 					 cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
                      aMap.animateCamera(cameraUpdate);
@@ -365,7 +369,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	    }
 	  public static void queryWeather(final Context context)
 		{     
-			  Http.sendWeatherRequest(countyName,weather_info.address3, new HttpCallbackListener()
+			  Http.sendWeatherRequest(pre.getString("locDistrict",""),weather_info.address3, new HttpCallbackListener()
 				{   
 					@Override
 					public void onFinish(String response)
@@ -449,6 +453,23 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						addCircle(latLng1, amaplocation.getAccuracy());//添加定位精度圆
 						addMarker(latLng1);//添加定位图标
 						mSensorEventHelper.setCurrentMarker(mLocMarker);//定位图标旋转
+						Http.queryAreaByXY(lat, lon, address, new HttpCallbackListener() {
+							@Override
+							public void onFinish(String response) {
+							    Utility.handleAreaByXY(response, context);
+								queryWeather(context);
+								if(!pre.getString("locCity","").equals("")&&!pre.getString("locDistrict","").equals(""))
+								{    
+									
+									((Activity) context).runOnUiThread(new Runnable(){
+								    @Override
+								    public void run(){
+								    	countyname.setText(pre.getString("locCity","")+pre.getString("locDistrict",""));
+								    	
+								   }});
+								}
+							}
+						});
 					} else {
 						mCircle.setCenter(latLng1);
 						mCircle.setRadius(amaplocation.getAccuracy());
@@ -457,7 +478,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				   }
 				else if(chucuoonce==0)
 			     	{
-				  	Log.e("error", "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo());
+				  	
 					Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
 					chucuoonce=1;
 			     	}
@@ -491,21 +512,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mLocationClient = null;
 			
 		}
-		@Override
-		public void onNearbyInfoSearched(NearbySearchResult arg0, int arg1) {
-			// TODO Auto-generated method stub
-			
-		}
-		@Override
-		public void onNearbyInfoUploaded(int arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-		@Override
-		public void onUserInfoCleared(int arg0) {
-			// TODO Auto-generated method stub
-			
-		}
+		
 		@Override
 		public void onPause() {
 			super.onPause();
@@ -560,8 +567,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			BitmapFactory.Options options1=new BitmapFactory.Options();
 			options1.inSampleSize=2;
 			Bitmap bitmap=BitmapFactory.decodeResource(this.getResources(), R.drawable.zhuanxiang, options1);
-			Log.d("Main",String.valueOf(bitmap.getHeight()));
-			Log.d("Main",String.valueOf(bitmap.getWidth()));
 			BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
 			
 //			BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
@@ -571,6 +576,56 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			options.position(latlng);
 			mLocMarker = aMap.addMarker(options);
 		}
-	
+		@Override
+		public void onNearbyInfoSearched(NearbySearchResult nearbySearchResult, int resultCode) 
+		{
+			 if(resultCode == 1000){
+				    if (nearbySearchResult != null
+				        && nearbySearchResult.getNearbyInfoList() != null
+				        && nearbySearchResult.getNearbyInfoList().size() > 0) 
+				    {
+				        NearbyInfo nearbyInfo = nearbySearchResult.getNearbyInfoList().get(0);
+				        Toast.makeText(context, "周边搜索结果为size "+ nearbySearchResult.getNearbyInfoList().size() + "first："+ nearbyInfo.getUserID() + "  " + nearbyInfo.getDistance()+ "  " 
+						                + nearbyInfo.getDrivingDistance() + "  "+ nearbyInfo.getTimeStamp() + "  "+  
+						                nearbyInfo.getPoint().toString(), Toast.LENGTH_LONG).show();
+				        Log.d("Main","nearbySearchResult");
+				       for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
+				       {
+				    	   addSanMarker(nearbySearchResult.getNearbyInfoList().get(i).getPoint());
+					   }
+				     
+				   } 
+				        else {
+				                     Toast.makeText(context, "周边为空",Toast.LENGTH_LONG).show();
+				              }
+				}
+				     else{
+				             Toast.makeText(context,"周边搜索出现异常，异常码为："+resultCode ,Toast.LENGTH_LONG).show();
+				         }
+
+			
+		}
+		@Override
+		public void onNearbyInfoUploaded(int resultCode) 
+		{
+			Log.d("Main", "resultCode is"+ resultCode);
+		}
+		@Override
+		public void onUserInfoCleared(int resultCode) {
+			
+		}
+		private void  addSanMarker(LatLonPoint latLng) 
+		{ 
+			BitmapFactory.Options options1=new BitmapFactory.Options();
+			options1.inSampleSize=2;
+			Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
+			BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+//			BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
+			MarkerOptions options = new MarkerOptions();
+			options.icon(des);
+			options.anchor(0.5f, 0.5f);
+			options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
+			mLocMarker = aMap.addMarker(options);
+		}
 
 }

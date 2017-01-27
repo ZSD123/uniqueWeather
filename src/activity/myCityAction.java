@@ -554,7 +554,6 @@ public class myCityAction extends Activity {
     		 myCity city=myCities.get(m);
     		 dataList.add(city); 
     	 }
-         Log.d("Main", "其他城市");
     	 
      }
      public void showProgressDialog()  
