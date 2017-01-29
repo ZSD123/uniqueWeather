@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E6E6FA" >
-<activity.CustomFont
+ <activity.CustomFont
     android:id="@+id/text_EndRain"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -12,8 +12,8 @@
     android:layout_centerHorizontal="true"
     android:layout_marginTop="90dp"
     android:textColor="#00BFFF"
-    />    
-<activity.CustomFontTextView
+    />     
+     <activity.CustomFontTextView
     android:id="@+id/text_huanyinnin"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_below="@id/text_huanyinnin"
-    android:layout_marginTop="80dp"
+    android:layout_marginTop="40dp"
     android:orientation="horizontal"
     >
     <TextView 
@@ -37,14 +37,17 @@
         android:layout_height="wrap_content"
         android:text="帐号"
         android:textSize="20sp"
+        
         />
     <EditText 
         android:id="@+id/editText_account"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:hint="手机号或者邮箱"
         />
    </LinearLayout>
+
    <LinearLayout 
      android:id="@+id/linear2"
      android:layout_below="@id/linear1"
@@ -63,40 +66,48 @@
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+         android:password="true"
          />
    </LinearLayout>
-   <LinearLayout 
-       android:id="@+id/buttonZu"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:layout_below="@id/linear2"
-       android:orientation="horizontal"
-      
-       >
-    <Button 
-       android:id="@+id/register"
-       android:layout_width="0dp"
-       android:layout_height="wrap_content"
-       android:layout_weight="1"
-       android:text="注册"
-       />
+
     <Button 
         android:id="@+id/login"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_below="@id/linear2"
+        android:layout_centerHorizontal="true"
+        android:background="#00FF00"
         android:text="登录"
         />
-   </LinearLayout>  
+      <Button 
+          android:id="@+id/shoujidenglu"
+          android:text="手机验证登录"
+          android:layout_below="@id/login"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          />
+      <Button 
+       android:id="@+id/register"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_below="@id/shoujidenglu"
+       android:text="快速注册"
+       />
    <TextView 
        android:id="@+id/xiantiyan"
-       android:layout_below="@id/buttonZu"
+       android:layout_below="@id/register"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_alignParentRight="true"
-       android:textSize="20sp"
        android:clickable="true"
-       android:text="先体验"
+       />
+   <TextView 
+       android:id="@+id/wangjimima"
+       android:layout_below="@id/register"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentLeft="true"
+       android:clickable="true"
        />
    <activity.myCaihong
        android:id="@+id/caihong"
@@ -106,4 +117,5 @@
        android:layout_gravity="center_horizontal"
        android:src="@drawable/caihong"
        />
+
 </RelativeLayout>
