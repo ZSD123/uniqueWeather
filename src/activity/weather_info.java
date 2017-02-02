@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.bmob.v3.Bmob;
-import cn.bmob.v3.BmobConfig;
-import cn.bmob.v3.BmobConfig.Builder;
+
 
 import com.uniqueweather.app.R;
 
@@ -52,7 +51,7 @@ public class weather_info extends FragmentActivity {
 	{
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.weather_layout);
+		setContentView(R.layout.main);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
 	    editor1=PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -84,15 +83,7 @@ public class weather_info extends FragmentActivity {
 	    
 	 }		
 	private void init() 
-	{  Bmob.initialize(this,"f3065817051f7c298d2e49d9329a2a6b");
-	   BmobConfig config=new BmobConfig.Builder(this)
-	                     .setApplicationId("f3065817051f7c298d2e49d9329a2a6b")
-	                     .setConnectTimeout(30)
-	                     .setUploadBlockSize(1024*1024)
-	                     .setFileExpiration(2500)
-	                     .build();
-	   Bmob.initialize(config);
-	   mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
+	{  mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
 	   for (int i=0;i<title.length;i++)                     //¼ÓÔØfragmentPart
 	      {
 		      fragmentPart fragP=new fragmentPart(weather_info.this);

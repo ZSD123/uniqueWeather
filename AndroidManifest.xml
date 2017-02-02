@@ -72,6 +72,9 @@
             </intent-filter>
         </activity>
         <activity 
+            android:name="activity.weather_info"
+            ></activity>
+        <activity 
             android:name="activity.chooseAreaActivity"
             ></activity>
         <activity 
