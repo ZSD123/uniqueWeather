@@ -6,9 +6,13 @@ import cn.bmob.v3.BmobUser;
 public class MyUser extends BmobUser {
 	private String sex;
 	private String nick;
-	private int age;
+	private String age;
 	private String constellation;
 	private String shengri;
+	private String zhiye;
+	private String school;
+	private String suozaidi;
+	private String guxiang;
 	public String getSex(){
 		return this.sex;
 	}
@@ -21,10 +25,10 @@ public class MyUser extends BmobUser {
 	public void setNick(String nick){
 		this.nick=nick;
 	}
-	public int getAge(){
+	public String getAge(){
 		return this.age;
 	}
-	public void setAge(int age){
+	public void setAge(String age){
 		this.age=age;
 	}
 	public String getConstellation(){
@@ -38,5 +42,30 @@ public class MyUser extends BmobUser {
 	}
 	public void setShengri(String shengri){
 		this.shengri=shengri;
+	}
+	public String getZhiye(){
+		return this.zhiye;
+	}
+	public void setZhiye(String zhiye){
+		this.zhiye=zhiye;
+	}
+	public String getSchool(){
+		return this.school;
+	}
+	public void setSchool(String school){
+		this.school=school;
+	}
+	public String getSuozaidi(){
+		return this.suozaidi;
+		
+	}
+	public void setSuozaidi(String suozaidi){
+		this.suozaidi=suozaidi;
+	}
+	public String getGuxiang(){
+		return this.guxiang;
+	}
+	public void setGuxiang(String guxiang){
+		this.guxiang=guxiang;
 	}
 }

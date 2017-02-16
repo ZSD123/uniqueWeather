@@ -220,7 +220,7 @@ public class myCityAction extends Activity {
          if(!existCityPic||changeLocalCity) 
       {   if(!myjingdiancityflag)                                                   
          {   
-             Log.d("Main","这里4");
+        
         	 Http.sendjingdiancityRequest(new HttpCallbackListener() {   //获得景点城市的情况，目的是获取相应的id
 			@Override
 			public void onFinish(String response) {                        //通常不等到onFinish的数据返回就转向下面的程序                          
@@ -320,7 +320,7 @@ public class myCityAction extends Activity {
          if(myJingdiancity1.getjingdiancityName()!=null)
          {   List<jingdian> jingdians1=dJingdianDB.loadjingdian(myJingdiancity1);//载入相应的城市的景点
       		 if(jingdians1.size()>0)//如果已经有相应城市的景点列表
-      		 {  Log.d("Main","这里2");
+      		 {  
   			    final jingdian jingdian2=jingdians1.get(0);
   			    new Thread(new Runnable() {
 					@Override
@@ -339,7 +339,6 @@ public class myCityAction extends Activity {
 		    }
          else {
         	     mycity1=new myCity(citynsString,null,weather_info.ALBUM_PATH , temp,null,null);//第二个参数应该一致，都是本地地
-		    	 Log.d("Main","加载本地城市");
 		    	 Message message=new Message();
 		    	 message.what=0;
 		    	 handler.sendMessage(message);
@@ -402,7 +401,7 @@ public class myCityAction extends Activity {
 		 			{
 		 				@Override
 		 				public void onFinish(String response)
-		 				{   Log.d("Main","handleWeatherByTable");
+		 				{  
 		 					handleWeatherByTable(response,name);
 		 			    }
 		 			});
@@ -416,7 +415,7 @@ public class myCityAction extends Activity {
      }
      public void handleWeatherByTable(String response,String name)//赋值我的城市的一些参数
      {
-    	 try {   Log.d("Main", "3");
+    	 try { 
     			JSONObject jsonobject=new JSONObject(response);
     			JSONObject obj1=jsonobject.getJSONObject("showapi_res_body");
     			JSONObject obj2=obj1.getJSONObject("now");
@@ -428,23 +427,22 @@ public class myCityAction extends Activity {
    	    	    {       		  
    	    	     c=""+c+b[i];
    	    	    }
-   	    	    Log.d("Main","2");
+   	    
    	    	    jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
    	    	if(myJingdiancity.getjingdiancityName()!=null)
    	    	    {
    				List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);//载入该城市的所有景点
-   				Log.d("Main", String.valueOf(jingdians.size())); 
    		          if(jingdians.size()>0)                        //如果已经有相应的城市的景点数据
    				     {   jingdian jingdian3=jingdians.get(0);
    			    		 mycityPic=jingdian3.getImageUrl();
-   			    		 Log.d("Main","1");
+   			    	
    			    	 }
    		          else {
    		        	      getMyCityPic(name);
 				       }
    	    	    }
    			else {
-   			     Log.d("Main","getMyCityPci");
+   			
 			     getMyCityPic(name);
 			     }
    	    	    
@@ -469,14 +467,14 @@ public class myCityAction extends Activity {
     	 return cityPicPath;     //城市背景景点本地动态路径
      }
      public void getMyCityPic(final String name)//获得城市背景图片URL
-     {   Log.d("Main","getMyCityPic");
+     {   
     	 char b[]=name.toCharArray();
          c="";
     	 for(int i=0;i<b.length-1;i++)
     	 {       		  
     	     c=""+c+b[i];
     	 }
-    	 Log.d("Main","time");
+    	
     	 final Timer timer=new Timer();            //计时，防止用户等太久
     	 TimerTask myTask=new TimerTask() {
 			
@@ -510,7 +508,7 @@ public class myCityAction extends Activity {
 				
 				@Override
 				public void onFinish(String response) 
-				{   Log.d("Main",response);
+				{  
 					Utility.handlejingdian(response, myCityAction.this);
                     jingdiancity myJingdiancity=dJingdianDB.loadjingdianCity(c);
 					List<jingdian> jingdians=dJingdianDB.loadjingdian(myJingdiancity);

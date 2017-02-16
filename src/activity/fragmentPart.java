@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 
 import service.autoUqdateService;
 
+import cn.bmob.v3.BmobUser;
+
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -109,6 +111,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public Context context;
     public Button button1;
     public MyHorizontalView horizontalView;
+    public Button button2;     //退出登录Button
     
     public  static LocationManager locationManager;
     public static MapView mMapView;
@@ -130,10 +133,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private Marker mLocMarker;
 	private OnLocationChangedListener mListener;
 	private boolean mFirstFix = false;
-	private String yuanLocation;     //原来的地理位置，用于比对
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
-    private String userId;
-	public fragmentPart(Context context)
+    private String yuanLocation;    //原来的地理位置
+	private TextView myAccount;     //我的账户TextView 
+    public fragmentPart(Context context)
     {
     	this.context=context;
     }
@@ -161,8 +164,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			countyname=(TextView)view.findViewById(R.id.countyName);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
+			button2=(Button)view.findViewById(R.id.button1);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			
+			myAccount=(TextView)view.findViewById(R.id.myAccount);
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
 			accountName=pre.getString("accountName","");
@@ -274,6 +279,22 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						
 					}
 				});
+			    myAccount.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View view) {
+						Intent intent=new Intent(context,myAccountAct.class);
+						startActivity(intent);
+					}
+				});
+			    button2.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View view) {
+					    BmobUser.logOut(context);
+						MyUser currentUser=(MyUser) MyUser.getCurrentUser(context);
+					}
+				});
 			    
 		}
 		else if(theKey.equals("map"))
@@ -321,9 +342,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             	       loadInfo.setPoint(latlng);
             	       //用户id信息
             	       loadInfo.setUserID(String.valueOf((int)lat*10));
-            	       Log.d("Main",String.valueOf((int)lat*10));
-            	       Log.d("Main","load");
-            	       
             	       return loadInfo;
             	}
             	},20000);
@@ -588,7 +606,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				        Toast.makeText(context, "周边搜索结果为size "+ nearbySearchResult.getNearbyInfoList().size() + "first："+ nearbyInfo.getUserID() + "  " + nearbyInfo.getDistance()+ "  " 
 						                + nearbyInfo.getDrivingDistance() + "  "+ nearbyInfo.getTimeStamp() + "  "+  
 						                nearbyInfo.getPoint().toString(), Toast.LENGTH_LONG).show();
-				        Log.d("Main","nearbySearchResult");
+
 				       for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {
 				    	   addSanMarker(nearbySearchResult.getNearbyInfoList().get(i).getPoint());
@@ -608,7 +626,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		@Override
 		public void onNearbyInfoUploaded(int resultCode) 
 		{
-			Log.d("Main", "resultCode is"+ resultCode);
+		
 		}
 		@Override
 		public void onUserInfoCleared(int resultCode) {

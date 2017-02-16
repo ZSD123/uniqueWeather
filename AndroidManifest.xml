@@ -75,7 +75,13 @@
             android:name="activity.weather_info"
             ></activity>
         <activity 
+            android:name="activity.myAccountAct"
+            ></activity>
+        <activity 
             android:name="activity.chooseAreaActivity"
+            ></activity>
+        <activity 
+            android:name="activity.register"
             ></activity>
         <activity 
             android:name="activity.myCityAction"

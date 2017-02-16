@@ -68,7 +68,7 @@ public class MyHorizontalView extends HorizontalScrollView {
 		   int x1=getScrollX();
 		   float x2=ev.getX();
 		   if(x1==0&&x2>mMenuWidth)
-		   {   Log.d("Main", "½øÈë");
+		   {   
 			   this.smoothScrollTo(mMenuWidth, 0);
 		   }
 		  return true;

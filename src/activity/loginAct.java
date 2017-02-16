@@ -177,7 +177,8 @@ public class loginAct extends Activity {
 				   if(isMobileNO(input)||isEmail(input))
 				   {
 					   bu.setUsername(input);
-					   bu.setPassword(MD5Util.getMD5String(passwordString));
+					   bu.setPassword(passwordString);
+					   Log.d("Main",MD5Util.getMD5String(passwordString));
 					   bu.login(loginAct.this,new SaveListener() 
 					   {@Override
 						public void onSuccess() 
@@ -191,7 +192,7 @@ public class loginAct extends Activity {
 						@Override
 						public void onFailure(int arg0, String arg1) 
 						{
-							Toast.makeText(loginAct.this,"登录失败,"+arg1,Toast.LENGTH_SHORT ).show();
+							Toast.makeText(loginAct.this,"登录失败,"+arg1+arg0,Toast.LENGTH_SHORT ).show();
 						}
 					});
 				   }
@@ -261,220 +262,14 @@ public class loginAct extends Activity {
 				return false;
 			}
 		});
-	    button3.setOnTouchListener(new OnTouchListener() {
-	    
+	    button3.setOnClickListener(new OnClickListener() {
 			
 			@Override
-			public boolean onTouch(View view, MotionEvent motionEvent) 
-			{
-                
-				int action=motionEvent.getAction();
-				if(action==MotionEvent.ACTION_DOWN)
-					{
-					 input=editText1.getText().toString();
-					 passwordString=editText2.getText().toString();
-					 button3.setBackgroundColor(Color.parseColor("#006400"));
-					 if (flag1) 
-					    button1.setBackgroundColor(0);
-					 if(flag2)
-						 button2.setBackgroundColor(0);
-					   account.setText("帐号");
-					   account.setTextSize(20);
-					   editText1.setHint("手机号或者邮箱");
-					   if(!flag3)
-					   { password.setText("密码");
-					     editText2.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD|InputType.TYPE_CLASS_TEXT);
-					   }
-					   password.setTextSize(20);
-					   imageView.setVisibility(View.VISIBLE);
-					   button4.setVisibility(View.GONE);
-					   if((input.isEmpty()||passwordString.isEmpty())&&flag3)
-							  Toast.makeText(loginAct.this, "帐号或密码不能为空", Toast.LENGTH_SHORT).show();
-					   if(isMobileNO(input)||isEmail(input))
-					   {     button4.setVisibility(View.VISIBLE);
-					         imageView.setVisibility(View.GONE);
-						     bu.setUsername(input);
-						     bu.setPassword(MD5Util.getMD5String(passwordString));
-						     if(isEmail(input))
-						     { bu.setEmail(input);	      
-						       if(onceE)
-						       {   bu.setEmailVerified(false);
-						    	   onceE=false;
-						       }
-						       bu.signUp(loginAct.this,new SaveListener()
-						    		   {@Override
-										public void onFailure(int arg0,
-												String arg1) {
-											Toast.makeText(loginAct.this,"注册失败，"+arg1, Toast.LENGTH_SHORT).show();
-										}
-
-										@Override
-										public void onSuccess() {
-										     Toast.makeText(loginAct.this,"注册成功，请验证",Toast.LENGTH_SHORT).show();
-										     if(bangzhufasongE)
-									    	 {    BmobUser.requestEmailVerify(loginAct.this,input,new EmailVerifyListener(){
-
-												@Override
-												public void onFailure(int arg0, String arg1) {
-													Toast.makeText(loginAct.this,"发送验证邮箱失败，"+arg1,Toast.LENGTH_SHORT).show();
-													
-												}
-
-												@Override
-												public void onSuccess() {
-													Toast.makeText(loginAct.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
-									    		    fasong=false;
-									    		    editText2.setText("");
-									    			timer.schedule(task, 1000);
-												} 
-												});
-									    	      bangzhufasongE=false;
-									    	 }
-									       
-										}   
-						    		   
-						    		   }
-						    		   );
-						      
-						     }
-						     if(isMobileNO(input))
-						     {    bu.setMobilePhoneNumber(input);
-						    	 if(onceM)
-						          { bu.setMobilePhoneNumberVerified(false);
-						            onceM=false;
-						          }
-						    	 if(bangzhufasongM)
-						    	 {   editText2.setText("");
-						    	     passwordString=editText2.getText().toString();
-						    		 BmobSMS.requestSMSCode(loginAct.this,input,"短信验证",new RequestSMSCodeListener()
-						    	   {
-						    		 @Override
-						    		 public void done(Integer smsId,BmobException ex)
-						    		 {    password.setText("验证码");
-					    			      editText2.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|InputType.TYPE_CLASS_TEXT);
-						    			 if(ex==null)
-						    			 { Toast.makeText(loginAct.this,"发送验证短信成功，"+smsId,Toast.LENGTH_SHORT).show();
-						    			   fasong=false;
-						    			   timer=new Timer();
-						   			       task=new TimerTask(){
-						   		 		
-						   		 		@Override
-						   		 		public void run() 
-						   		 		{   daojishi--;
-						   		 		    Message message=new Message();
-						   		 			message.what=UPDATE_TEXT;
-						   		 			handler.sendMessage(message);
-						   		 			if(daojishi==0)
-						   		 			{   
-						   		 			    message=new Message();
-						   		 			    message.what=TOFASONG;
-						   		 			    handler.sendMessage(message);
-						   		 			    timer.cancel();
-						   		 			    task.cancel();
-						   		 			    daojishi=30;
-						   		 			}
-						   		 		}
-						   		 	  };
-						   				timer.schedule(task, 1000,1000);	
-						    			 }
-						    			 else {
-											Toast.makeText(loginAct.this,"发送验证短信失败，"+ex.getMessage(), Toast.LENGTH_SHORT).show();
-											Log.d("Main",ex.getMessage());
-										}
-						    		 }
-						    	  }
-						    			 );
-						    	      bangzhufasongM=false;
-						    	 }
-						    	 if(!passwordString.equals(""))
-						    	 {  Log.d("Main","代码是"+passwordString);
-						    		bu.signOrLogin(loginAct.this,passwordString, new SaveListener()
-						    		{   @Override
-										public void onFailure(int arg0,
-												String arg1) {
-											Toast.makeText(loginAct.this,"注册失败，"+arg1,Toast.LENGTH_SHORT).show();
-											
-										}
-
-										@Override
-										public void onSuccess() {
-											Toast.makeText(loginAct.this,"注册成功,正在转入", Toast.LENGTH_SHORT).show();
-											  bu.login(loginAct.this,new SaveListener() 
-											   {@Override
-												public void onSuccess() 
-												{
-													  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
-													  Intent intent=new Intent(loginAct.this,weather_info.class);
-													  startActivity(intent);
-													  finish();
-												}
-												
-												@Override
-												public void onFailure(int arg0, String arg1) 
-												{
-													Toast.makeText(loginAct.this,"登录失败,"+arg1,Toast.LENGTH_SHORT ).show();
-												}
-											});
-										}
-						    		}	
-						    		);
-						    	 }else {
-									Toast.makeText(loginAct.this,"验证码不能为空", Toast.LENGTH_SHORT).show();
-								}
-						    	  
-						     }
-						     if(isEmail(passwordString))  
-						        if(fasong)
-						    	 BmobUser.requestEmailVerify(loginAct.this,input,new EmailVerifyListener() {
-									
-									@Override
-									public void onSuccess() 
-									{   
-										Toast.makeText(loginAct.this, "验证邮件发送成功",Toast.LENGTH_SHORT).show();
-										fasong=false;
-										timer=new Timer();
-									    task=new TimerTask(){
-								 		
-								 		@Override
-								 		public void run() 
-								 		{   daojishi--;
-								 		    Message message=new Message();
-								 			message.what=UPDATE_TEXT;
-								 			handler.sendMessage(message);
-								 			Log.d("Main","数字为"+daojishi);
-								 			if(daojishi==0)
-								 			{   
-								 			    message=new Message();
-								 			    message.what=TOFASONG;
-								 			    handler.sendMessage(message);
-								 			    timer.cancel();
-								 			    task.cancel();
-								 			    daojishi=30;
-								 			    Log.d("Main", "2");
-								 			}
-								 		}
-								 	};
-										timer.schedule(task, 1000,1000);	
-									}
-									
-									@Override
-									public void onFailure(int arg0, String arg1) 
-									{
-										Toast.makeText(loginAct.this,"验证邮件发送失败",Toast.LENGTH_SHORT).show();
-									}
-								});
-						     
-					   }
-					   else {
-						Toast.makeText(loginAct.this,"请输入正确的手机号或邮箱", Toast.LENGTH_SHORT);
-					}
-					   flag1=false;
-					   flag2=false;
-					   flag3=true;
-					}
-				if(action==MotionEvent.ACTION_UP)
-					button3.setBackgroundColor(Color.parseColor("#00FF00"));
-				return false;
+			public void onClick(View view) {
+				 
+				   Intent intent=new Intent(loginAct.this,register.class);
+				   startActivity(intent);
+				
 			}
 		});
         caihong.setOnTouchListener(new OnTouchListener() {
@@ -518,7 +313,7 @@ public class loginAct extends Activity {
 					 		    Message message=new Message();
 					 			message.what=UPDATE_TEXT;
 					 			handler.sendMessage(message);
-					 			Log.d("Main","数字为"+daojishi);
+					 
 					 			if(daojishi==0)
 					 			{   
 					 			    message=new Message();
@@ -527,7 +322,7 @@ public class loginAct extends Activity {
 					 			    timer.cancel();
 					 			    task.cancel();
 					 			    daojishi=30;
-					 			    Log.d("Main", "2");
+					 	
 					 			}
 					 		}
 					 	};
@@ -560,7 +355,7 @@ public class loginAct extends Activity {
 					 		    Message message=new Message();
 					 			message.what=UPDATE_TEXT;
 					 			handler.sendMessage(message);
-					 			Log.d("Main","数字为"+daojishi);
+				
 					 			if(daojishi==0)
 					 			{   
 					 			    message=new Message();
@@ -569,7 +364,7 @@ public class loginAct extends Activity {
 					 			    timer.cancel();
 					 			    task.cancel();
 					 			    daojishi=30;
-					 			    Log.d("Main", "2");
+					 		
 					 			}
 					 		}
 					 	};
