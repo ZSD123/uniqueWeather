@@ -8,13 +8,13 @@
 <LinearLayout 
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:background="#00FF00"
     >
     <ImageButton 
         android:id="@+id/imagebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:src="@drawable/jiantou"
         android:clickable="true"
         />
@@ -68,10 +68,39 @@
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+         android:digits="@string/engDig"
          android:password="true"
          />
      <ImageView
          android:id="@+id/kekanmima"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:src="@drawable/eyeclose"
+         android:clickable="true"
+         />
+</LinearLayout>
+<LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    >
+    <TextView 
+         android:id="@+id/querenpassword"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="确认密码"
+         android:textSize="20sp"
+         />
+     <EditText 
+         android:id="@+id/editText_querensecret"
+         android:layout_width="0dp"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:digits="@string/engDig"
+         android:password="true"
+         />
+     <ImageView
+         android:id="@+id/kekanmima1"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:src="@drawable/eyeclose"
@@ -95,6 +124,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:digits="@string/engDig"
         />
     <Button 
          android:id="@+id/sendYanzhengma"
@@ -110,5 +140,27 @@
         android:layout_gravity="center_horizontal"
         android:text="注   册"
         />
+    <RelativeLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+    <CheckBox
+       android:id="@+id/checkbox"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentBottom="true"
+       android:layout_centerHorizontal="true"
+       android:text="我同意"
+       />
+  <TextView 
+      android:id="@+id/fuwu"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignBaseline="@id/checkbox"
+      android:layout_toRightOf="@id/checkbox"
+      android:text="服务条款"
+      android:textColor="#00C957"
+      />
+    </RelativeLayout>
 
 </LinearLayout>

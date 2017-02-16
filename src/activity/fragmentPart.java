@@ -293,6 +293,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					public void onClick(View view) {
 					    BmobUser.logOut(context);
 						MyUser currentUser=(MyUser) MyUser.getCurrentUser(context);
+						Intent intent=new Intent(context,loginAct.class);
+						startActivity(intent);
+						Activity activity=(Activity)context;
+						activity.finish();
 					}
 				});
 			    

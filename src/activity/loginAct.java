@@ -2,53 +2,42 @@ package activity;
 
 
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobSMS;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.c.i;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.EmailVerifyListener;
+import cn.bmob.v3.listener.FindCallback;
 import cn.bmob.v3.listener.LogInListener;
 import cn.bmob.v3.listener.RequestSMSCodeListener;
 import cn.bmob.v3.listener.SaveListener;
-import cn.bmob.v3.listener.UpdateListener;
 
 import com.a.a.in;
-import com.amap.api.mapcore2d.p;
-import com.amap.api.services.a.br;
-import com.squareup.okhttp.OkHttpClient;
 import com.uniqueweather.app.R;
 
 
 
 import Util.MD5Util;
-import android.R.integer;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.renderscript.Type;
 import android.text.Html;
 import android.text.InputType;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -57,9 +46,11 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 public class loginAct extends Activity {
@@ -71,6 +62,9 @@ public class loginAct extends Activity {
     private int widthPixels;
     private int heightPixels;
     
+    
+    private boolean kedenglu=false;  //邮箱验证登录
+    
     private Button button1;  //登录按钮
     private Button button2;  //手机验证登录
     private Button button3;  //快速注册
@@ -79,7 +73,6 @@ public class loginAct extends Activity {
     private TextView text2;  //忘记密码
     private boolean flag1=true;    //button1亮色，true表示启动
     private boolean flag2=false;    //button2亮色
-    private boolean flag3=false;    //button3亮色
     private TextView account;       //帐号
     private TextView password;       //密码
     
@@ -87,10 +80,6 @@ public class loginAct extends Activity {
     private EditText editText2;     //第二行
     private Button button4;    //  发送验证码
     
-    private boolean onceE=true;     //邮箱验证一次
-    private boolean onceM=true;      //手机短信验证一次，verify一次
-    private boolean bangzhufasongM=true;   //手机号帮助发送一次
-    private boolean bangzhufasongE=true;   //邮箱验证帮助发送一次
     private String input;      //输入数据
     private String passwordString;   //密码
 
@@ -99,6 +88,9 @@ public class loginAct extends Activity {
     private boolean eye=false;     //眼睛关上
     private static final int UPDATE_TEXT=0;
     private static final int TOFASONG=1;
+    
+    private CheckBox checkBox;       //我同意服务条款checkbox
+    
     private int daojishi=30;   
     private Message message;
     private Timer timer=new Timer();
@@ -110,6 +102,7 @@ public class loginAct extends Activity {
     			break;
     		case TOFASONG:
     			button4.setText("发送验证码");
+    			fasong=true;
     		default:
     			break;
     		}
@@ -129,6 +122,7 @@ public class loginAct extends Activity {
 		button1=(Button)findViewById(R.id.login);
 		button2=(Button)findViewById(R.id.shoujidenglu);
 		button3=(Button)findViewById(R.id.register);
+		button3.setBackgroundColor(0);
 	    customFont=(CustomFont)findViewById(R.id.text_EndRain);
 	    caihong=(myCaihong)findViewById(R.id.caihong);
 	    text1=(TextView)findViewById(R.id.wangjimima);
@@ -138,12 +132,16 @@ public class loginAct extends Activity {
 	    account=(TextView)findViewById(R.id.account);
 	    password=(TextView)findViewById(R.id.password);
 	    
+	    checkBox=(CheckBox)findViewById(R.id.checkbox);
+	    checkBox.setChecked(true);
+	    
 	    imageView=(ImageView)findViewById(R.id.kekanmima);
 	    editText1=(EditText)findViewById(R.id.editText_account);
 	    editText2=(EditText)findViewById(R.id.editText_secret);
+	    
+	    editText1.setInputType(InputType.TYPE_CLASS_TEXT);
 	    button4=(Button)findViewById(R.id.sendYanzhengma);
 	    button2.setBackgroundColor(0);
-	    button3.setBackgroundColor(0);
 		MyUser userInfo=MyUser.getCurrentUser(loginAct.this,MyUser.class);
 		if(userInfo!=null){
 			  Intent intent=new Intent(loginAct.this,weather_info.class);
@@ -162,8 +160,6 @@ public class loginAct extends Activity {
 					button1.setBackgroundColor(Color.parseColor("#006400"));
 				  if (flag2) 
 				     button2.setBackgroundColor(0);
-				  if(flag3)
-					 button3.setBackgroundColor(0);
 				   account.setText("帐号");
 				   account.setTextSize(20);
 				   editText1.setHint("手机号或者邮箱");
@@ -174,31 +170,85 @@ public class loginAct extends Activity {
 				   button4.setVisibility(View.GONE);
 				   if((input.isEmpty()||passwordString.isEmpty())&&flag1)
 					  Toast.makeText(loginAct.this, "帐号或密码不能为空", Toast.LENGTH_SHORT).show();
-				   if(isMobileNO(input)||isEmail(input))
-				   {
+				   else if(isMobileNO(input)||isEmail(input))
+				   {   
 					   bu.setUsername(input);
-					   bu.setPassword(passwordString);
-					   Log.d("Main",MD5Util.getMD5String(passwordString));
-					   bu.login(loginAct.this,new SaveListener() 
-					   {@Override
-						public void onSuccess() 
-						{
-							  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
-							  Intent intent=new Intent(loginAct.this,weather_info.class);
-							  startActivity(intent);
-							  finish();
+					   bu.setPassword(MD5Util.getMD5String(passwordString));			  
+					   
+					   if(isEmail(input)){
+					   BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
+					   query.addWhereEqualTo("username",input);
+					   query.findObjects(loginAct.this, new FindCallback() {
+						
+						@Override
+						public void onFailure(int a, String b) {
+							if(a==9016)
+							    Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+							else {
+								Toast.makeText(loginAct.this,"连接失败，请稍后再试，"+b,Toast.LENGTH_SHORT).show();
+							}
 						}
 						
 						@Override
-						public void onFailure(int arg0, String arg1) 
-						{
-							Toast.makeText(loginAct.this,"登录失败,"+arg1+arg0,Toast.LENGTH_SHORT ).show();
+						public void onSuccess(JSONArray array) {
+						    try {
+								JSONObject jsonObject=array.getJSONObject(0);
+								kedenglu=jsonObject.getBoolean("emailVerified");
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						    if(kedenglu){
+						    	 bu.login(loginAct.this,new SaveListener() {  
+										@Override
+										public void onSuccess() 
+										{     
+											  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+											  Intent intent=new Intent(loginAct.this,weather_info.class);
+											  startActivity(intent);
+											  finish();
+										}
+										
+										@Override
+										public void onFailure(int arg0, String arg1) 
+										{   
+											Toast.makeText(loginAct.this,"登录失败,"+arg1,Toast.LENGTH_SHORT ).show();
+										}
+									});
+						    }else {
+								Toast.makeText(loginAct.this,"请先验证您的邮箱",Toast.LENGTH_SHORT).show();
+							}
+						    
 						}
 					});
-				   }
+					   }else if(isMobileNO(input)){
+						 bu.login(loginAct.this,new SaveListener() {  
+								@Override
+								public void onSuccess() 
+								{     
+									  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+									  Intent intent=new Intent(loginAct.this,weather_info.class);
+									  startActivity(intent);
+									  finish();
+								}
+								
+								@Override
+								public void onFailure(int arg0, String arg1) 
+								{   if(arg0==9016)
+									  Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
+								else {
+									 Toast.makeText(loginAct.this,"登录失败，"+arg1, Toast.LENGTH_SHORT).show();
+								}
+								   
+								}
+							});
+					}
+					  
+					 
+				   }else {
+					Toast.makeText(loginAct.this,"请输入正确的手机号或者邮箱", Toast.LENGTH_SHORT).show();
+				}
 				   flag1=true;
 				   flag2=false;
-				   flag3=false;
 				}
 				if(action==MotionEvent.ACTION_UP)
 					button1.setBackgroundColor(Color.parseColor("#00FF00"));
@@ -218,8 +268,6 @@ public class loginAct extends Activity {
 					 button2.setBackgroundColor(Color.parseColor("#006400"));
 					 if (flag1) 
 					    button1.setBackgroundColor(0);
-					 if(flag3)
-						 button3.setBackgroundColor(0);
 					   account.setText("手机号");
 					   account.setTextSize(20);
 					   editText1.setHint("11位手机号");
@@ -254,7 +302,6 @@ public class loginAct extends Activity {
 					    }
 					   flag1=false;
 					   flag2=true;
-					   flag3=false;
 					}
 				  
 				if(action==MotionEvent.ACTION_UP)
@@ -338,46 +385,7 @@ public class loginAct extends Activity {
 				else {
 					Toast.makeText(loginAct.this,"请输入正确的手机号码格式", Toast.LENGTH_SHORT).show();
 				}
-		        if(isEmail(input)){
-		        	BmobUser.requestEmailVerify(loginAct.this,input,new EmailVerifyListener() {
-						
-						@Override
-						public void onSuccess() 
-						{
-							Toast.makeText(loginAct.this, "验证邮件发送成功",Toast.LENGTH_SHORT).show();
-							fasong=false;
-							timer=new Timer();
-						    task=new TimerTask(){
-					 		
-					 		@Override
-					 		public void run() 
-					 		{   daojishi--;
-					 		    Message message=new Message();
-					 			message.what=UPDATE_TEXT;
-					 			handler.sendMessage(message);
-				
-					 			if(daojishi==0)
-					 			{   
-					 			    message=new Message();
-					 			    message.what=TOFASONG;
-					 			    handler.sendMessage(message);
-					 			    timer.cancel();
-					 			    task.cancel();
-					 			    daojishi=30;
-					 		
-					 			}
-					 		}
-					 	};
-							timer.schedule(task, 1000,1000);	
-						}
-						
-						@Override
-						public void onFailure(int arg0, String arg1) {
-							
-							Toast.makeText(loginAct.this,"验证邮件发送失败",Toast.LENGTH_SHORT).show();
-						}
-				    	});
-		        }
+		       
 			}
 			}
 		});
@@ -398,6 +406,20 @@ public class loginAct extends Activity {
 			
 		}
 	});
+       checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		
+		@Override
+		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+			if(isChecked){
+				button1.setEnabled(true);
+				button2.setEnabled(true);
+			}else{
+				button1.setEnabled(false);
+				button2.setEnabled(false);
+			}
+			
+		}
+	   });
 	 }
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) 

@@ -68,6 +68,7 @@
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+         android:digits="@string/engDig"
          android:password="true"
          />
      <ImageView
@@ -133,5 +134,22 @@
        android:layout_gravity="center_horizontal"
        android:src="@drawable/caihong"
        />
-
+   <CheckBox
+       android:id="@+id/checkbox"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentBottom="true"
+       android:layout_centerHorizontal="true"
+       android:text="我同意"
+       />
+  <TextView 
+      android:id="@+id/fuwu"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_toRightOf="@id/checkbox"
+      android:layout_alignBaseline="@id/checkbox"
+      android:text="服务条款"
+      android:textColor="#00C957"
+      />
 </RelativeLayout>
