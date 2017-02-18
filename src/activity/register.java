@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -172,6 +173,7 @@ public class register extends Activity {
 							MyUser bu=new MyUser();
 							bu.setUsername(input);
 							bu.setPassword(MD5Util.getMD5String(passwordString));
+							Log.d("Main",MD5Util.getMD5String(passwordString));
 							bu.setEmail(input);
 						    bu.setEmailVerified(false);
 						    bu.signUp(register.this, new SaveListener() {
@@ -186,7 +188,7 @@ public class register extends Activity {
 											public void onSuccess() {
 												Toast.makeText(register.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
 												fasong=false;
-												
+											
 												timer=new Timer();
 												task=new TimerTask(){
 												 		@Override
@@ -217,6 +219,7 @@ public class register extends Activity {
 												
 											}
 										});
+									bangzhufasongE=false;
 									  }
 								}
 								
@@ -303,6 +306,7 @@ public class register extends Activity {
 			@Override
 			public void onClick(View view) {
 				if(fasong){
+					input=editText1.getText().toString();
 					if(isMobileNO(input)){
 				   	BmobSMS.requestSMSCode(register.this,input,"短信验证",new RequestSMSCodeListener() {
 						
@@ -372,7 +376,13 @@ public class register extends Activity {
 							
 							@Override
 							public void onFailure(int arg0, String arg1) {
-								Toast.makeText(register.this,"失败，"+arg1,Toast.LENGTH_SHORT).show();
+								if(arg0==205){
+									Toast.makeText(register.this,"失败，没有找到此邮件的用户，请先注册或者绑定邮箱", Toast.LENGTH_SHORT).show();
+								}else{
+									Toast.makeText(register.this,"失败，"+arg1,Toast.LENGTH_SHORT).show();
+								}
+								
+								
 								
 							}
 						});

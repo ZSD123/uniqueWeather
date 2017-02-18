@@ -68,7 +68,6 @@
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:layout_weight="1"
-         android:digits="@string/engDig"
          android:password="true"
          />
      <ImageView
@@ -96,7 +95,6 @@
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:layout_weight="1"
-         android:digits="@string/engDig"
          android:password="true"
          />
      <ImageView
@@ -130,7 +128,7 @@
          android:id="@+id/sendYanzhengma"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:text="发送验证码"
+         android:text="发送验证"
          />
 </LinearLayout>
     <Button 

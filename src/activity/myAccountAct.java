@@ -3,9 +3,15 @@ package activity;
 
 import java.util.Calendar;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import receiver.uqdateReceive;
 
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.listener.FindCallback;
 import cn.bmob.v3.listener.UpdateListener;
 
 import com.amap.api.location.AMapLocation;
@@ -13,6 +19,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
+import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
 import Util.Http;
@@ -78,6 +85,7 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 	    editText6=(EditText)findViewById(R.id.suozaidi);
 	    editText7=(EditText)findViewById(R.id.guxiang);
 	    
+	    
 	    button=(Button)findViewById(R.id.button);
 	    button1=(Button)findViewById(R.id.button1);
 	    
@@ -89,6 +97,47 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 		mLocationClientOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
 	    mLocationClient.setLocationOption(mLocationClientOption);
 		
+	    editText1.setText(getIntent().getExtras().getString("name"));
+	    
+	    final MyUser userInfo=MyUser.getCurrentUser(myAccountAct.this,MyUser.class);
+	    
+	    BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
+	    query.addWhereEqualTo("username",userInfo.getUsername());
+	    query.findObjects(myAccountAct.this,new FindCallback() {
+			
+			@Override
+			public void onFailure(int arg0, String arg1) {
+				if(arg0==9016)
+				    Toast.makeText(myAccountAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+				else {
+					Toast.makeText(myAccountAct.this,"连接失败，请稍后再试，"+arg1,Toast.LENGTH_SHORT).show();
+				}
+			}
+			
+			@Override
+			public void onSuccess(JSONArray jsonArray) {
+				try {
+					JSONObject jsonObject=jsonArray.getJSONObject(0);
+					String sex=jsonObject.getString("sex");
+					if(sex.equals("男"))
+						spinner1.setSelection(0);
+					else if (sex.equals("女")) {
+						spinner1.setSelection(1);
+					}
+					editText2.setText(jsonObject.getString("age")+"岁");
+					editText3.setText(jsonObject.getString("shengri"));
+					editText4.setText(jsonObject.getString("constellation"));
+					spinner2.setSelection(jsonObject.getInt("zhiye"));
+					editText5.setText(jsonObject.getString("school"));
+					editText6.setText(jsonObject.getString("suozaidi"));
+					editText7.setText(jsonObject.getString("guxiang"));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+	    
 	    pre=PreferenceManager.getDefaultSharedPreferences(this);
 	    final String arr[]=new String[]{
 	    	"男",
@@ -232,12 +281,11 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 	            	newUser.setAge(editText2.getText().toString());
 	            	newUser.setShengri(editText3.getText().toString());
 	            	newUser.setConstellation(editText4.getText().toString());
-	            	newUser.setZhiye(spinner2.getSelectedItem().toString());
+	            	newUser.setZhiye(spinner2.getSelectedItemPosition());
 	            	newUser.setSchool(editText5.getText().toString());
 	            	newUser.setSuozaidi(editText6.getText().toString());
 	            	newUser.setGuxiang(editText7.getText().toString());
-	            	MyUser bmobUser=(MyUser) MyUser.getCurrentUser(myAccountAct.this);
-	            	newUser.update(myAccountAct.this, bmobUser.getObjectId(),new UpdateListener() {
+	            	newUser.update(myAccountAct.this, userInfo.getObjectId(),new UpdateListener() {
 						
 						@Override
 						public void onSuccess() {

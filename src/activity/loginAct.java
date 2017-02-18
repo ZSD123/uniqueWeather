@@ -38,6 +38,7 @@ import android.os.Message;
 import android.renderscript.Type;
 import android.text.Html;
 import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -170,7 +171,7 @@ public class loginAct extends Activity {
 				   button4.setVisibility(View.GONE);
 				   if((input.isEmpty()||passwordString.isEmpty())&&flag1)
 					  Toast.makeText(loginAct.this, "帐号或密码不能为空", Toast.LENGTH_SHORT).show();
-				   else if(isMobileNO(input)||isEmail(input))
+				   else if((isMobileNO(input)||isEmail(input))&&flag1)
 				   {   
 					   bu.setUsername(input);
 					   bu.setPassword(MD5Util.getMD5String(passwordString));			  
@@ -215,7 +216,7 @@ public class loginAct extends Activity {
 										}
 									});
 						    }else {
-								Toast.makeText(loginAct.this,"请先验证您的邮箱",Toast.LENGTH_SHORT).show();
+								Toast.makeText(loginAct.this,"请先验证您的邮箱，如果邮件被删，请在注册页面输入您的邮箱，点击发送验证",Toast.LENGTH_SHORT).show();
 							}
 						    
 						}
@@ -241,10 +242,10 @@ public class loginAct extends Activity {
 								   
 								}
 							});
-					}
+					   }
 					  
-					 
-				   }else {
+				
+				   }else if(flag1){
 					Toast.makeText(loginAct.this,"请输入正确的手机号或者邮箱", Toast.LENGTH_SHORT).show();
 				}
 				   flag1=true;
@@ -399,7 +400,7 @@ public class loginAct extends Activity {
 		    	 eye=false;
 		    	 
 		     }else {
-				editText2.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+				editText2.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|InputType.TYPE_CLASS_TEXT);
 				imageView.setImageResource(R.drawable.eyeopen);
 				eye=true;
 			}
@@ -420,7 +421,11 @@ public class loginAct extends Activity {
 			
 		}
 	   });
+      
 	 }
+    public String getStringData(int id){
+    	return getResources().getString(id);
+    }
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) 
 	{

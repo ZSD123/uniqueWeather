@@ -85,8 +85,8 @@ public class weather_info extends FragmentActivity {
 	private void init() 
 	{  mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
 	   for (int i=0;i<title.length;i++)                     //¼ÓÔØfragmentPart
-	      {
-		      fragmentPart fragP=new fragmentPart(weather_info.this);
+	      {   
+		      fragmentPart fragP=fragmentPart.getInstance(this);
 		      Bundle bundle =new Bundle();
 		      bundle.putString(fragmentPart.keyToGet,title[i]);
 		      fragP.setArguments(bundle);

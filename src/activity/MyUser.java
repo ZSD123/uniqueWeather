@@ -9,7 +9,7 @@ public class MyUser extends BmobUser {
 	private String age;
 	private String constellation;
 	private String shengri;
-	private String zhiye;
+	private int zhiye;
 	private String school;
 	private String suozaidi;
 	private String guxiang;
@@ -43,11 +43,11 @@ public class MyUser extends BmobUser {
 	public void setShengri(String shengri){
 		this.shengri=shengri;
 	}
-	public String getZhiye(){
+	public int getZhiye(){
 		return this.zhiye;
 	}
-	public void setZhiye(String zhiye){
-		this.zhiye=zhiye;
+	public void setZhiye(int i){
+		this.zhiye=i;
 	}
 	public String getSchool(){
 		return this.school;

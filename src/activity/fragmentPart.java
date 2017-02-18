@@ -3,6 +3,7 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.security.PublicKey;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
@@ -72,6 +73,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.text.StaticLayout;
 import android.text.LoginFilter.UsernameFilterGeneric;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -135,11 +137,16 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private boolean mFirstFix = false;
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
     private String yuanLocation;    //原来的地理位置
-	private TextView myAccount;     //我的账户TextView 
-    public fragmentPart(Context context)
-    {
-    	this.context=context;
-    }
+	private TextView myAccount;     //我的账户TextView 	
+	public fragmentPart(){
+		
+	}
+	public static fragmentPart getInstance(Context context){
+		fragmentPart fragmentPart=new fragmentPart();
+		fragmentPart.context=context;
+		return fragmentPart;
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) 
@@ -166,8 +173,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			button1=(Button)view.findViewById(R.id.button_map);
 			button2=(Button)view.findViewById(R.id.button1);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
-			
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
+			if(context==null)
+			   context=(Context)getActivity();
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
 			accountName=pre.getString("accountName","");
@@ -179,7 +187,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{
 				userName.setText("未命名");
 			}
-			 uriUserPicture = pre.getString("userPicture",null);
+			 
+			
+			uriUserPicture = pre.getString("userPicture",null);
 			 if(uriUserPicture!=null)
 				{  
 				    Uri uri=Uri.parse(uriUserPicture);
@@ -205,7 +215,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    time.setText(c);
 				    }
 				
-		
+		   
 				button_refresh.setOnClickListener(new OnClickListener()
 				{
 					@Override
@@ -239,27 +249,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			            ((Activity)context).startActivityForResult(intent, 2);
 					}
 				});
-				userName.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						final EditText editText=new EditText(getActivity());
-						AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
-						builder.setTitle("请输入对您的尊称").setNegativeButton("取消", null).setView(editText);
-						builder.setPositiveButton("确定",new DialogInterface.OnClickListener() 
-						{ @Override
-							public void onClick(DialogInterface dialogInterface, int which) 
-						    {
-								
-							    String accountNameString=editText.getText().toString();
-								editor.putString("accountName",accountNameString );
-								editor.commit();
-								userName.setText(accountNameString);
-							}
-						});
-						builder.show();
-					}
-				});
+				
 				myCity.setOnClickListener(new OnClickListener() {
 					
 					@Override
@@ -284,6 +274,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					@Override
 					public void onClick(View view) {
 						Intent intent=new Intent(context,myAccountAct.class);
+						Bundle data=new Bundle();
+						data.putString("name",userName.getText().toString());
+						intent.putExtras(data);
 						startActivity(intent);
 					}
 				});
@@ -325,7 +318,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			   }
 		    aMap.setLocationSource(this);
 		    aMap.setMyLocationEnabled(true); 
-		    
+		    if(context==null)
+		        context=(Context)getActivity();
 		    mSensorEventHelper = new SensorEventHelper(context);
 			if (mSensorEventHelper != null) {
 				mSensorEventHelper.registerSensorListener();
