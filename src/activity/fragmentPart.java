@@ -7,9 +7,15 @@ import java.security.PublicKey;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import service.autoUqdateService;
 
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.listener.FindCallback;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -174,8 +180,35 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			button2=(Button)view.findViewById(R.id.button1);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
+			
 			if(context==null)
-			   context=(Context)getActivity();
+				context=(Context)getActivity();
+			MyUser userInfo=MyUser.getCurrentUser(context,MyUser.class);
+		    
+		    BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
+		    query.addWhereEqualTo("username",userInfo.getUsername());
+			query.findObjects(context, new FindCallback() {
+				
+				@Override
+				public void onFailure(int arg0, String arg1) {
+					if(arg0==9016)
+					    Toast.makeText(context,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+					else {
+						Toast.makeText(context,"连接失败，请稍后再试，"+arg1,Toast.LENGTH_SHORT).show();
+					}
+				}
+				
+				@Override
+				public void onSuccess(JSONArray jsonArray) {
+					try {
+						JSONObject jsonObject=jsonArray.getJSONObject(0);
+						userName.setText(jsonObject.getString("nick"));
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			});  
+			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
 			accountName=pre.getString("accountName","");
@@ -196,6 +229,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    try{ContentResolver cResolver=getActivity().getContentResolver();
 					Bitmap bitmap=BitmapFactory.decodeStream(cResolver.openInputStream(uri));
 					userPicture.setImageBitmap(bitmap);
+					
+					
 				    }catch(Exception e)
 				    {
 				    	e.printStackTrace();
@@ -243,7 +278,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 					@Override
 					public void onClick(View V) {
-						Intent intent = new Intent(Intent.ACTION_PICK, null);
+						Intent intent = new Intent(Intent.ACTION_PICK);
 			            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
 			                    "image/*");
 			            ((Activity)context).startActivityForResult(intent, 2);
@@ -601,9 +636,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				        && nearbySearchResult.getNearbyInfoList().size() > 0) 
 				    {
 				        NearbyInfo nearbyInfo = nearbySearchResult.getNearbyInfoList().get(0);
-				        Toast.makeText(context, "周边搜索结果为size "+ nearbySearchResult.getNearbyInfoList().size() + "first："+ nearbyInfo.getUserID() + "  " + nearbyInfo.getDistance()+ "  " 
-						                + nearbyInfo.getDrivingDistance() + "  "+ nearbyInfo.getTimeStamp() + "  "+  
-						                nearbyInfo.getPoint().toString(), Toast.LENGTH_LONG).show();
+				       // Toast.makeText(context, "周边搜索结果为size "+ nearbySearchResult.getNearbyInfoList().size() + "first："+ nearbyInfo.getUserID() + "  " + nearbyInfo.getDistance()+ "  " 
+						        //        + nearbyInfo.getDrivingDistance() + "  "+ nearbyInfo.getTimeStamp() + "  "+  
+						         //       nearbyInfo.getPoint().toString(), Toast.LENGTH_LONG).show();
 
 				       for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {

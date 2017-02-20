@@ -45,7 +45,6 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_marginTop="10dp"
-       android:clickable="false"
        />
    
 </LinearLayout>
@@ -70,7 +69,7 @@
         android:layout_marginTop="10sp"
         android:inputType="number"
         android:background="@android:drawable/alert_light_frame"
-            android:enabled="false"
+        android:enabled="false"
         />
    </LinearLayout> 
    <LinearLayout 
@@ -139,7 +138,6 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_marginTop="10dp"
-       android:clickable="false"
        />
     </LinearLayout>
 

@@ -1,25 +1,37 @@
 package activity;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.datatype.BmobFile;
+import cn.bmob.v3.listener.UploadFileListener;
 
 
 import com.uniqueweather.app.R;
 
 
+import android.R.integer;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -119,13 +131,32 @@ public class weather_info extends FragmentActivity {
 			break;
 		case 2:
 			if(resultCode==RESULT_OK)
-			{Uri uri=data.getData();
+			{final Uri uri=data.getData();
 			ContentResolver cr=this.getContentResolver();
 			fragmentPart.editor.putString("userPicture", uri.toString());
 			fragmentPart.editor.commit();
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
 				fragmentPart.refreshUserPicture(bitmap);
+		        
+             	BmobFile bmobFile=new BmobFile(new File(uri.toString()));
+				bmobFile.uploadblock(weather_info.this,new UploadFileListener() {
+					
+					@Override
+					public void onSuccess() {
+						  Toast.makeText(weather_info.this,"³É¹¦", Toast.LENGTH_SHORT).show();
+						
+					}
+					
+					@Override
+					public void onFailure(int arg0, String arg1) {
+					   Toast.makeText(weather_info.this,"Ê§°Ü£¬"+arg1+uri.toString(), Toast.LENGTH_SHORT).show();
+					}
+					@Override
+					public void onProgress(Integer value){
+						
+					}
+				});
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -135,6 +166,5 @@ public class weather_info extends FragmentActivity {
 			break;
 		}
 	}
-   
-  
+	
 }

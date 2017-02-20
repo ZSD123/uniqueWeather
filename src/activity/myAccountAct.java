@@ -26,8 +26,11 @@ import Util.Http;
 import Util.HttpCallbackListener;
 import Util.Utility;
 import android.R.anim;
+import android.R.integer;
+import android.R.string;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,7 +55,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class myAccountAct extends Activity implements AMapLocationListener {
+public class myAccountAct extends Activity implements AMapLocationListener,OnTouchListener {
 	private Spinner spinner1;    //性别的
 	private EditText editText3;   //生日EditText
     private Spinner spinner2;    //职业
@@ -69,6 +72,10 @@ public class myAccountAct extends Activity implements AMapLocationListener {
     
 	private Button button;       //编辑Button
 	private Button button1;      //取消Button
+	
+	private int year;
+	private int month;
+	private int day;
 	@Override
      public void onCreate(Bundle savedInstanceState)
 	 {
@@ -124,7 +131,7 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 					else if (sex.equals("女")) {
 						spinner1.setSelection(1);
 					}
-					editText2.setText(jsonObject.getString("age")+"岁");
+					editText2.setText(jsonObject.getString("age"));
 					editText3.setText(jsonObject.getString("shengri"));
 					editText4.setText(jsonObject.getString("constellation"));
 					spinner2.setSelection(jsonObject.getInt("zhiye"));
@@ -164,57 +171,13 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 	    ArrayAdapter<String> arrayAdapter2=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,arr1);
 	    spinner1.setAdapter(arrayAdapter);
 	    spinner2.setAdapter(arrayAdapter2);
-	    spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				Spinner spinner=(Spinner)parent;
-				
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				Toast.makeText(myAccountAct.this,"没有选",Toast.LENGTH_SHORT).show();
-				
-			}
-		   
-	    });
-	    editText3.setOnTouchListener(new OnTouchListener() {    //生日EditText
-			
-			@Override
-			public boolean onTouch(View view, MotionEvent motionEvent) {
-				if(motionEvent.getAction()==MotionEvent.ACTION_DOWN){
-					AlertDialog.Builder builder=new AlertDialog.Builder(myAccountAct.this);
-					View view1=View.inflate(myAccountAct.this,R.layout.date_time_dialog,null);
-					final DatePicker datePicker=(DatePicker)view1.findViewById(R.id.date_picker);
-					builder.setView(view1);
-					
-					Calendar cal=Calendar.getInstance();
-					cal.setTimeInMillis(System.currentTimeMillis());
-					datePicker.init(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH),null);
-					
-					builder.setTitle("选取您的生日");
-					builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-						
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-						 	StringBuffer sb=new StringBuffer();
-						    sb.append(String.format("%d年%02d月%02d日", 
-						    		datePicker.getYear(),
-						    		datePicker.getMonth()+1,
-						    		datePicker.getDayOfMonth()));
-						    sb.append("  ");
-						    editText3.setText(sb);
-						    dialog.cancel();
-						}
-					});
-					Dialog dialog=builder.create();
-					dialog.show();
-				}
-				return false;
-			}
-		});
+	    
+	    spinner1.setEnabled(false);
+	    spinner2.setEnabled(false);
+	   
+	    editText2.setOnTouchListener(this);
+	    editText3.setOnTouchListener(this);
+	    editText4.setOnTouchListener(this);
 	    editText6.setOnClickListener(new OnClickListener() {    //所在地EditText
 			
 			@Override
@@ -246,6 +209,7 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 				
 			}
 		});
+	    
 	    button.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -258,8 +222,8 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 	              editText5.setEnabled(true); 	
 	              editText6.setEnabled(true); 	
 	              editText7.setEnabled(true); 	
-				  spinner1.setClickable(true);
-				  spinner2.setClickable(true);
+				  spinner1.setEnabled(true);
+				  spinner2.setEnabled(true);
 				  button.setText("保    存");
 				  button1.setVisibility(View.VISIBLE);
 	            }
@@ -271,10 +235,15 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 	            	editText5.setEnabled(false);
 	            	editText6.setEnabled(false);
 	            	editText7.setEnabled(false);
-	            	spinner1.setClickable(false);
-	            	spinner2.setClickable(false);
+	            	spinner1.setEnabled(false);
+	            	spinner2.setEnabled(false);
 	            	button.setText("编    辑");
 	            	button1.setVisibility(View.GONE);
+	            	
+	            	SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(myAccountAct.this).edit();
+	            	editor.putString("accountName", editText1.getText().toString());
+	            	editor.commit();
+	            	
 	            	MyUser newUser=new MyUser();
 	            	newUser.setNick(editText1.getText().toString());
 	            	newUser.setSex(spinner1.getSelectedItem().toString());
@@ -312,8 +281,8 @@ public class myAccountAct extends Activity implements AMapLocationListener {
             	editText5.setEnabled(false);
             	editText6.setEnabled(false);
             	editText7.setEnabled(false);
-            	spinner1.setClickable(false);
-            	spinner2.setClickable(false);
+            	spinner1.setEnabled(false);
+            	spinner2.setEnabled(false);
             	button.setText("编    辑");
             	button1.setVisibility(View.GONE);
 				
@@ -347,7 +316,7 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 		    if (aMapLocation.getErrorCode() == 0) {
 		    	    Log.d("Main","1");
 		    	    Log.d("Main", aMapLocation.getCity());
-		    	    editText2.setText(aMapLocation.getCity()+aMapLocation.getDistrict());
+		    	    editText6.setText(aMapLocation.getCity()+aMapLocation.getDistrict());
 				 }
 		else {
 		Toast.makeText(myAccountAct.this, "errorcode:"+aMapLocation.getErrorCode()+",errorInfo:"+aMapLocation.getErrorInfo(), Toast.LENGTH_LONG).show();
@@ -364,6 +333,94 @@ public class myAccountAct extends Activity implements AMapLocationListener {
 		}
 		mLocationClient = null;
 	}
+	private void getAstro(int month, int day) {
+        String[] astro = new String[]{"摩羯座", "水瓶座", "双鱼座", "白羊座", "金牛座",
+                "双子座", "巨蟹座", "狮子座", "处女座", "天秤座", "天蝎座", "射手座","摩羯座"};
+        int[] arr = new int[]{20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 23, 22};// 两个星座分割日
+        if(day<arr[month-1]){
+        	editText4.setText(astro[month-1]);
+        }else {
+			editText4.setText(astro[month]);
+		}
+        
+    }
+	
+	@Override
+	public boolean onTouch(View view, MotionEvent arg1) {
+		if(arg1.getAction()==MotionEvent.ACTION_DOWN)
+		switch (view.getId()) {
+		case R.id.nianling:
+		case R.id.xingzuo:
+		case R.id.shengri:
+			AlertDialog.Builder builder=new AlertDialog.Builder(myAccountAct.this);
+			View view1=View.inflate(myAccountAct.this,R.layout.date_time_dialog,null);
+			final DatePicker datePicker=(DatePicker)view1.findViewById(R.id.date_picker);
+			builder.setView(view1);
+			
+			final Calendar cal=Calendar.getInstance();
+			cal.setTimeInMillis(System.currentTimeMillis());
+			String shengri=editText3.getText().toString();
+		    char[]b=shengri.toCharArray();
+		    if(b.length>0)
+		    {	
+		        datePicker.init(Integer.parseInt(""+b[0]+b[1]+b[2]+b[3]),Integer.parseInt(""+b[5]+b[6])-1, Integer.parseInt(""+b[8]+b[9]), null);
+		    }
+		    else {
+		    	datePicker.init(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH),null);
+			}
+			builder.setTitle("选取您的生日,系统将自动转化为年龄和星座");
+			builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				 	StringBuffer sb=new StringBuffer();
+				    sb.append(String.format("%d年%02d月%02d日", 
+				    		datePicker.getYear(),
+				    		datePicker.getMonth()+1,
+				    		datePicker.getDayOfMonth()));
+				    sb.append("  ");
+				    editText3.setText(sb);
+				    
+				    int nowyear=cal.get(Calendar.YEAR);
+				    int birth=nowyear-datePicker.getYear();
+				    int nowmonth=cal.get(Calendar.MONTH)+1;
+				    int nowday=cal.get(Calendar.DAY_OF_MONTH);
+				    if(nowmonth>datePicker.getMonth()+1){
+				    	Log.d("Main","1");
+				    }else if(datePicker.getMonth()+1==nowmonth){
+				    	if(nowday>=datePicker.getDayOfMonth()){
+				    		Log.d("Main","2");
+				    	}else{
+				    		birth--;
+				    		Log.d("Main","3");
+				    	}
+				    }else{
+				    	birth--;
+				    	Log.d("Main","4");
+				    }
+				    Log.d("Main","month="+nowmonth);
+				    editText2.setText(birth+"岁");
+				    getAstro(datePicker.getMonth()+1,datePicker.getDayOfMonth());
+				}
+			});
+			builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+					
+				}
+			});
+			Dialog dialog=builder.create();
+			dialog.show();
+			
+			break;
+        default:
+			break;
+		}
+		return false;
+	}
+
 	
        
 }
