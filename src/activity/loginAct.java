@@ -2,6 +2,7 @@ package activity;
 
 
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -15,15 +16,13 @@ import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobSMS;
 import cn.bmob.v3.BmobUser;
-import cn.bmob.v3.c.i;
 import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.EmailVerifyListener;
-import cn.bmob.v3.listener.FindCallback;
+import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.LogInListener;
-import cn.bmob.v3.listener.RequestSMSCodeListener;
+import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 
-import com.a.a.in;
+
 import com.uniqueweather.app.R;
 
 
@@ -143,7 +142,7 @@ public class loginAct extends Activity {
 	    editText1.setInputType(InputType.TYPE_CLASS_TEXT);
 	    button4=(Button)findViewById(R.id.sendYanzhengma);
 	    button2.setBackgroundColor(0);
-		MyUser userInfo=MyUser.getCurrentUser(loginAct.this,MyUser.class);
+		MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 		if(userInfo!=null){
 			  Intent intent=new Intent(loginAct.this,weather_info.class);
 			  startActivity(intent);
@@ -179,69 +178,64 @@ public class loginAct extends Activity {
 					   if(isEmail(input)){
 					   BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
 					   query.addWhereEqualTo("username",input);
-					   query.findObjects(loginAct.this, new FindCallback() {
+				       query.findObjects(new FindListener<MyUser>() {
 						
 						@Override
-						public void onFailure(int a, String b) {
-							if(a==9016)
-							    Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
-							else {
-								Toast.makeText(loginAct.this,"连接失败，请稍后再试，"+b,Toast.LENGTH_SHORT).show();
+						public void done(List<MyUser> object, BmobException e) {
+						     if(e==null){
+						    	 Toast.makeText(loginAct.this,"成功", Toast.LENGTH_SHORT).show();
+						    	 for(MyUser myUser : object){
+						    		 if(myUser.getEmailVerified()){
+						    			 bu.login(new SaveListener<MyUser>(){
+
+											@Override
+											public void done(MyUser user,
+													BmobException e) {
+												if(e==null){
+													 Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+													  Intent intent=new Intent(loginAct.this,weather_info.class);
+													  startActivity(intent);
+													  finish();
+												}else {
+													Toast.makeText(loginAct.this,"登录失败,"+e.getMessage(),Toast.LENGTH_SHORT ).show();
+												}
+												
+											}
+						    				 
+						    			 });
+						    		 }else {
+						    			 Toast.makeText(loginAct.this,"请先验证您的邮箱，如果邮件被删，请在注册页面输入您的邮箱，点击发送验证",Toast.LENGTH_SHORT).show();
+									}
+						    	 }
+						     }else if(e.getErrorCode()==9016){
+						    	  Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+						     } else{
+								Toast.makeText(loginAct.this,"连接失败，请稍后再试，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 							}
-						}
-						
-						@Override
-						public void onSuccess(JSONArray array) {
-						    try {
-								JSONObject jsonObject=array.getJSONObject(0);
-								kedenglu=jsonObject.getBoolean("emailVerified");
-							} catch (JSONException e) {
-								e.printStackTrace();
-							}
-						    if(kedenglu){
-						    	 bu.login(loginAct.this,new SaveListener() {  
-										@Override
-										public void onSuccess() 
-										{     
-											  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
-											  Intent intent=new Intent(loginAct.this,weather_info.class);
-											  startActivity(intent);
-											  finish();
-										}
-										
-										@Override
-										public void onFailure(int arg0, String arg1) 
-										{   
-											Toast.makeText(loginAct.this,"登录失败,"+arg1,Toast.LENGTH_SHORT ).show();
-										}
-									});
-						    }else {
-								Toast.makeText(loginAct.this,"请先验证您的邮箱，如果邮件被删，请在注册页面输入您的邮箱，点击发送验证",Toast.LENGTH_SHORT).show();
-							}
-						    
+							
 						}
 					});
 					   }else if(isMobileNO(input)){
-						 bu.login(loginAct.this,new SaveListener() {  
-								@Override
-								public void onSuccess() 
-								{     
-									  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
-									  Intent intent=new Intent(loginAct.this,weather_info.class);
-									  startActivity(intent);
-									  finish();
+						    bu.login(new SaveListener<MyUser>(){
+
+                                @Override
+								public void done(MyUser myUser, BmobException e) {
+									if(e==null){
+                                          Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+										  Intent intent=new Intent(loginAct.this,weather_info.class);
+										  startActivity(intent);
+										  finish();
+									}else {
+										 if(e.getErrorCode()==9016)
+											  Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
+										else {
+											 Toast.makeText(loginAct.this,"登录失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+										}
+									}
+									
 								}
-								
-								@Override
-								public void onFailure(int arg0, String arg1) 
-								{   if(arg0==9016)
-									  Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
-								else {
-									 Toast.makeText(loginAct.this,"登录失败，"+arg1, Toast.LENGTH_SHORT).show();
-								}
-								   
-								}
-							});
+	
+						    });
 					   }
 					  
 				
@@ -282,7 +276,7 @@ public class loginAct extends Activity {
 						   Toast.makeText(loginAct.this, "验证码不能为空", Toast.LENGTH_SHORT).show();
 					   else if(flag2&&!passwordString.isEmpty())
 					    {
-						    BmobUser.loginBySMSCode(loginAct.this,input, passwordString, new LogInListener<BmobUser>()
+						    BmobUser.loginBySMSCode(input, passwordString, new LogInListener<BmobUser>()
 						   {		
 
 						           @Override
@@ -344,7 +338,7 @@ public class loginAct extends Activity {
 				if(fasong)
 		      {	 if(isMobileNO(input))
 				{
-				  BmobSMS.requestSMSCode(loginAct.this, input,"短信验证",new RequestSMSCodeListener() {
+				  BmobSMS.requestSMSCode( input,"短信验证",new QueryListener<Integer>() {
 					
 					@Override
 					public void done(Integer smsId, BmobException ex) {

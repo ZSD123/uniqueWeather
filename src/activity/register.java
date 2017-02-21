@@ -9,12 +9,10 @@ import java.util.regex.Pattern;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobSMS;
 import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.EmailVerifyListener;
-import cn.bmob.v3.listener.RequestSMSCodeListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 
-import com.a.a.in;
+
 import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
@@ -176,56 +174,13 @@ public class register extends Activity {
 							Log.d("Main",MD5Util.getMD5String(passwordString));
 							bu.setEmail(input);
 						    bu.setEmailVerified(false);
-						    bu.signUp(register.this, new SaveListener() {
-								
+						    bu.signUp(new SaveListener<MyUser>() {
+
 								@Override
-								public void onSuccess() {
-									  Toast.makeText(register.this,"注册成功，请在邮箱里验证",Toast.LENGTH_SHORT).show();
-									  if(bangzhufasongE){
-										  MyUser.requestEmailVerify(register.this,input,new EmailVerifyListener() {
-											
-											@Override
-											public void onSuccess() {
-												Toast.makeText(register.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
-												fasong=false;
-											
-												timer=new Timer();
-												task=new TimerTask(){
-												 		@Override
-												 		public void run() 
-												 		{   daojishi--;
-												 		    Message message=new Message();
-												 			message.what=UPDATE_TEXT;
-												 			handler.sendMessage(message);
-											
-												 			if(daojishi==0)
-												 			{   
-												 			    message=new Message();
-												 			    message.what=TOFASONG;
-												 			    handler.sendMessage(message);
-												 			    timer.cancel();
-												 			    task.cancel();
-												 			    daojishi=30;
-												 		
-												 			}
-												 		}
-												 	};
-												timer.schedule(task, 1000,1000);
-											}
-											
-											@Override
-											public void onFailure(int arg0, String arg1) {
-												Toast.makeText(register.this,"发送验证邮箱失败，"+arg1, Toast.LENGTH_SHORT).show();
-												
-											}
-										});
-									bangzhufasongE=false;
-									  }
-								}
-								
-								@Override
-								public void onFailure(int arg0, String arg1) {
-									Toast.makeText(register.this,"注册失败，"+arg1, Toast.LENGTH_SHORT).show();
+								public void done(MyUser myUser, BmobException e) {
+									if(e==null){
+										  Toast.makeText(register.this,"注册成功，请在邮箱里验证",Toast.LENGTH_SHORT).show();
+									}
 									
 								}
 							});
@@ -237,59 +192,21 @@ public class register extends Activity {
 							bu.setMobilePhoneNumber(input);
 							bu.setMobilePhoneNumberVerified(false);
 							if(bangzhufasongM){
-								BmobSMS.requestSMSCode(register.this,input,"短信验证",new RequestSMSCodeListener() {
-									
-									@Override
-									public void done(Integer smsId, BmobException ex) {
-										if(ex==null){
-											 Toast.makeText(register.this,"发送验证短信成功，"+smsId,Toast.LENGTH_SHORT).show();
-											 fasong=false;
-											 timer=new Timer();
-											 task=new TimerTask() {
-												
-												@Override
-												public void run() {
-													daojishi--;
-								   		 		    Message message=new Message();
-								   		 			message.what=UPDATE_TEXT;
-								   		 			handler.sendMessage(message);
-								   		 			if(daojishi==0)
-								   		 			{   
-								   		 			    message=new Message();
-								   		 			    message.what=TOFASONG;
-								   		 			    handler.sendMessage(message);
-								   		 			    timer.cancel();
-								   		 			    task.cancel();
-								   		 			    daojishi=30;
-								   		 			}
-													
-												}
-											};
-											timer.schedule(task, 1000,1000);
-										}else {
-											Toast.makeText(register.this, "发送验证短信失败，"+ex.getMessage(), Toast.LENGTH_SHORT).show();
-										}
-										
-									}
-								});
+								
 								bangzhufasongM=false;
 							}
 							if(!editText3.getText().toString().equals("")){
-								bu.signOrLogin(register.this,editText3.getText().toString(),new SaveListener() {
+								bu.signOrLogin(editText3.getText().toString(),new SaveListener() {
 									
-									@Override
-									public void onSuccess() {
-										Toast.makeText(register.this,"注册成功，正在转入", Toast.LENGTH_SHORT).show();
-										Intent intent=new Intent(register.this,weather_info.class);
-										startActivity(intent);
-										finish();
-									}
 									
+
 									@Override
-									public void onFailure(int arg0, String arg1) {
-										Toast.makeText(register.this,"注册失败，"+arg1, Toast.LENGTH_SHORT).show();
+									public void done(Object arg0,
+											BmobException arg1) {
+										// TODO Auto-generated method stub
 										
 									}
+
 								});
 							}else{
 								Toast.makeText(register.this,"请输入验证码", Toast.LENGTH_SHORT).show();
@@ -308,84 +225,9 @@ public class register extends Activity {
 				if(fasong){
 					input=editText1.getText().toString();
 					if(isMobileNO(input)){
-				   	BmobSMS.requestSMSCode(register.this,input,"短信验证",new RequestSMSCodeListener() {
-						
-						@Override
-						public void done(Integer smsId, BmobException ex) {
-							if(ex==null){
-								 Toast.makeText(register.this,"发送验证短信成功，"+smsId,Toast.LENGTH_SHORT).show();
-								 fasong=false;
-								 timer=new Timer();
-								 task=new TimerTask() {
-									
-									@Override
-									public void run() {
-										daojishi--;
-					   		 		    Message message=new Message();
-					   		 			message.what=UPDATE_TEXT;
-					   		 			handler.sendMessage(message);
-					   		 			if(daojishi==0)
-					   		 			{   
-					   		 			    message=new Message();
-					   		 			    message.what=TOFASONG;
-					   		 			    handler.sendMessage(message);
-					   		 			    timer.cancel();
-					   		 			    task.cancel();
-					   		 			    daojishi=30;
-					   		 			}
-										
-									}
-								};
-								timer.schedule(task, 1000,1000);
-							}else {
-								Toast.makeText(register.this, "发送验证短信失败，"+ex.getMessage(), Toast.LENGTH_SHORT).show();
-							}
-							
-						}
-					});
+				   
 					}else if(isEmail(input)){
-						MyUser.requestEmailVerify(register.this, input,new EmailVerifyListener() {
-							
-							@Override
-							public void onSuccess() {
-								Toast.makeText(register.this,"请求验证邮件成功", Toast.LENGTH_SHORT).show();
-								 fasong=false;
-								 timer=new Timer();
-								 task=new TimerTask() {
-									
-									@Override
-									public void run() {
-										daojishi--;
-					   		 		    Message message=new Message();
-					   		 			message.what=UPDATE_TEXT;
-					   		 			handler.sendMessage(message);
-					   		 			if(daojishi==0)
-					   		 			{   
-					   		 			    message=new Message();
-					   		 			    message.what=TOFASONG;
-					   		 			    handler.sendMessage(message);
-					   		 			    timer.cancel();
-					   		 			    task.cancel();
-					   		 			    daojishi=30;
-					   		 			}
-										
-									}
-								};
-								timer.schedule(task, 1000,1000);
-							}
-							
-							@Override
-							public void onFailure(int arg0, String arg1) {
-								if(arg0==205){
-									Toast.makeText(register.this,"失败，没有找到此邮件的用户，请先注册或者绑定邮箱", Toast.LENGTH_SHORT).show();
-								}else{
-									Toast.makeText(register.this,"失败，"+arg1,Toast.LENGTH_SHORT).show();
-								}
-								
-								
-								
-							}
-						});
+						
 					}else {
 						Toast.makeText(register.this,"手机号或者邮箱格式不对", Toast.LENGTH_SHORT).show();
 					}

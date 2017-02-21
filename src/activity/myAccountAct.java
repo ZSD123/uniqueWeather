@@ -11,7 +11,7 @@ import receiver.uqdateReceive;
 
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
-import cn.bmob.v3.listener.FindCallback;
+import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.UpdateListener;
 
 import com.amap.api.location.AMapLocation;
@@ -32,13 +32,21 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -106,44 +114,23 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 		
 	    editText1.setText(getIntent().getExtras().getString("name"));
 	    
-	    final MyUser userInfo=MyUser.getCurrentUser(myAccountAct.this,MyUser.class);
+		final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 	    
-	    BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
-	    query.addWhereEqualTo("username",userInfo.getUsername());
-	    query.findObjects(myAccountAct.this,new FindCallback() {
-			
-			@Override
-			public void onFailure(int arg0, String arg1) {
-				if(arg0==9016)
-				    Toast.makeText(myAccountAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
-				else {
-					Toast.makeText(myAccountAct.this,"连接失败，请稍后再试，"+arg1,Toast.LENGTH_SHORT).show();
-				}
-			}
-			
-			@Override
-			public void onSuccess(JSONArray jsonArray) {
-				try {
-					JSONObject jsonObject=jsonArray.getJSONObject(0);
-					String sex=jsonObject.getString("sex");
-					if(sex.equals("男"))
-						spinner1.setSelection(0);
-					else if (sex.equals("女")) {
-						spinner1.setSelection(1);
-					}
-					editText2.setText(jsonObject.getString("age"));
-					editText3.setText(jsonObject.getString("shengri"));
-					editText4.setText(jsonObject.getString("constellation"));
-					spinner2.setSelection(jsonObject.getInt("zhiye"));
-					editText5.setText(jsonObject.getString("school"));
-					editText6.setText(jsonObject.getString("suozaidi"));
-					editText7.setText(jsonObject.getString("guxiang"));
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-				
-			}
-		});
+	    String sex=(String)MyUser.getObjectByKey("sex");
+	    if(sex.equals("男"))
+	    	spinner1.setSelection(0);
+	    else if(sex.equals("女")){
+			spinner1.setSelection(1);
+		}else if(sex.equals("保密")){
+			spinner1.setSelection(2);
+		}
+	    editText2.setText((String)MyUser.getObjectByKey("age"));
+	    editText3.setText((String)MyUser.getObjectByKey("shengri"));
+	    editText4.setText((String)MyUser.getObjectByKey("constellation"));
+	    spinner2.setSelection(Integer.parseInt(String.valueOf(MyUser.getObjectByKey("zhiye"))));
+	    editText5.setText((String)MyUser.getObjectByKey("school"));
+	    editText6.setText((String)MyUser.getObjectByKey("suozaidi"));
+	    editText7.setText((String)MyUser.getObjectByKey("guxiang"));
 	    
 	    pre=PreferenceManager.getDefaultSharedPreferences(this);
 	    final String arr[]=new String[]{
@@ -254,17 +241,17 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 	            	newUser.setSchool(editText5.getText().toString());
 	            	newUser.setSuozaidi(editText6.getText().toString());
 	            	newUser.setGuxiang(editText7.getText().toString());
-	            	newUser.update(myAccountAct.this, userInfo.getObjectId(),new UpdateListener() {
+	            	newUser.update( userInfo.getObjectId(),new UpdateListener() {
 						
+					
 						@Override
-						public void onSuccess() {
-							Toast.makeText(myAccountAct.this, "保存成功", Toast.LENGTH_SHORT).show();
+						public void done(BmobException e) {
+							if(e==null){
+								Toast.makeText(myAccountAct.this,"更新信息成功", Toast.LENGTH_SHORT).show();
+							}else {
+								Toast.makeText(myAccountAct.this,"失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+							}
 							
-						}
-						
-						@Override
-						public void onFailure(int arg0, String arg1) {
-							Toast.makeText(myAccountAct.this,"保存失败，"+arg1 ,Toast.LENGTH_SHORT).show();
 						}
 					});
 				}
@@ -314,13 +301,11 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 	public void onLocationChanged(AMapLocation aMapLocation) {
 		if (aMapLocation != null) {
 		    if (aMapLocation.getErrorCode() == 0) {
-		    	    Log.d("Main","1");
-		    	    Log.d("Main", aMapLocation.getCity());
 		    	    editText6.setText(aMapLocation.getCity()+aMapLocation.getDistrict());
 				 }
 		else {
 		Toast.makeText(myAccountAct.this, "errorcode:"+aMapLocation.getErrorCode()+",errorInfo:"+aMapLocation.getErrorInfo(), Toast.LENGTH_LONG).show();
-		Log.d("Main","errorcode:"+aMapLocation.getErrorCode()+",errorInfo:"+aMapLocation.getErrorInfo());
+		
   	}
 		}
 	}
@@ -398,7 +383,6 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 				    	birth--;
 				    	Log.d("Main","4");
 				    }
-				    Log.d("Main","month="+nowmonth);
 				    editText2.setText(birth+"岁");
 				    getAstro(datePicker.getMonth()+1,datePicker.getDayOfMonth());
 				}
@@ -420,7 +404,6 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 		}
 		return false;
 	}
-
 	
        
 }

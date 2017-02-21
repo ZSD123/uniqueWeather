@@ -3,19 +3,16 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.security.PublicKey;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
+import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
 
 import service.autoUqdateService;
 
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
-import cn.bmob.v3.listener.FindCallback;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -23,13 +20,10 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps2d.AMap;
-import com.amap.api.maps2d.AMap.OnMapLoadedListener;
-import com.amap.api.maps2d.AMapOptions;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
-import com.amap.api.maps2d.UiSettings;
 import com.amap.api.maps2d.model.BitmapDescriptor;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
@@ -38,14 +32,11 @@ import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
-import com.amap.api.maps2d.model.MyLocationStyle;
-import com.amap.api.services.a.bo;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.nearby.NearbyInfo;
 import com.amap.api.services.nearby.NearbySearch;
 import com.amap.api.services.nearby.NearbySearch.NearbyListener;
 import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
-import com.amap.api.services.nearby.NearbySearchFunctionType;
 import com.amap.api.services.nearby.NearbySearchResult;
 import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
@@ -56,39 +47,24 @@ import Util.Http;
 import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
-import android.R.integer;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.text.StaticLayout;
-import android.text.LoginFilter.UsernameFilterGeneric;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view .ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -139,11 +115,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
 	private Marker mLocMarker;
-	private OnLocationChangedListener mListener;
 	private boolean mFirstFix = false;
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
-    private String yuanLocation;    //原来的地理位置
 	private TextView myAccount;     //我的账户TextView 	
+	private OnLocationChangedListener mListener;
+	private String yuanLocation;
 	public fragmentPart(){
 		
 	}
@@ -183,31 +159,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			if(context==null)
 				context=(Context)getActivity();
-			MyUser userInfo=MyUser.getCurrentUser(context,MyUser.class);
+			MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 		    
-		    BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
-		    query.addWhereEqualTo("username",userInfo.getUsername());
-			query.findObjects(context, new FindCallback() {
-				
-				@Override
-				public void onFailure(int arg0, String arg1) {
-					if(arg0==9016)
-					    Toast.makeText(context,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
-					else {
-						Toast.makeText(context,"连接失败，请稍后再试，"+arg1,Toast.LENGTH_SHORT).show();
-					}
-				}
-				
-				@Override
-				public void onSuccess(JSONArray jsonArray) {
-					try {
-						JSONObject jsonObject=jsonArray.getJSONObject(0);
-						userName.setText(jsonObject.getString("nick"));
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-			});  
+		    String nick=(String)BmobUser.getObjectByKey("nick");
+		    if(nick!=null){
+		    	userName.setText(nick);
+		    }else {
+				Toast.makeText(context, "连接失败，请稍后再试", Toast.LENGTH_SHORT).show();
+			}
 			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
@@ -278,9 +237,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 					@Override
 					public void onClick(View V) {
-						Intent intent = new Intent(Intent.ACTION_PICK);
-			            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-			                    "image/*");
+						Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+						intent.addCategory(Intent.CATEGORY_OPENABLE);
+			            intent.setType("image/jpeg");
 			            ((Activity)context).startActivityForResult(intent, 2);
 					}
 				});
@@ -319,8 +278,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 					@Override
 					public void onClick(View view) {
-					    BmobUser.logOut(context);
-						MyUser currentUser=(MyUser) MyUser.getCurrentUser(context);
+					    BmobUser.logOut();
+						BmobUser currentUser=BmobUser.getCurrentUser();
 						Intent intent=new Intent(context,loginAct.class);
 						startActivity(intent);
 						Activity activity=(Activity)context;
