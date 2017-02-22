@@ -8,8 +8,10 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
 
 
@@ -142,7 +144,7 @@ public class weather_info extends FragmentActivity {
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
 				fragmentPart.refreshUserPicture(bitmap);
 		        
-             	BmobFile bmobFile=new BmobFile(new File(path));
+             	final BmobFile bmobFile=new BmobFile(new File(path));
 				bmobFile.uploadblock(new UploadFileListener() {
 					
 					
@@ -152,9 +154,27 @@ public class weather_info extends FragmentActivity {
 					}
 
 					@Override
-					public void done(BmobException arg0) {
-						// TODO Auto-generated method stub
-						
+					public void done(BmobException e) {
+						   if(e==null){
+						String fileUrl=bmobFile.getFileUrl();
+						MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
+						userInfo.setTouXiangUrl(fileUrl);
+						userInfo.update(userInfo.getObjectId(),new UpdateListener() {
+							
+							@Override
+							public void done(BmobException e) {
+								  if(e==null){
+							            Toast.makeText(weather_info.this, "保存成功",Toast.LENGTH_SHORT).show();
+							        }else{
+							           Toast.makeText(weather_info.this,"更新用户信息失败:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+							        }
+								
+							}
+					    	});
+						   } else {
+							   Toast.makeText(weather_info.this,"失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+							
+						}
 					}
 				});
 			}catch (Exception e) {

@@ -11,6 +11,7 @@ import service.autoUqdateService;
 
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 
@@ -47,6 +48,7 @@ import Util.Http;
 import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
+import Util.download;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -58,8 +60,10 @@ import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view .ViewGroup;
@@ -79,7 +83,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private static RelativeLayout weather_layout;
 	private static TextView weather;
 	private static TextView temper;
-	private static ImageView userPicture;
+	public static ImageView userPicture;
 	private TextView myCity;
     private Button button_refresh;
     public static String countyName;
@@ -159,9 +163,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			if(context==null)
 				context=(Context)getActivity();
-			MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
-		    
-		    String nick=(String)BmobUser.getObjectByKey("nick");
+			
+			String nick=(String)BmobUser.getObjectByKey("nick");
+		    String touxiangUrl=(String)BmobUser.getObjectByKey("touxiangUrl");
 		    if(nick!=null){
 		    	userName.setText(nick);
 		    }else {
@@ -179,22 +183,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{
 				userName.setText("未命名");
 			}
-			 
-			
-			uriUserPicture = pre.getString("userPicture",null);
-			 if(uriUserPicture!=null)
-				{  
-				    Uri uri=Uri.parse(uriUserPicture);
-				    try{ContentResolver cResolver=getActivity().getContentResolver();
-					Bitmap bitmap=BitmapFactory.decodeStream(cResolver.openInputStream(uri));
-					userPicture.setImageBitmap(bitmap);
-					
-					
-				    }catch(Exception e)
-				    {
-				    	e.printStackTrace();
-				    	Toast.makeText(context, "未找到相应图片", Toast.LENGTH_SHORT).show();
-				    }
+
+			 if(touxiangUrl!=null)
+				{  BmobFile bmobFile=new BmobFile("头像.png",null,touxiangUrl);
+				   download.downloadFile(bmobFile,context);
+				 
 				}
 		        countyName=pre.getString("locDistrict","");
 				pic.setImageBitmap(getPicture());

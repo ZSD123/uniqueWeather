@@ -8,7 +8,10 @@ import java.util.regex.Pattern;
 
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobSMS;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.LogInListener;
+import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 
@@ -171,7 +174,6 @@ public class register extends Activity {
 							MyUser bu=new MyUser();
 							bu.setUsername(input);
 							bu.setPassword(MD5Util.getMD5String(passwordString));
-							Log.d("Main",MD5Util.getMD5String(passwordString));
 							bu.setEmail(input);
 						    bu.setEmailVerified(false);
 						    bu.signUp(new SaveListener<MyUser>() {
@@ -180,6 +182,49 @@ public class register extends Activity {
 								public void done(MyUser myUser, BmobException e) {
 									if(e==null){
 										  Toast.makeText(register.this,"注册成功，请在邮箱里验证",Toast.LENGTH_SHORT).show();
+										  if(bangzhufasongE){
+											  MyUser.requestEmailVerify(input,new UpdateListener(){
+
+												@Override
+												public void done(BmobException e) {
+													if(e==null){
+														Toast.makeText(register.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
+														fasong=false;
+														
+														timer=new Timer();
+														task=new TimerTask(){
+														 		@Override
+														 		public void run() 
+														 		{   daojishi--;
+														 		    Message message=new Message();
+														 			message.what=UPDATE_TEXT;
+														 			handler.sendMessage(message);
+													
+														 			if(daojishi==0)
+														 			{   
+														 			    message=new Message();
+														 			    message.what=TOFASONG;
+														 			    handler.sendMessage(message);
+														 			    timer.cancel();
+														 			    task.cancel();
+														 			    daojishi=30;
+														 		
+														 			}
+														 		}
+														 	};
+														timer.schedule(task, 1000,1000);
+													}else {
+														Toast.makeText(register.this,"发送验证邮箱失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+													}
+													
+												}
+												  
+											  }
+											   );
+											  bangzhufasongE=false;
+										  }
+									}else {
+										Toast.makeText(register.this,"注册失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 									}
 									
 								}
@@ -192,21 +237,57 @@ public class register extends Activity {
 							bu.setMobilePhoneNumber(input);
 							bu.setMobilePhoneNumberVerified(false);
 							if(bangzhufasongM){
-								
+								BmobSMS.requestSMSCode(input,"短信验证",  new QueryListener<Integer>() {
+
+									@Override
+									public void done(Integer arg0,BmobException e) {
+										if(e==null){
+											 Toast.makeText(register.this,"发送成功，请验证", Toast.LENGTH_SHORT).show();
+											 fasong=false;
+											 timer=new Timer();
+											 task=new TimerTask() {
+												
+												@Override
+												public void run() {
+													daojishi--;
+								   		 		    Message message=new Message();
+								   		 			message.what=UPDATE_TEXT;
+								   		 			handler.sendMessage(message);
+								   		 			if(daojishi==0)
+								   		 			{   
+								   		 			    message=new Message();
+								   		 			    message.what=TOFASONG;
+								   		 			    handler.sendMessage(message);
+								   		 			    timer.cancel();
+								   		 			    task.cancel();
+								   		 			    daojishi=30;
+								   		 			}
+													
+												}
+											};
+											timer.schedule(task, 1000,1000);
+										}else {
+											Toast.makeText(register.this, "发送验证短信失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+										}
+										
+									}
+									
+								});
 								bangzhufasongM=false;
 							}
 							if(!editText3.getText().toString().equals("")){
-								bu.signOrLogin(editText3.getText().toString(),new SaveListener() {
-									
-									
-
-									@Override
-									public void done(Object arg0,
-											BmobException arg1) {
-										// TODO Auto-generated method stub
-										
-									}
-
+								MyUser.signOrLoginByMobilePhone(input,editText3.getText().toString(),new LogInListener<MyUser>() {
+									 @Override
+									    public void done(MyUser user, BmobException e) {
+									        if(user!=null){
+									        	Toast.makeText(register.this,"注册成功，正在转入", Toast.LENGTH_SHORT).show();
+												Intent intent=new Intent(register.this,weather_info.class);
+												startActivity(intent);
+												finish();
+									        }else if(e!=null){
+									        	Toast.makeText(register.this,"注册失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+									        }
+									    }
 								});
 							}else{
 								Toast.makeText(register.this,"请输入验证码", Toast.LENGTH_SHORT).show();
@@ -225,9 +306,83 @@ public class register extends Activity {
 				if(fasong){
 					input=editText1.getText().toString();
 					if(isMobileNO(input)){
-				   
+						BmobSMS.requestSMSCode(input,"短信验证",  new QueryListener<Integer>() {
+
+							@Override
+							public void done(Integer arg0,BmobException e) {
+								if(e==null){
+									 Toast.makeText(register.this,"发送成功，请验证", Toast.LENGTH_SHORT).show();
+									 fasong=false;
+									 timer=new Timer();
+									 task=new TimerTask() {
+										
+										@Override
+										public void run() {
+											daojishi--;
+						   		 		    Message message=new Message();
+						   		 			message.what=UPDATE_TEXT;
+						   		 			handler.sendMessage(message);
+						   		 			if(daojishi==0)
+						   		 			{   
+						   		 			    message=new Message();
+						   		 			    message.what=TOFASONG;
+						   		 			    handler.sendMessage(message);
+						   		 			    timer.cancel();
+						   		 			    task.cancel();
+						   		 			    daojishi=30;
+						   		 			}
+											
+										}
+									};
+									timer.schedule(task, 1000,1000);
+								}else {
+									Toast.makeText(register.this, "发送验证短信失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+								}
+								
+							}
+							
+						});
 					}else if(isEmail(input)){
-						
+						 MyUser.requestEmailVerify(input,new UpdateListener(){
+
+								@Override
+								public void done(BmobException e) {
+									if(e==null){
+										Toast.makeText(register.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
+										fasong=false;
+										
+										timer=new Timer();
+										task=new TimerTask(){
+										 		@Override
+										 		public void run() 
+										 		{   daojishi--;
+										 		    Message message=new Message();
+										 			message.what=UPDATE_TEXT;
+										 			handler.sendMessage(message);
+									
+										 			if(daojishi==0)
+										 			{   
+										 			    message=new Message();
+										 			    message.what=TOFASONG;
+										 			    handler.sendMessage(message);
+										 			    timer.cancel();
+										 			    task.cancel();
+										 			    daojishi=30;
+										 		
+										 			}
+										 		}
+										 	};
+										timer.schedule(task, 1000,1000);
+									}else if(e.getErrorCode()==205){
+										Toast.makeText(register.this,"失败，没有找到此邮件的用户，请先注册或者绑定邮箱", Toast.LENGTH_SHORT).show();
+									}else {
+										Toast.makeText(register.this,"失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
+									}
+									
+								}
+								  
+							  }
+							   );
 					}else {
 						Toast.makeText(register.this,"手机号或者邮箱格式不对", Toast.LENGTH_SHORT).show();
 					}

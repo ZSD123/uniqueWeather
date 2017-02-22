@@ -13,6 +13,13 @@ public class MyUser extends BmobUser {
 	private String school;
 	private String suozaidi;
 	private String guxiang;
+	private String touxiangUrl;
+	public String getTouXiangUrl(){
+		return this.touxiangUrl;
+	}
+	public void setTouXiangUrl(String touxiangUrl){
+		this.touxiangUrl=touxiangUrl;
+	}
 	public String getSex(){
 		return this.sex;
 	}

@@ -371,17 +371,16 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 				    int nowmonth=cal.get(Calendar.MONTH)+1;
 				    int nowday=cal.get(Calendar.DAY_OF_MONTH);
 				    if(nowmonth>datePicker.getMonth()+1){
-				    	Log.d("Main","1");
+
 				    }else if(datePicker.getMonth()+1==nowmonth){
 				    	if(nowday>=datePicker.getDayOfMonth()){
-				    		Log.d("Main","2");
 				    	}else{
 				    		birth--;
-				    		Log.d("Main","3");
+				    
 				    	}
 				    }else{
 				    	birth--;
-				    	Log.d("Main","4");
+
 				    }
 				    editText2.setText(birth+"Ëê");
 				    getAstro(datePicker.getMonth()+1,datePicker.getDayOfMonth());
