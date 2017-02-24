@@ -185,8 +185,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			}
 
 			 if(touxiangUrl!=null)
-				{  BmobFile bmobFile=new BmobFile("头像.png",null,touxiangUrl);
-				   download.downloadFile(bmobFile,context);
+				{  
+				   BmobFile bmobFile=new BmobFile("头像"+".png",null,touxiangUrl);//确定文件名字（头像.png）和网络地址
+				   download.downloadFile(bmobFile,context);//进行下载操作
+				   Log.d("Main","这里");
 				 
 				}
 		        countyName=pre.getString("locDistrict","");

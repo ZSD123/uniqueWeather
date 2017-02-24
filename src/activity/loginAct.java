@@ -3,6 +3,7 @@ package activity;
 
 
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -13,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobInstallation;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobSMS;
 import cn.bmob.v3.BmobUser;
@@ -21,6 +23,7 @@ import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.LogInListener;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
+import cn.bmob.v3.listener.UpdateListener;
 
 
 import com.uniqueweather.app.R;
@@ -30,10 +33,13 @@ import com.uniqueweather.app.R;
 import Util.MD5Util;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.renderscript.Type;
 import android.text.Html;
 import android.text.InputType;
@@ -135,6 +141,8 @@ public class loginAct extends Activity {
 	    checkBox=(CheckBox)findViewById(R.id.checkbox);
 	    checkBox.setChecked(true);
 	    
+	    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(loginAct.this).edit();
+			
 	    imageView=(ImageView)findViewById(R.id.kekanmima);
 	    editText1=(EditText)findViewById(R.id.editText_account);
 	    editText2=(EditText)findViewById(R.id.editText_secret);
@@ -142,12 +150,29 @@ public class loginAct extends Activity {
 	    editText1.setInputType(InputType.TYPE_CLASS_TEXT);
 	    button4=(Button)findViewById(R.id.sendYanzhengma);
 	    button2.setBackgroundColor(0);
-		MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
-		if(userInfo!=null){
-			  Intent intent=new Intent(loginAct.this,weather_info.class);
-			  startActivity(intent);
-			  finish();
-		}
+	   
+		final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
+		
+		if(userInfo!=null)
+		userInfo.update(new UpdateListener() {
+			@Override
+			public void done(BmobException e) {
+				 if(e==null){
+					   {
+					   	  Intent intent=new Intent(loginAct.this,weather_info.class);
+						  startActivity(intent);
+						  finish();
+						  
+					 }
+				 }else if(e.getErrorCode()==206){
+					  Toast.makeText(loginAct.this, "为了您的安全，请重新登录", Toast.LENGTH_SHORT).show();
+				 }else{
+					  Toast.makeText(loginAct.this, "请重新登录，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+				 }
+			 }
+		});
+	
+		
 	    button1.setOnTouchListener(new OnTouchListener() {
 			
 			@Override
@@ -192,7 +217,10 @@ public class loginAct extends Activity {
 											public void done(MyUser user,
 													BmobException e) {
 												if(e==null){
-													 Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+													  BmobInstallation.getCurrentInstallation().save();
+													  BmobQuery<MyBmobInstallation> query=new BmobQuery<MyBmobInstallation>();
+													 
+										              Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
 													  Intent intent=new Intent(loginAct.this,weather_info.class);
 													  startActivity(intent);
 													  finish();

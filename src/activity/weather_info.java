@@ -2,6 +2,7 @@ package activity;
 
 import java.io.File;
 import java.net.URI;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
 
 
+import com.amap.api.location.AMapLocationClient;
 import com.uniqueweather.app.R;
 
 
@@ -45,7 +47,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class weather_info extends FragmentActivity {
+public class weather_info extends activityBase {
      public String accountName;
      public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	 public static String address3="http://route.showapi.com/9-2";
@@ -64,7 +66,7 @@ public class weather_info extends FragmentActivity {
 	 private FragmentPagerAdapter mAdapter;
 	@Override
 	public void onCreate(Bundle savedInstance)
-	{
+	{   
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
@@ -157,14 +159,30 @@ public class weather_info extends FragmentActivity {
 					public void done(BmobException e) {
 						   if(e==null){
 						String fileUrl=bmobFile.getFileUrl();
-						MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
+					    MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
+						final String yuanUrl=userInfo.getTouXiangUrl();
 						userInfo.setTouXiangUrl(fileUrl);
+						
 						userInfo.update(userInfo.getObjectId(),new UpdateListener() {
 							
 							@Override
 							public void done(BmobException e) {
 								  if(e==null){
 							            Toast.makeText(weather_info.this, "保存成功",Toast.LENGTH_SHORT).show();
+							            BmobFile file=new BmobFile();
+							            file.setUrl(yuanUrl);
+							            file.delete(new UpdateListener() {
+											
+											@Override
+											public void done(BmobException e) {
+												if(e==null){
+													
+												}else {
+													Toast.makeText(weather_info.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+												}
+												
+											}
+										});
 							        }else{
 							           Toast.makeText(weather_info.this,"更新用户信息失败:" + e.getMessage(), Toast.LENGTH_SHORT).show();
 							        }
