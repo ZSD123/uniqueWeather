@@ -208,19 +208,14 @@ public class loginAct extends Activity {
 						@Override
 						public void done(List<MyUser> object, BmobException e) {
 						     if(e==null){
-						    	 Toast.makeText(loginAct.this,"成功", Toast.LENGTH_SHORT).show();
 						    	 for(MyUser myUser : object){
 						    		 if(myUser.getEmailVerified()){
 						    			 bu.login(new SaveListener<MyUser>(){
-
-											@Override
-											public void done(MyUser user,
-													BmobException e) {
+                                           @Override
+											public void done(MyUser user,BmobException e) {
 												if(e==null){
-													  BmobInstallation.getCurrentInstallation().save();
-													  BmobQuery<MyBmobInstallation> query=new BmobQuery<MyBmobInstallation>();
-													 
-										              Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+													  MyBmobInstallation.getCurrentInstallation().save();
+													  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
 													  Intent intent=new Intent(loginAct.this,weather_info.class);
 													  startActivity(intent);
 													  finish();

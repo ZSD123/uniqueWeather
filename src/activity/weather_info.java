@@ -9,6 +9,8 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobInstallation;
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
@@ -47,7 +49,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class weather_info extends activityBase {
+public class weather_info extends FragmentActivity {
      public String accountName;
      public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	 public static String address3="http://route.showapi.com/9-2";
@@ -126,6 +128,10 @@ public class weather_info extends activityBase {
 			
 		}
 	   };
+	   
+	   BmobQuery<MyBmobInstallation> query=new BmobQuery<MyBmobInstallation>();
+	   query.addWhereEqualTo("installationId",BmobInstallation.getInstallationId(weather_info.this));
+	   
 		
 	}
 	@Override
