@@ -34,7 +34,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class chooseAreaActivity extends Activity {
+public class chooseAreaActivity extends baseActivity {
 	 static Province province=new Province();
 	 static City city=new City();
 	 static County county=new County();
@@ -216,7 +216,7 @@ public class chooseAreaActivity extends Activity {
 	    				 JSONArray jsonArray2=jsonObject2.getJSONArray("children");
 	    				 flag=jsonobject1.getBoolean("flag");
 	    				 if(jsonArray2.length()>0)
-	    				 {   Log.d("length",String.valueOf(jsonArray2.length()));
+	    				 { 
 	    					 for(int i=0;i<jsonArray2.length();i++)
 	    					 {  
 	    						 city.setCityCode(jsonArray2.getJSONObject(i).getString("id"));

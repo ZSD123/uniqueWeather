@@ -63,7 +63,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class myAccountAct extends Activity implements AMapLocationListener,OnTouchListener {
+public class myAccountAct extends baseActivity implements AMapLocationListener,OnTouchListener {
 	private Spinner spinner1;    //性别的
 	private EditText editText3;   //生日EditText
     private Spinner spinner2;    //职业
@@ -117,13 +117,14 @@ public class myAccountAct extends Activity implements AMapLocationListener,OnTou
 		final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 	    
 	    String sex=(String)MyUser.getObjectByKey("sex");
-	    if(sex.equals("男"))
-	    	spinner1.setSelection(0);
-	    else if(sex.equals("女")){
-			spinner1.setSelection(1);
-		}else if(sex.equals("保密")){
-			spinner1.setSelection(2);
-		}
+	    if(sex!=null)
+	       if(sex.equals("男"))
+	    	  spinner1.setSelection(0);
+	      else if(sex.equals("女")){
+			  spinner1.setSelection(1);
+		   }else if(sex.equals("保密")){
+			  spinner1.setSelection(2);
+	    	}
 	    editText2.setText((String)MyUser.getObjectByKey("age"));
 	    editText3.setText((String)MyUser.getObjectByKey("shengri"));
 	    editText4.setText((String)MyUser.getObjectByKey("constellation"));

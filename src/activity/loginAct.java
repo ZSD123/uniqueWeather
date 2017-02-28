@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobInstallation;
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.BmobRealTimeData;
 import cn.bmob.v3.BmobSMS;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
@@ -24,12 +25,15 @@ import cn.bmob.v3.listener.LogInListener;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
+import cn.bmob.v3.listener.ValueEventListener;
 
 
+import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
 
 
+import Util.AES;
 import Util.MD5Util;
 import android.app.Activity;
 import android.content.Intent;
@@ -67,7 +71,8 @@ public class loginAct extends Activity {
     
     private int widthPixels;
     private int heightPixels;
-    
+       
+	private static final String PASSWORD = "pamcigam";
     
     private boolean kedenglu=false;  //邮箱验证登录
     
@@ -97,6 +102,7 @@ public class loginAct extends Activity {
     
     private CheckBox checkBox;       //我同意服务条款checkbox
     
+    public static String installationId;
     private int daojishi=30;   
     private Message message;
     private Timer timer=new Timer();
@@ -121,10 +127,23 @@ public class loginAct extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
+		
+		final SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(loginAct.this).edit();
+	    SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(loginAct.this);	
+		  
 	    
 		Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");
 		final MyUser bu=new MyUser();
 	    
+        final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
+		
+		if(userInfo!=null)
+		{   
+			installationId=MyBmobInstallation.getInstallationId(loginAct.this);
+			Intent intent=new Intent(loginAct.this,weather_info.class);
+			startActivity(intent);
+			finish();
+		}
 		button1=(Button)findViewById(R.id.login);
 		button2=(Button)findViewById(R.id.shoujidenglu);
 		button3=(Button)findViewById(R.id.register);
@@ -141,8 +160,7 @@ public class loginAct extends Activity {
 	    checkBox=(CheckBox)findViewById(R.id.checkbox);
 	    checkBox.setChecked(true);
 	    
-	    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(loginAct.this).edit();
-			
+	   
 	    imageView=(ImageView)findViewById(R.id.kekanmima);
 	    editText1=(EditText)findViewById(R.id.editText_account);
 	    editText2=(EditText)findViewById(R.id.editText_secret);
@@ -151,26 +169,9 @@ public class loginAct extends Activity {
 	    button4=(Button)findViewById(R.id.sendYanzhengma);
 	    button2.setBackgroundColor(0);
 	   
-		final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 		
-		if(userInfo!=null)
-		userInfo.update(new UpdateListener() {
-			@Override
-			public void done(BmobException e) {
-				 if(e==null){
-					   {
-					   	  Intent intent=new Intent(loginAct.this,weather_info.class);
-						  startActivity(intent);
-						  finish();
-						  
-					 }
-				 }else if(e.getErrorCode()==206){
-					  Toast.makeText(loginAct.this, "为了您的安全，请重新登录", Toast.LENGTH_SHORT).show();
-				 }else{
-					  Toast.makeText(loginAct.this, "请重新登录，"+e.getMessage(), Toast.LENGTH_SHORT).show();
-				 }
-			 }
-		});
+			
+		
 	
 		
 	    button1.setOnTouchListener(new OnTouchListener() {
@@ -213,8 +214,8 @@ public class loginAct extends Activity {
 						    			 bu.login(new SaveListener<MyUser>(){
                                            @Override
 											public void done(MyUser user,BmobException e) {
-												if(e==null){
-													  MyBmobInstallation.getCurrentInstallation().save();
+												
+                                        	   if(e==null){
 													  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
 													  Intent intent=new Intent(loginAct.this,weather_info.class);
 													  startActivity(intent);

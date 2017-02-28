@@ -36,7 +36,7 @@ public class download {
 			    	  fragmentPart.userPicture.setImageBitmap(bitmap);
 			      }else {
 					Toast.makeText(context,"¡¨Ω” ß∞‹£¨"+e.getMessage()+e.getErrorCode(),Toast.LENGTH_SHORT).show();
-					Log.d("Main",e.getMessage()+e.getErrorCode());
+		
 				}
 				
 			}

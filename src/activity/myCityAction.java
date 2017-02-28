@@ -57,7 +57,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class myCityAction extends Activity {
+public class myCityAction extends baseActivity {
 	 public List<myCity> dataList=new ArrayList<myCity>();
 	 public String citynsString;
 	 public String temp;  //主城市温度

@@ -14,11 +14,13 @@ import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
 
 
 import com.amap.api.location.AMapLocationClient;
+import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
 
@@ -49,7 +51,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class weather_info extends FragmentActivity {
+public class weather_info extends baseFragmentActivity {
      public String accountName;
      public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	 public static String address3="http://route.showapi.com/9-2";
@@ -129,9 +131,26 @@ public class weather_info extends FragmentActivity {
 		}
 	   };
 	   
-	   BmobQuery<MyBmobInstallation> query=new BmobQuery<MyBmobInstallation>();
-	   query.addWhereEqualTo("installationId",BmobInstallation.getInstallationId(weather_info.this));
-	   
+	   MyUser newUser=new MyUser();
+	   newUser.setInstallationId(BmobInstallation.getInstallationId(weather_info.this));
+	   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
+	   newUser.update(bmobUser.getObjectId(), new UpdateListener() {
+		
+		@Override
+		public void done(BmobException e) {
+			if(e==null){
+
+			}else {
+				Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
+				MyUser.logOut();
+				MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+				Intent intent=new Intent(getApplicationContext(),loginAct.class);
+				startActivity(intent);
+				finish();
+			}
+			
+		}
+	    });
 		
 	}
 	@Override
