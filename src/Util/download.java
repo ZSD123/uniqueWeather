@@ -34,12 +34,22 @@ public class download {
 			      if(e==null){
 	                  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
 			    	  fragmentPart.userPicture.setImageBitmap(bitmap);
-			      }else {
-					Toast.makeText(context,"连接失败，"+e.getMessage()+e.getErrorCode(),Toast.LENGTH_SHORT).show();
-		
-				}
+			      }else if(e.getErrorCode()==9016){
+					Toast.makeText(context,"无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+					setBitmapWithoutWeb(filename);
+					}else {
+						Toast.makeText(context,e.getMessage(), Toast.LENGTH_SHORT).show();
+						setBitmapWithoutWeb(filename);
+				     }
 				
 			}
 		});
+     }
+     public static void setBitmapWithoutWeb(String filename){
+    	 File file =new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
+			if(file.exists()){
+				 Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
+		    	 fragmentPart.userPicture.setImageBitmap(bitmap);
+			}
      }
 }

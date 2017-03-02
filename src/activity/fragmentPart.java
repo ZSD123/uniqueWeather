@@ -393,7 +393,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 
 	public static void savePicture(Bitmap bitmap,String path)
-		{
+		{   File file1=new File(Environment.getExternalStorageDirectory()+"/download");
+		    if(!file1.exists())
+		    	file1.mkdirs();
 			File file=new File(path);
 			try{
 			FileOutputStream out=new FileOutputStream(file);

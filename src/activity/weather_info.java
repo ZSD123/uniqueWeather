@@ -140,7 +140,7 @@ public class weather_info extends baseFragmentActivity {
 		public void done(BmobException e) {
 			if(e==null){
 
-			}else {
+			}else if(e.getErrorCode()==206){
 				Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
 				MyUser.logOut();
 				MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
@@ -148,6 +148,7 @@ public class weather_info extends baseFragmentActivity {
 				startActivity(intent);
 				finish();
 			}
+			
 			
 		}
 	    });
