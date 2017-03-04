@@ -1,4 +1,4 @@
-package horizontalview;
+package myCustomView;
 
 import android.content.Context;
 import android.util.AttributeSet;

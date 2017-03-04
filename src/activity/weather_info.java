@@ -164,9 +164,9 @@ public class weather_info extends baseFragmentActivity {
 		case 2:
 			if(resultCode==RESULT_OK)
 			{final Uri uri=data.getData();
-			final String path=getPath(weather_info.this, uri);
+			final String path=getPath(weather_info.this, uri);  //这里取得路径，将uri转化为路径
 			ContentResolver cr=this.getContentResolver();
-			fragmentPart.editor.putString("userPicture", uri.toString());
+			fragmentPart.editor.putString("userPicture",path);
 			fragmentPart.editor.commit();
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));

@@ -5,10 +5,12 @@ import java.io.File;
 import activity.fragmentPart;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,6 +23,7 @@ public class download {
      public static void downloadFile(final BmobFile file,final Context context){
     	 final File saveFile=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/",file.getFilename());//ÎÄ¼þÂ·¾¶
     	 final String filename=file.getFilename();
+    	 final SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
     	 file.download(saveFile, new DownloadFileListener() {
 			
 			@Override
@@ -31,6 +34,8 @@ public class download {
 			
 			@Override
 			public void done(String savePath, BmobException e) {
+				  editor.putString("userPicture", savePath);
+				  editor.commit();
 			      if(e==null){
 	                  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
 			    	  fragmentPart.userPicture.setImageBitmap(bitmap);

@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
 
+import myCustomView.CircleImageView;
+
 
 
 import service.autoUqdateService;
@@ -58,6 +60,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.LocationManager;
+import android.media.MediaRouter.UserRouteInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -83,7 +86,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private static RelativeLayout weather_layout;
 	private static TextView weather;
 	private static TextView temper;
-	public static ImageView userPicture;
+	public static CircleImageView userPicture;
 	private TextView myCity;
     private Button button_refresh;
     public static String countyName;
@@ -147,7 +150,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			view=inflater.inflate(R.layout.connection,container,false);
 		    userName=(TextView)view.findViewById(R.id.userName);
 			time=(TextView)view.findViewById(R.id.time);
-	        userPicture=(ImageView)view.findViewById(R.id.userPicture);
+	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
 			realtime=(TextView)view.findViewById(R.id.realTime);
 			weather_layout=(RelativeLayout)view.findViewById(R.id.weather_info);
 			weather=(TextView)view.findViewById(R.id.weather);
@@ -183,12 +186,20 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{
 				userName.setText("未命名");
 			}
-
-			 if(touxiangUrl!=null)
+			String userPictString=pre.getString("userPicture", "");
+			Log.d("Main",userPictString);
+            if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
+            	File file=new File(userPictString);
+            	if(file.exists()){
+            		Bitmap bitmap=BitmapFactory.decodeFile(userPictString);
+            		userPicture.setImageBitmap(bitmap);
+            	}
+            }
+			 if(touxiangUrl!=null)       //这里防止更新图片后另外一台客户端没有更新
 				{  
 				   BmobFile bmobFile=new BmobFile("头像"+".png",null,touxiangUrl);//确定文件名字（头像.png）和网络地址
 				   download.downloadFile(bmobFile,context);//进行下载操作
-				 
+				   
 				}
 		        countyName=pre.getString("locDistrict","");
 				pic.setImageBitmap(getPicture());

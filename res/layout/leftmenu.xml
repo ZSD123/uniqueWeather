@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/back"
->
+xmlns:app="http://schemas.android.com/apk/res/com.uniqueweather.app">
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -12,7 +12,8 @@
 
 
 
-        <ImageView
+        <myCustomView.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/userPicture"
             android:layout_width="200dp"
             android:layout_height="200dp"    
@@ -20,6 +21,8 @@
             android:layout_marginTop="10dp"
             android:src="@drawable/userpicture"
             android:clickable="true"
+            app:border_width="2dp"
+            app:border_color="#ccc"
              />
 
 

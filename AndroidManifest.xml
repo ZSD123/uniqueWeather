@@ -76,6 +76,7 @@
         </activity>
         <activity 
             android:name="activity.weather_info"
+            android:launchMode="singleTask"
             ></activity>
         <activity 
             android:name="activity.myAccountAct"
