@@ -195,10 +195,11 @@ public class CircleImageView extends ImageView {
      dx = (mDrawableRect.width() - mBitmapWidth * scale) * 0.5f;
    } else {
      scale = mDrawableRect.width() / (float) mBitmapWidth;
+     
      dy = (mDrawableRect.height() - mBitmapHeight * scale) * 0.5f;
    }
-   mShaderMatrix.setScale(scale, scale);
-   mShaderMatrix.postTranslate((int) (dx + 0.5f) + mBorderWidth, (int) (dy + 0.5f) + mBorderWidth);
+   mShaderMatrix.setScale(scale, scale);  //设置Matrix进行缩放，sx、sy为X、Y方向上的缩放比例。
+   mShaderMatrix.postTranslate((int) (dx + 0.5f) + mBorderWidth, (int) (dy + 0.5f) + mBorderWidth);//表示平移,如果没有这一句，那么圆圈部分会显示图片的左边区域,当左边参数为100的时候，右边为0，表示该图左上角在该View的坐标为（100,0）
    mBitmapShader.setLocalMatrix(mShaderMatrix);
   }
 }

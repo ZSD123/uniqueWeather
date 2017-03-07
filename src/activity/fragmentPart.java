@@ -27,9 +27,11 @@ import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.AMap.OnCameraChangeListener;
 import com.amap.api.maps2d.model.BitmapDescriptor;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
+import com.amap.api.maps2d.model.CameraPosition.Builder;
 import com.amap.api.maps2d.model.Circle;
 import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
@@ -78,7 +80,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener
+public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener
 {   public static String keyToGet="begin";
     private String theKey;
 	private static TextView time;
@@ -121,7 +123,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
-	private Marker mLocMarker;
+	private Marker mLocMarker;    //定位Marker
+	private Marker mFujinMarker;   //附近用户Marker
+	private Marker mLoveMarker;    //当前Marker
 	private boolean mFirstFix = false;
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
 	private TextView myAccount;     //我的账户TextView 	
@@ -187,7 +191,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				userName.setText("未命名");
 			}
 			String userPictString=pre.getString("userPicture", "");
-			Log.d("Main",userPictString);
             if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
             	File file=new File(userPictString);
             	if(file.exists()){
@@ -317,6 +320,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			   }
 		    aMap.setLocationSource(this);
 		    aMap.setMyLocationEnabled(true); 
+		    aMap.setOnCameraChangeListener(this);
 		    if(context==null)
 		        context=(Context)getActivity();
 		    mSensorEventHelper = new SensorEventHelper(context);
@@ -338,7 +342,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             	       //位置信息
             	       loadInfo.setPoint(latlng);
             	       //用户id信息
-            	       loadInfo.setUserID(String.valueOf((int)lat*10));
+            	       loadInfo.setUserID((String)MyUser.getObjectByKey("username"));
             	       return loadInfo;
             	}
             	},20000);
@@ -356,7 +360,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             query.setTimeRange(10000);
             //调用异步查询接口
             mNearbySearch.searchNearbyInfoAsyn(query);
-
+            
+            
+            
 		    locButton.setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -642,7 +648,29 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			options.icon(des);
 			options.anchor(0.5f, 0.5f);
 			options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
-			mLocMarker = aMap.addMarker(options);
+			mFujinMarker = aMap.addMarker(options);
+		}
+		private void addLoveding(CameraPosition cameraPosition){
+			if(mLoveMarker!=null){
+				mLoveMarker.remove();
+			}
+			BitmapFactory.Options options1=new BitmapFactory.Options();
+			options1.inSampleSize=2;
+			Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.loveding, options1);
+			BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+			MarkerOptions options = new MarkerOptions();
+			options.icon(des);
+			options.anchor(0.5f, 1f);
+			options.position(cameraPosition.target);
+			mLoveMarker=aMap.addMarker(options);
+		}
+		@Override
+		public void onCameraChange(CameraPosition cameraPosition) {
+			addLoveding(cameraPosition);
+	        
+		}
+		@Override
+		public void onCameraChangeFinish(CameraPosition cameraPosition) {
 		}
 
 }
