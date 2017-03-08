@@ -412,7 +412,7 @@ public class register extends Activity {
 		Matcher m = p.matcher(email);
         return m.matches();
 
-		}
+	}
 	
 	 
 

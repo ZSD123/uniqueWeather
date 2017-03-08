@@ -22,6 +22,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
+import com.amap.api.mapcore2d.u;
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
@@ -53,6 +54,7 @@ import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
 import Util.download;
+import android.R.integer;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -119,12 +121,19 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public int chucuoonce=0;
     public double lat;
     public double lon;
+    public double searchLat;   //当前寻找其他用户的地点
+    public double searchLon;   //同上
+    public NearbyQuery query;  
+    public NearbySearch mNearbySearch;
+    
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
 	private Marker mLocMarker;    //定位Marker
-	private Marker mFujinMarker;   //附近用户Marker
+	private Marker [] mFujinMarker;   //附近用户Marker
+	
+	private int markNum=0;//Marker个数
 	private Marker mLoveMarker;    //当前Marker
 	private boolean mFirstFix = false;
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
@@ -332,7 +341,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             aMap.moveCamera(cameraUpdate);       //初始化到相应的位置
             aMap.invalidate();
 		    
-            NearbySearch mNearbySearch=NearbySearch.getInstance(context);
+            mNearbySearch=NearbySearch.getInstance(context);
             mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
             	//设置自动上传数据和上传的间隔时间
             	@Override
@@ -342,14 +351,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             	       //位置信息
             	       loadInfo.setPoint(latlng);
             	       //用户id信息
-            	       loadInfo.setUserID((String)MyUser.getObjectByKey("username"));
+                       loadInfo.setUserID((String)MyUser.getObjectByKey("objectId")); 
             	       return loadInfo;
             	}
             	},20000);
             
             mNearbySearch.addNearbyListener(this);
           //设置搜索条件
-            NearbyQuery query = new NearbyQuery();
+            query = new NearbyQuery();
             //设置搜索的中心点
             query.setCenterPoint(new LatLonPoint(lat, lon));
             //设置搜索的坐标体系
@@ -560,6 +569,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{   mLocationClient.stopLocation();
 				mLocationClient.onDestroy();
 			}
+			NearbySearch.destroy();
 		}
 		@Override
 		public void onResume() {
@@ -586,7 +596,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mCircle = aMap.addCircle(options);
 		}
 		private void addMarker(LatLng latlng) {
-			
+			if(mLocMarker!=null){
+				mLocMarker.remove();
+			}
 			BitmapFactory.Options options1=new BitmapFactory.Options();
 			options1.inSampleSize=2;
 			Bitmap bitmap=BitmapFactory.decodeResource(this.getResources(), R.drawable.zhuanxiang, options1);
@@ -606,16 +618,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && nearbySearchResult.getNearbyInfoList().size() > 0) 
-				    {
-				        NearbyInfo nearbyInfo = nearbySearchResult.getNearbyInfoList().get(0);
-				       // Toast.makeText(context, "周边搜索结果为size "+ nearbySearchResult.getNearbyInfoList().size() + "first："+ nearbyInfo.getUserID() + "  " + nearbyInfo.getDistance()+ "  " 
-						        //        + nearbyInfo.getDrivingDistance() + "  "+ nearbyInfo.getTimeStamp() + "  "+  
-						         //       nearbyInfo.getPoint().toString(), Toast.LENGTH_LONG).show();
-
-				       for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
-				       {
-				    	   addSanMarker(nearbySearchResult.getNearbyInfoList().get(i).getPoint());
-					   }
+				    {   
+				        
+				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
+				       {   if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  
+				    	        addSanMarker(nearbySearchResult.getNearbyInfoList().get(i).getPoint(),nearbySearchResult.getNearbyInfoList().get(i).getUserID());
+				       }
 				     
 				   } 
 				        else {
@@ -631,24 +639,43 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		@Override
 		public void onNearbyInfoUploaded(int resultCode) 
 		{
-		
+		   
 		}
 		@Override
 		public void onUserInfoCleared(int resultCode) {
 			
 		}
-		private void  addSanMarker(LatLonPoint latLng) 
-		{ 
-			BitmapFactory.Options options1=new BitmapFactory.Options();
-			options1.inSampleSize=2;
-			Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
-			BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
-//			BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
-			MarkerOptions options = new MarkerOptions();
-			options.icon(des);
-			options.anchor(0.5f, 0.5f);
-			options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
-			mFujinMarker = aMap.addMarker(options);
+		private void  addSanMarker(LatLonPoint latLng,String username) 
+		{  for(int j=0;j<=markNum;j++){
+			   if(mFujinMarker[j].getObject().equals(username)){
+				   mFujinMarker[j].remove();
+				   BitmapFactory.Options options1=new BitmapFactory.Options();
+					options1.inSampleSize=2;
+					Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
+					BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+//					BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
+					MarkerOptions options = new MarkerOptions();
+					options.icon(des);
+					options.anchor(0.5f, 0.5f);
+					options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
+					mFujinMarker[markNum].setObject(username);
+					mFujinMarker[markNum] = aMap.addMarker(options);
+			   }else {
+				    BitmapFactory.Options options1=new BitmapFactory.Options();
+					options1.inSampleSize=2;
+					Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
+					BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+//					BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
+					MarkerOptions options = new MarkerOptions();
+					options.icon(des);
+					options.anchor(0.5f, 0.5f);
+					options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
+					mFujinMarker[markNum].setObject(username);
+					mFujinMarker[markNum] = aMap.addMarker(options);
+		            markNum++;
+			    }
+		  }
+		 	
 		}
 		private void addLoveding(CameraPosition cameraPosition){
 			if(mLoveMarker!=null){
@@ -671,6 +698,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		@Override
 		public void onCameraChangeFinish(CameraPosition cameraPosition) {
+			   searchLat=cameraPosition.target.latitude;
+			   searchLon=cameraPosition.target.longitude;
+			   query.setCenterPoint(new LatLonPoint(searchLat, searchLon));
+			   mNearbySearch.searchNearbyInfoAsyn(query);    
 		}
+	
+		
 
 }
