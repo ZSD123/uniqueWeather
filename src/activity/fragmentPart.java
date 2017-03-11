@@ -29,6 +29,7 @@ import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
 import com.amap.api.maps2d.AMap.OnCameraChangeListener;
+import com.amap.api.maps2d.UiSettings;
 import com.amap.api.maps2d.model.BitmapDescriptor;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
@@ -108,6 +109,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public MyHorizontalView horizontalView;
     public Button button2;     //退出登录Button
     
+    public UiSettings uiSettings;     //AMap的设置
     public  static LocationManager locationManager;
     public static MapView mMapView;
     public static AMap aMap;
@@ -131,7 +133,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
 	private Marker mLocMarker;    //定位Marker
-	private Marker [] mFujinMarker;   //附近用户Marker
+	private Marker [] mFujinMarker=new Marker[1000];;   //附近用户Marker
 	
 	private int markNum=0;//Marker个数
 	private Marker mLoveMarker;    //当前Marker
@@ -315,6 +317,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mMapView=(MapView)view.findViewById(R.id.map);
 			mMapView.onCreate(savedInstanceState);
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
+			Button button=(Button)view.findViewById(R.id.ceshi);
 			if(aMap==null)
 			{   
 				aMap=mMapView.getMap();
@@ -330,6 +333,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    aMap.setLocationSource(this);
 		    aMap.setMyLocationEnabled(true); 
 		    aMap.setOnCameraChangeListener(this);
+		    uiSettings=aMap.getUiSettings();
+		    uiSettings.setAllGesturesEnabled(true);
 		    if(context==null)
 		        context=(Context)getActivity();
 		    mSensorEventHelper = new SensorEventHelper(context);
@@ -383,6 +388,17 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					 cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
                      aMap.animateCamera(cameraUpdate);
                      aMap.invalidate();
+				}
+			});
+		    button.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					for (int j = 0; j <markNum; j++) {
+						mFujinMarker[j].destroy();
+					}
+					markNum=0;
+					
 				}
 			});
 			
@@ -597,7 +613,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		private void addMarker(LatLng latlng) {
 			if(mLocMarker!=null){
-				mLocMarker.remove();
+				mLocMarker.setPosition(latlng);
 			}
 			BitmapFactory.Options options1=new BitmapFactory.Options();
 			options1.inSampleSize=2;
@@ -619,7 +635,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && nearbySearchResult.getNearbyInfoList().size() > 0) 
 				    {   
-				        
+				        Log.d("Main","listsize="+nearbySearchResult.getNearbyInfoList().size());
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {   if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  
 				    	        addSanMarker(nearbySearchResult.getNearbyInfoList().get(i).getPoint(),nearbySearchResult.getNearbyInfoList().get(i).getUserID());
@@ -646,41 +662,47 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 		}
 		private void  addSanMarker(LatLonPoint latLng,String username) 
-		{  for(int j=0;j<=markNum;j++){
-			   if(mFujinMarker[j].getObject().equals(username)){
-				   mFujinMarker[j].remove();
-				   BitmapFactory.Options options1=new BitmapFactory.Options();
-					options1.inSampleSize=2;
-					Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
-					BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
-//					BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
-					MarkerOptions options = new MarkerOptions();
-					options.icon(des);
-					options.anchor(0.5f, 0.5f);
-					options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
-					mFujinMarker[markNum].setObject(username);
-					mFujinMarker[markNum] = aMap.addMarker(options);
-			   }else {
-				    BitmapFactory.Options options1=new BitmapFactory.Options();
-					options1.inSampleSize=2;
-					Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
-					BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
-//					BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
-					MarkerOptions options = new MarkerOptions();
-					options.icon(des);
-					options.anchor(0.5f, 0.5f);
-					options.position(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
-					mFujinMarker[markNum].setObject(username);
-					mFujinMarker[markNum] = aMap.addMarker(options);
-		            markNum++;
-			    }
-		  }
-		 	
+		{   boolean ketianjia=true;
+		    boolean kejixu=true;//减少运算量
+		    if(kejixu)
+		    if(markNum==0){
+				BitmapFactory.Options options1=new BitmapFactory.Options();
+				options1.inSampleSize=2;
+				Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
+				BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+				MarkerOptions options = new MarkerOptions();
+				options.icon(des);
+				options.anchor(0.5f, 1f);
+		 		mFujinMarker[0]=aMap.addMarker(options);
+		 		mFujinMarker[0].setObject(username);
+		 		markNum++;
+		     	}
+		 	else {
+				for(int j=0;j<markNum;j++){
+					if(mFujinMarker[j].getObject().equals(username)){
+						mFujinMarker[j].setPosition(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
+						ketianjia=false;
+						kejixu=false;
+					}else if(j==markNum-1&&ketianjia){
+						BitmapFactory.Options options1=new BitmapFactory.Options();
+						options1.inSampleSize=2;
+						Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
+						BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
+						MarkerOptions options = new MarkerOptions();
+						options.icon(des);
+						options.anchor(0.5f, 1f);
+				 		mFujinMarker[markNum]=aMap.addMarker(options);
+				 		mFujinMarker[markNum].setObject(username);
+				 		markNum++;
+					}
+				}
+			  }
 		}
 		private void addLoveding(CameraPosition cameraPosition){
 			if(mLoveMarker!=null){
-				mLoveMarker.remove();
+				mLoveMarker.setPosition(cameraPosition.target);
 			}
+			else {
 			BitmapFactory.Options options1=new BitmapFactory.Options();
 			options1.inSampleSize=2;
 			Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.loveding, options1);
@@ -690,6 +712,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			options.anchor(0.5f, 1f);
 			options.position(cameraPosition.target);
 			mLoveMarker=aMap.addMarker(options);
+			}
 		}
 		@Override
 		public void onCameraChange(CameraPosition cameraPosition) {
@@ -702,6 +725,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			   searchLon=cameraPosition.target.longitude;
 			   query.setCenterPoint(new LatLonPoint(searchLat, searchLon));
 			   mNearbySearch.searchNearbyInfoAsyn(query);    
+			   
 		}
 	
 		
