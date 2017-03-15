@@ -3,9 +3,13 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 import myCustomView.CircleImageView;
+import myCustomView.MapCircleImageView;
 
 
 
@@ -24,6 +28,7 @@ import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.mapcore2d.u;
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMapUtils;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
@@ -55,25 +60,43 @@ import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
 import Util.download;
+import android.R.anim;
 import android.R.integer;
 import android.app.Activity;
+import android.app.ActivityManager.TaskDescription;
+import android.app.Notification.MessagingStyle.Message;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Xfermode;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
 import android.media.MediaRouter.UserRouteInfo;
 import android.net.Uri;
+import android.opengl.Visibility;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view .ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -92,6 +115,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private static TextView weather;
 	private static TextView temper;
 	public static CircleImageView userPicture;
+	public static MapCircleImageView userPicture1;  //地图上userPicture
+	
 	private TextView myCity;
     private Button button_refresh;
     public static String countyName;
@@ -104,10 +129,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private View view;
     private String uriUserPicture;
     private static Bitmap bitmap;
+    private static Bitmap bitmap1;
     public Context context;
     public Button button1;
     public MyHorizontalView horizontalView;
     public Button button2;     //退出登录Button
+    
+    public String yonghuUrl;   //其他用户url    
+    public Bitmap bitmaptou;    //其他用户头
+    public Handler handler;     
     
     public UiSettings uiSettings;     //AMap的设置
     public  static LocationManager locationManager;
@@ -123,10 +153,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public int chucuoonce=0;
     public double lat;
     public double lon;
-    public double searchLat;   //当前寻找其他用户的地点
-    public double searchLon;   //同上
+    public LatLng yuanLatLng;   //原来的LatLng,即搜寻
+    public LatLng searchLatLng;   //同上
     public NearbyQuery query;  
     public NearbySearch mNearbySearch;
+    
     
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
@@ -150,7 +181,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		fragmentPart.context=context;
 		return fragmentPart;
 	}
-
+  
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) 
@@ -166,7 +197,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    userName=(TextView)view.findViewById(R.id.userName);
 			time=(TextView)view.findViewById(R.id.time);
 	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
-			realtime=(TextView)view.findViewById(R.id.realTime);
+
+	        realtime=(TextView)view.findViewById(R.id.realTime);
 			weather_layout=(RelativeLayout)view.findViewById(R.id.weather_info);
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
@@ -205,8 +237,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
             	File file=new File(userPictString);
             	if(file.exists()){
-            		Bitmap bitmap=BitmapFactory.decodeFile(userPictString);
-            		userPicture.setImageBitmap(bitmap);
+            	    bitmap1=BitmapFactory.decodeFile(userPictString);
+            		userPicture.setImageBitmap(bitmap1);
+      
             	}
             }
 			 if(touxiangUrl!=null)       //这里防止更新图片后另外一台客户端没有更新
@@ -309,7 +342,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		else if(theKey.equals("map"))
 		{   
-			view=inflater.inflate(R. layout.map,container,false);
+			view=inflater.inflate(R.layout.map,container,false);
 			lat=pre.getFloat("lat", 39);
 			lon=pre.getFloat("lon",116);
 			zoom=pre.getFloat("zoom", 18);
@@ -317,8 +350,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mMapView=(MapView)view.findViewById(R.id.map);
 			mMapView.onCreate(savedInstanceState);
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
-			Button button=(Button)view.findViewById(R.id.ceshi);
-			if(aMap==null)
+	        userPicture1=(MapCircleImageView)view.findViewById(R.id.userPicture1);
+	        if(aMap==null)
 			{   
 				aMap=mMapView.getMap();
 				if(aMap==null)
@@ -359,7 +392,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
                        loadInfo.setUserID((String)MyUser.getObjectByKey("objectId")); 
             	       return loadInfo;
             	}
-            	},20000);
+            	},10000);
             
             mNearbySearch.addNearbyListener(this);
           //设置搜索条件
@@ -369,7 +402,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             //设置搜索的坐标体系
             query.setCoordType(NearbySearch.AMAP);
             //设置搜索半径
-            query.setRadius(10000);
+            query.setRadius(1000);
             //设置查询的时间
             query.setTimeRange(10000);
             //调用异步查询接口
@@ -390,17 +423,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
                      aMap.invalidate();
 				}
 			});
-		    button.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					for (int j = 0; j <markNum; j++) {
-						mFujinMarker[j].destroy();
-					}
-					markNum=0;
-					
-				}
-			});
+		   
 			
 		}
 	
@@ -585,7 +608,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{   mLocationClient.stopLocation();
 				mLocationClient.onDestroy();
 			}
-			NearbySearch.destroy();
+
 		}
 		@Override
 		public void onResume() {
@@ -620,7 +643,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			Bitmap bitmap=BitmapFactory.decodeResource(this.getResources(), R.drawable.zhuanxiang, options1);
 			BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
 			
-//			BitmapDescriptor des = BitmapDescriptorFactory.fromResource(R.drawable.navi_map_gps_locked);
 			MarkerOptions options = new MarkerOptions();
 			options.icon(des);
 			options.anchor(0.5f, 0.5f);
@@ -629,7 +651,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		@Override
 		public void onNearbyInfoSearched(NearbySearchResult nearbySearchResult, int resultCode) 
-		{
+		{   
 			 if(resultCode == 1000){
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
@@ -661,42 +683,74 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		public void onUserInfoCleared(int resultCode) {
 			
 		}
-		private void  addSanMarker(LatLonPoint latLng,String username) 
-		{   boolean ketianjia=true;
-		    boolean kejixu=true;//减少运算量
-		    if(kejixu)
-		    if(markNum==0){
-				BitmapFactory.Options options1=new BitmapFactory.Options();
-				options1.inSampleSize=2;
-				Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
-				BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
-				MarkerOptions options = new MarkerOptions();
-				options.icon(des);
-				options.anchor(0.5f, 1f);
-		 		mFujinMarker[0]=aMap.addMarker(options);
-		 		mFujinMarker[0].setObject(username);
-		 		markNum++;
-		     	}
-		 	else {
-				for(int j=0;j<markNum;j++){
-					if(mFujinMarker[j].getObject().equals(username)){
-						mFujinMarker[j].setPosition(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
-						ketianjia=false;
-						kejixu=false;
-					}else if(j==markNum-1&&ketianjia){
-						BitmapFactory.Options options1=new BitmapFactory.Options();
-						options1.inSampleSize=2;
-						Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.san, options1);
-						BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bitmap);
-						MarkerOptions options = new MarkerOptions();
-						options.icon(des);
-						options.anchor(0.5f, 1f);
-				 		mFujinMarker[markNum]=aMap.addMarker(options);
-				 		mFujinMarker[markNum].setObject(username);
-				 		markNum++;
+		private void  addSanMarker(final LatLonPoint latLng,final String username) 
+		{   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+		    query.addWhereEqualTo("objectId",username);
+		    query.findObjects(new FindListener<MyUser>() {
+
+				@Override
+				public void done(List<MyUser> object, BmobException e) {
+					if(e==null){
+						for (int i = 0; i < object.size(); i++) {
+							yonghuUrl=object.get(i).getTouXiangUrl();
+							new Thread(networkTask).start();
+						    handler=new Handler(){
+						    	@Override
+						    	public void handleMessage(android.os.Message msg){
+						    		super.handleMessage(msg);
+						    		if(msg.what==0){
+						    		    
+										boolean ketianjia=true;
+									    boolean kejixu=true;//减少运算量
+									    if(kejixu)
+									    if(markNum==0){
+							                ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+											userPicture1.setVisibility(View.VISIBLE);
+											if(bitmaptou!=null)
+											   userPicture1.setImageBitmap(bitmaptou);
+											BitmapDescriptor des = BitmapDescriptorFactory.fromView(userPicture1);
+											MarkerOptions options = new MarkerOptions();
+											options.icon(des);
+											options.anchor(0.5f, 1f);
+											options.position(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
+									 		mFujinMarker[0]=aMap.addMarker(options);
+									 		mFujinMarker[0].setObject(username);
+									 		markNum++;
+									     	}
+									 	else {
+											for(int j=0;j<markNum;j++){
+												if(mFujinMarker[j].getObject().equals(username)){
+													mFujinMarker[j].setPosition(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
+													ketianjia=false;
+													kejixu=false;
+												}else if(j==markNum-1&&ketianjia){
+													((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+													userPicture1.setVisibility(View.VISIBLE);
+													if(bitmaptou!=null)
+													    userPicture1.setImageBitmap(bitmaptou);
+													BitmapDescriptor des = BitmapDescriptorFactory.fromView(userPicture1);
+													MarkerOptions options = new MarkerOptions();
+													options.icon(des);
+													options.anchor(0.5f, 1f);
+													options.position(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
+											 		mFujinMarker[markNum]=aMap.addMarker(options);
+											 		mFujinMarker[markNum].setObject(username);
+											 		markNum++;
+												}
+											}
+										  }
+						    		}
+						    	}
+						    };
+						}
+					}else {
+						Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT);
 					}
+					
 				}
-			  }
+		    	
+			});
+			
 		}
 		private void addLoveding(CameraPosition cameraPosition){
 			if(mLoveMarker!=null){
@@ -721,13 +775,40 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		@Override
 		public void onCameraChangeFinish(CameraPosition cameraPosition) {
-			   searchLat=cameraPosition.target.latitude;
-			   searchLon=cameraPosition.target.longitude;
-			   query.setCenterPoint(new LatLonPoint(searchLat, searchLon));
-			   mNearbySearch.searchNearbyInfoAsyn(query);    
+		   
+			if(yuanLatLng==null) { 
+		     	 yuanLatLng=cameraPosition.target;   //原来的LatLng
+		        
+			  }
+		  
+			  searchLatLng=cameraPosition.target;
+			  if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>500){
+				  query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
+				  mNearbySearch.searchNearbyInfoAsyn(query);
+				  for (int j = 0; j <markNum; j++) {
+						mFujinMarker[j].destroy();
+					}
+					markNum=0;
+			        yuanLatLng=cameraPosition.target;
+			   }
 			   
 		}
+		Runnable networkTask=new Runnable() {
+			
+			@Override
+			public void run() {
+				bitmaptou=null;
+				try {
+					InputStream is=new URL(yonghuUrl).openStream();
+					bitmaptou=BitmapFactory.decodeStream(is);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				android.os.Message message=new android.os.Message();
+				message.what=0;
+				handler.sendMessage(message);
+			}
+		};
+	   
 	
-		
-
 }
