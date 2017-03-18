@@ -4,17 +4,47 @@ package activity;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
-
-
-
 import service.autoUqdateService;
-
+import Util.Http;
+import Util.HttpCallbackListener;
+import Util.SensorEventHelper;
+import Util.Utility;
+import Util.download;
+import android.R.anim;
+import android.app.Activity;
+import android.app.Notification.MessagingStyle.Message;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
@@ -26,26 +56,23 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
-import com.amap.api.mapcore2d.u;
 import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.AMap.OnCameraChangeListener;
 import com.amap.api.maps2d.AMapUtils;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.LocationSource;
 import com.amap.api.maps2d.MapView;
-import com.amap.api.maps2d.AMap.OnCameraChangeListener;
 import com.amap.api.maps2d.UiSettings;
 import com.amap.api.maps2d.model.BitmapDescriptor;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.CameraPosition;
-import com.amap.api.maps2d.model.CameraPosition.Builder;
 import com.amap.api.maps2d.model.Circle;
 import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.amap.api.services.core.LatLonPoint;
-import com.amap.api.services.nearby.NearbyInfo;
 import com.amap.api.services.nearby.NearbySearch;
 import com.amap.api.services.nearby.NearbySearch.NearbyListener;
 import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
@@ -54,58 +81,7 @@ import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
 import com.uniqueweather.app.R;
 
-
-import Util.Http;
-import Util.HttpCallbackListener;
-import Util.SensorEventHelper;
-import Util.Utility;
-import Util.download;
-import android.R.anim;
-import android.R.integer;
-import android.app.Activity;
-import android.app.ActivityManager.TaskDescription;
-import android.app.Notification.MessagingStyle.Message;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.Xfermode;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
-import android.location.LocationManager;
-import android.media.MediaRouter.UserRouteInfo;
-import android.net.Uri;
-import android.opengl.Visibility;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view .ViewGroup;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import db.yonghuDB;
 public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener
 {   public static String keyToGet="begin";
     private String theKey;
@@ -135,8 +111,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public MyHorizontalView horizontalView;
     public Button button2;     //退出登录Button
     
-    public String yonghuUrl;   //其他用户url    
-    public Bitmap bitmaptou;    //其他用户头
+    public String  yonghuUrl;   //其他用户url    
+    public int yonghuNum=0;      //加载头像Url组的
+    public Bitmap bitmaptou[]=new Bitmap[1000];    //其他用户头
+    public int bitmapNum=0;       //其他用户头的个数
+    
     public Handler handler;     
     
     public UiSettings uiSettings;     //AMap的设置
@@ -158,6 +137,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public NearbyQuery query;  
     public NearbySearch mNearbySearch;
     
+    private Thread thread;
+    private Timer timer;
+    private TimerTask task;
+    private int daojishi=3;
     
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
@@ -173,6 +156,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private TextView myAccount;     //我的账户TextView 	
 	private OnLocationChangedListener mListener;
 	private String yuanLocation;
+	
+	private yonghuDB yongbDb;
 	public fragmentPart(){
 		
 	}
@@ -350,8 +335,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mMapView=(MapView)view.findViewById(R.id.map);
 			mMapView.onCreate(savedInstanceState);
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
-	        userPicture1=(MapCircleImageView)view.findViewById(R.id.userPicture1);
-	        if(aMap==null)
+			View mapView=LayoutInflater.from(context).inflate(R.layout.mapcircleimageview, null);
+			userPicture1=(MapCircleImageView)mapView.findViewById(R.id.mapCircle);
+			thread=new Thread(networkTask);
+			
+			yongbDb=yonghuDB.getInstance(context);
+			if(aMap==null)
 			{   
 				aMap=mMapView.getMap();
 				if(aMap==null)
@@ -596,6 +585,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			}
 			deactivate();
 			mFirstFix=false;
+			markNum=0;
 		}
 		@Override
 		public void onDestroy()
@@ -608,7 +598,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{   mLocationClient.stopLocation();
 				mLocationClient.onDestroy();
 			}
-
+            markNum=0;
+            Log.d("Main","onDestroy");
 		}
 		@Override
 		public void onResume() {
@@ -649,19 +640,63 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			options.position(latlng);
 			mLocMarker = aMap.addMarker(options);
 		}
+		private boolean ketongguo=true;
+		private boolean cunzai=false;
+		private boolean fangzhiduoci=false;    //防止多次调用返回用户函数
 		@Override
 		public void onNearbyInfoSearched(NearbySearchResult nearbySearchResult, int resultCode) 
-		{   
+		{      timer=new Timer();
+	           task=new TimerTask(){
+	 		
+ 		      @Override
+ 		    public void run() 
+ 	     	{   daojishi--;
+ 	     	    android.os.Message message=new android.os.Message();
+ 			    message.what=1;
+ 		     	handler.sendMessage(message);
+ 
+ 		     	if(daojishi==0)
+ 		     	{   
+ 			      message=new Message();
+ 			       message.what=TOFASONG;
+ 			       handler.sendMessage(message);
+ 			       timer.cancel();
+ 			       task.cancel();
+ 			        daojishi=30;
+ 	
+ 			  }
+ 		   }
+ 	     };
+	     	timer.schedule(task, 1000,1000);	
 			 if(resultCode == 1000){
+				  
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && nearbySearchResult.getNearbyInfoList().size() > 0) 
 				    {   
-				        Log.d("Main","listsize="+nearbySearchResult.getNearbyInfoList().size());
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
-				       {   if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  
-				    	        addSanMarker(nearbySearchResult.getNearbyInfoList().get(i).getPoint(),nearbySearchResult.getNearbyInfoList().get(i).getUserID());
+				       {    cunzai=false;
+				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  {
+				                List<String> list=yongbDb.loadObjectId();
+				                Log.d("Main", "list.size="+list.size());
+				                if(list.size()==0){
+				                	yongbDb.saveObjectIdandlatlon(nearbySearchResult.getNearbyInfoList().get(i).getUserID(), nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLatitude()+"",  nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLongitude()+"");
+				                  
+				                }else {
+				                	for (int j = 0; j < list.size(); j++) {
+										   if(nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals(list.get(j))){
+											   cunzai=true;
+										   }
+										  
+									  }
+				                	 if(!cunzai){
+				                			yongbDb.saveObjectIdandlatlon(nearbySearchResult.getNearbyInfoList().get(i).getUserID(), nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLatitude()+"",  nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLongitude()+"");
+						              }
+								}
+				                
+				             }
 				       }
+				        addSanMarker();
 				     
 				   } 
 				        else {
@@ -683,66 +718,45 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		public void onUserInfoCleared(int resultCode) {
 			
 		}
-		private void  addSanMarker(final LatLonPoint latLng,final String username) 
-		{   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-		    query.addWhereEqualTo("objectId",username);
+		private  void addSanMarker() 
+		{   
+			BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+		    query.addWhereEqualTo("objectId",userId);
 		    query.findObjects(new FindListener<MyUser>() {
 
 				@Override
 				public void done(List<MyUser> object, BmobException e) {
 					if(e==null){
-						for (int i = 0; i < object.size(); i++) {
-							yonghuUrl=object.get(i).getTouXiangUrl();
-							new Thread(networkTask).start();
+							Log.d("Main","查询返回");
+							yongbDb.saveUserNameandTouxiangUrl(userId, object.get(0).getNick(),object.get(0).getTouXiangUrl());
+							thread.start();
 						    handler=new Handler(){
 						    	@Override
 						    	public void handleMessage(android.os.Message msg){
-						    		super.handleMessage(msg);
-						    		if(msg.what==0){
-						    		    
-										boolean ketianjia=true;
-									    boolean kejixu=true;//减少运算量
-									    if(kejixu)
-									    if(markNum==0){
-							                ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
-											userPicture1.setVisibility(View.VISIBLE);
-											if(bitmaptou!=null)
-											   userPicture1.setImageBitmap(bitmaptou);
-											BitmapDescriptor des = BitmapDescriptorFactory.fromView(userPicture1);
-											MarkerOptions options = new MarkerOptions();
-											options.icon(des);
-											options.anchor(0.5f, 1f);
-											options.position(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
-									 		mFujinMarker[0]=aMap.addMarker(options);
-									 		mFujinMarker[0].setObject(username);
-									 		markNum++;
-									     	}
-									 	else {
-											for(int j=0;j<markNum;j++){
-												if(mFujinMarker[j].getObject().equals(username)){
-													mFujinMarker[j].setPosition(new LatLng(latLng.getLatitude(),latLng.getLongitude()));
-													ketianjia=false;
-													kejixu=false;
-												}else if(j==markNum-1&&ketianjia){
-													((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
-													userPicture1.setVisibility(View.VISIBLE);
-													if(bitmaptou!=null)
-													    userPicture1.setImageBitmap(bitmaptou);
-													BitmapDescriptor des = BitmapDescriptorFactory.fromView(userPicture1);
-													MarkerOptions options = new MarkerOptions();
-													options.icon(des);
-													options.anchor(0.5f, 1f);
-													options.position(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
-											 		mFujinMarker[markNum]=aMap.addMarker(options);
-											 		mFujinMarker[markNum].setObject(username);
-											 		markNum++;
-												}
-											}
-										  }
-						    		}
-						    	}
-						    };
-						}
+						    		if(msg.what==0&&ketongguo){
+						    			  if(bitmaptou!=null){
+									   		    userPicture1.setImageBitmap(bitmaptou);
+									        	}
+									   	    if(userPicture1.getParent()!=null)
+									   	    	((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+									   	    userPicture1.setLayoutParams(new LayoutParams(getPixelsFromDp(100), getPixelsFromDp(100)));
+									    	BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
+									    	MarkerOptions options=new MarkerOptions();
+									    	options.icon(descriptor);
+									    	options.anchor(0.5f, 1f);
+									    	options.position(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
+									    	mFujinMarker[markNum]=aMap.addMarker(options);
+									    	markNum++;
+									    	Log.d("Main","0markNum="+markNum);
+									    	Log.d("Main","yonghuNum"+yonghuNum);
+									    	if(markNum==yonghuNum){
+									    		ketongguo=false;
+									    	}
+						    			}
+									}
+						    	};
+						    
+						
 					}else {
 						Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT);
 					}
@@ -775,40 +789,47 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		@Override
 		public void onCameraChangeFinish(CameraPosition cameraPosition) {
-		   
-			if(yuanLatLng==null) { 
-		     	 yuanLatLng=cameraPosition.target;   //原来的LatLng
-		        
-			  }
-		  
-			  searchLatLng=cameraPosition.target;
-			  if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>500){
-				  query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
-				  mNearbySearch.searchNearbyInfoAsyn(query);
-				  for (int j = 0; j <markNum; j++) {
-						mFujinMarker[j].destroy();
-					}
-					markNum=0;
-			        yuanLatLng=cameraPosition.target;
-			   }
+		          if(yuanLatLng==null){
+		        	  yuanLatLng=cameraPosition.target;
+		          }
+		          searchLatLng=cameraPosition.target;
+		          if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>500)
+		          {   yuanLatLng=searchLatLng;
+		        	  query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
+				      mNearbySearch.searchNearbyInfoAsyn(query);
+				      ketongguo=true;
+		          }
+		
 			   
 		}
 		Runnable networkTask=new Runnable() {
 			
 			@Override
 			public void run() {
-				bitmaptou=null;
-				try {
-					InputStream is=new URL(yonghuUrl).openStream();
-					bitmaptou=BitmapFactory.decodeStream(is);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		           if(yonghuUrl!=null)
+					  { try {
+						  Log.d("Main","yonghuUrl="+yonghuUrl);
+						  InputStream is=new URL(yonghuUrl).openStream();
+						  bitmaptou[bitmapNum]=BitmapFactory.decodeStream(is);
+						  bitmapNum++;
+				     	 } catch (Exception e) {
+						  e.printStackTrace();
+				    	  }
+					  }else {
+						bitmaptou[bitmapNum]=BitmapFactory.decodeResource(getResources(),R.drawable.userpicture);
+					 }
+				
+				
 				android.os.Message message=new android.os.Message();
 				message.what=0;
 				handler.sendMessage(message);
+				Log.d("Main","sendMessage");
 			}
 		};
-	   
+	   private int getPixelsFromDp(int size){
+		   DisplayMetrics metrics=new DisplayMetrics();
+		   ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
+	   }
 	
 }

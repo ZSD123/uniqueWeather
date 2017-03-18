@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/maplayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -17,18 +18,5 @@
     android:layout_marginBottom="20dp"
     android:background="@drawable/location"
     />
-      <myCustomView.MapCircleImageView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/userPicture1"
-            android:layout_width="100dp"
-            android:layout_height="100dp"    
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/userpicture"
-            android:clickable="true"
-            app:border_width="2dp"
-            app:border_color="#ccc"
-            android:visibility="gone"
-             />
 
 </RelativeLayout>
