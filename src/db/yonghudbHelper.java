@@ -12,7 +12,8 @@ public class yonghudbHelper extends SQLiteOpenHelper {
     		+ "userName Text,"
     		+ "touxiangUrl Text,"
     		+ "lat Text,"
-    		+ "lon Text)";
+    		+ "lon Text,"
+    		+ "jiazai integer)";
 	public yonghudbHelper(Context context, String name, CursorFactory factory,
 			int version) {
 		super(context, name, factory, version);

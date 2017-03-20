@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,6 +57,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
+import com.amap.api.mapcore2d.db;
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMap.OnCameraChangeListener;
 import com.amap.api.maps2d.AMapUtils;
@@ -136,18 +138,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public LatLng searchLatLng;   //同上
     public NearbyQuery query;  
     public NearbySearch mNearbySearch;
-    
-    private Thread thread;
-    private Timer timer;
-    private TimerTask task;
-    private int daojishi=3;
-    
+      
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
 	private Marker mLocMarker;    //定位Marker
 	private Marker [] mFujinMarker=new Marker[1000];;   //附近用户Marker
+	private  List<String> urlList=new ArrayList<String>();;
 	
 	private int markNum=0;//Marker个数
 	private Marker mLoveMarker;    //当前Marker
@@ -337,7 +335,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			View mapView=LayoutInflater.from(context).inflate(R.layout.mapcircleimageview, null);
 			userPicture1=(MapCircleImageView)mapView.findViewById(R.id.mapCircle);
-			thread=new Thread(networkTask);
 			
 			yongbDb=yonghuDB.getInstance(context);
 			if(aMap==null)
@@ -645,29 +642,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		private boolean fangzhiduoci=false;    //防止多次调用返回用户函数
 		@Override
 		public void onNearbyInfoSearched(NearbySearchResult nearbySearchResult, int resultCode) 
-		{      timer=new Timer();
-	           task=new TimerTask(){
-	 		
- 		      @Override
- 		    public void run() 
- 	     	{   daojishi--;
- 	     	    android.os.Message message=new android.os.Message();
- 			    message.what=1;
- 		     	handler.sendMessage(message);
- 
- 		     	if(daojishi==0)
- 		     	{   
- 			      message=new Message();
- 			       message.what=TOFASONG;
- 			       handler.sendMessage(message);
- 			       timer.cancel();
- 			       task.cancel();
- 			        daojishi=30;
- 	
- 			  }
- 		   }
- 	     };
-	     	timer.schedule(task, 1000,1000);	
+		{  
 			 if(resultCode == 1000){
 				  
 				    if (nearbySearchResult != null
@@ -678,7 +653,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				       {    cunzai=false;
 				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  {
 				                List<String> list=yongbDb.loadObjectId();
-				                Log.d("Main", "list.size="+list.size());
 				                if(list.size()==0){
 				                	yongbDb.saveObjectIdandlatlon(nearbySearchResult.getNearbyInfoList().get(i).getUserID(), nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLatitude()+"",  nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLongitude()+"");
 				                  
@@ -696,7 +670,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				                
 				             }
 				       }
-				        addSanMarker();
+				        addSanMarker1();
 				     
 				   } 
 				        else {
@@ -718,52 +692,33 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		public void onUserInfoCleared(int resultCode) {
 			
 		}
-		private  void addSanMarker() 
-		{   
-			BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-		    query.addWhereEqualTo("objectId",userId);
-		    query.findObjects(new FindListener<MyUser>() {
+		private  void addSanMarker1() 
+		{   List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();
+		    if(objectIdList.size()>0){
+		    	for (int i = 0; i < objectIdList.size(); i++) {
+		    		BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+				    query.addWhereEqualTo("objectId",yongbDb.loadUserTouxiangUrl(objectIdList.get(i)));
+				    query.findObjects(new FindListener<MyUser>() {
 
-				@Override
-				public void done(List<MyUser> object, BmobException e) {
-					if(e==null){
-							Log.d("Main","查询返回");
-							yongbDb.saveUserNameandTouxiangUrl(userId, object.get(0).getNick(),object.get(0).getTouXiangUrl());
-							thread.start();
-						    handler=new Handler(){
-						    	@Override
-						    	public void handleMessage(android.os.Message msg){
-						    		if(msg.what==0&&ketongguo){
-						    			  if(bitmaptou!=null){
-									   		    userPicture1.setImageBitmap(bitmaptou);
-									        	}
-									   	    if(userPicture1.getParent()!=null)
-									   	    	((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
-									   	    userPicture1.setLayoutParams(new LayoutParams(getPixelsFromDp(100), getPixelsFromDp(100)));
-									    	BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
-									    	MarkerOptions options=new MarkerOptions();
-									    	options.icon(descriptor);
-									    	options.anchor(0.5f, 1f);
-									    	options.position(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
-									    	mFujinMarker[markNum]=aMap.addMarker(options);
-									    	markNum++;
-									    	Log.d("Main","0markNum="+markNum);
-									    	Log.d("Main","yonghuNum"+yonghuNum);
-									    	if(markNum==yonghuNum){
-									    		ketongguo=false;
-									    	}
-						    			}
-									}
-						    	};
-						    
-						
-					}else {
-						Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT);
-					}
-					
+						@Override
+						public void done(List<MyUser> object, BmobException e) {
+							if(e==null){
+								Log.d("Main","查询返回");
+								yongbDb.saveUserNameandTouxiangUrl(object.get(0).getObjectId(), object.get(0).getNick(),object.get(0).getTouXiangUrl());
+								if(!object.get(0).getTouXiangUrl().equals(""))
+								     checkJiaZai();
+								 else {
+								 	  addSanMarker2();     //如果touxiangUrl为空的话，直接加载
+								     }
+							}else {
+								Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT);
+							 }
+						}
+					});
 				}
-		    	
-			});
+		    }
+		
+		   
 			
 		}
 		private void addLoveding(CameraPosition cameraPosition){
@@ -802,34 +757,29 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		
 			   
 		}
-		Runnable networkTask=new Runnable() {
-			
-			@Override
-			public void run() {
-		           if(yonghuUrl!=null)
-					  { try {
-						  Log.d("Main","yonghuUrl="+yonghuUrl);
-						  InputStream is=new URL(yonghuUrl).openStream();
-						  bitmaptou[bitmapNum]=BitmapFactory.decodeStream(is);
-						  bitmapNum++;
-				     	 } catch (Exception e) {
-						  e.printStackTrace();
-				    	  }
-					  }else {
-						bitmaptou[bitmapNum]=BitmapFactory.decodeResource(getResources(),R.drawable.userpicture);
-					 }
-				
-				
-				android.os.Message message=new android.os.Message();
-				message.what=0;
-				handler.sendMessage(message);
-				Log.d("Main","sendMessage");
-			}
-		};
+		
 	   private int getPixelsFromDp(int size){
 		   DisplayMetrics metrics=new DisplayMetrics();
 		   ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
 	   }
-	
+	   private void checkJiaZai(){
+		   urlList=yongbDb.loadJiaZai0Url();
+		   if(urlList.size()>0){
+			  new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					for (int i = 0; i < urlList.size(); i++) {
+						bitmaptou[bitmapNum]=Utility.getTouxiangBitmap(urlList.get(i), context,yongbDb);
+						bitmapNum++;
+					}
+					
+				}
+			}).run();
+		   }
+	   }
+	   private void addSanMarker2(){
+		   
+	   }
 }

@@ -13,7 +13,10 @@ import model.jingdiancity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.uniqueweather.app.R;
+
 import db.jingdianDB;
+import db.yonghuDB;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -72,6 +75,34 @@ public class Utility {
         }catch(Exception e)
         {
         	e.printStackTrace();
+        }
+
+        return bitmap;
+	}
+	public static Bitmap getTouxiangBitmap(String urlstring,Context context,yonghuDB yonghudB)
+	{
+		Bitmap bitmap=null;
+		HttpURLConnection connection=null;
+        try{ 
+             URL url=new URL(urlstring);
+             connection=(HttpURLConnection)url.openConnection();
+             connection.setConnectTimeout(8000);
+             connection.setRequestMethod("GET");
+             connection.setDoInput(true);
+             connection.setUseCaches(true);
+             if(connection.getResponseCode()==HttpURLConnection.HTTP_OK)
+             {  InputStream in=connection.getInputStream();
+                 bitmap=BitmapFactory.decodeStream(in);
+             }else {
+				bitmap=BitmapFactory.decodeResource(context.getResources(),R.drawable.userpicture);//加载网络图片失败的话就加载本地图片
+				yonghudB.updateJiaZai0(urlstring);
+             }
+        }catch(Exception e)
+        {
+        	e.printStackTrace();
+        	
+        	bitmap=BitmapFactory.decodeResource(context.getResources(),R.drawable.userpicture);//同上
+			yonghudB.updateJiaZai0(urlstring);       
         }
 
         return bitmap;
