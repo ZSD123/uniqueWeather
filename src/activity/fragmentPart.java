@@ -19,6 +19,7 @@ import Util.SensorEventHelper;
 import Util.Utility;
 import Util.download;
 import android.R.anim;
+import android.R.integer;
 import android.app.Activity;
 import android.app.Notification.MessagingStyle.Message;
 import android.content.Context;
@@ -105,8 +106,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public static SharedPreferences pre;
     private String accountName;
     private View view;
-    private String uriUserPicture;
     private static Bitmap bitmap;
+    private String uriUserPicture;
     private static Bitmap bitmap1;
     public Context context;
     public Button button1;
@@ -117,6 +118,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public int yonghuNum=0;      //加载头像Url组的
     public Bitmap bitmaptou[]=new Bitmap[1000];    //其他用户头
     public int bitmapNum=0;       //其他用户头的个数
+    private Marker [] mFujinMarker=new Marker[1000];;   //设置有头像添加头像的附近用户Marker
+    private int markNum=0;
     
     public Handler handler;     
     
@@ -144,10 +147,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
 	private Marker mLocMarker;    //定位Marker
-	private Marker [] mFujinMarker=new Marker[1000];;   //附近用户Marker
+	private Marker [] mZFujinMarker=new Marker[1000];;   //没有设置头像直接添加头像的附近用户Marker
 	private  List<String> urlList=new ArrayList<String>();;
 	
-	private int markNum=0;//Marker个数
+	private int zmarkNum=0;//直接添加用户头像的Marker个数
 	private Marker mLoveMarker;    //当前Marker
 	private boolean mFirstFix = false;
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
@@ -582,7 +585,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			}
 			deactivate();
 			mFirstFix=false;
-			markNum=0;
+
 		}
 		@Override
 		public void onDestroy()
@@ -595,7 +598,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{   mLocationClient.stopLocation();
 				mLocationClient.onDestroy();
 			}
-            markNum=0;
             Log.d("Main","onDestroy");
 		}
 		@Override
@@ -660,6 +662,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				                	for (int j = 0; j < list.size(); j++) {
 										   if(nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals(list.get(j))){
 											   cunzai=true;
+											   yongbDb.updateData(nearbySearchResult.getNearbyInfoList().get(i).getUserID(), nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLatitude()+"",  nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLongitude()+"");
 										   }
 										  
 									  }
@@ -706,10 +709,20 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 								Log.d("Main","查询返回");
 								yongbDb.saveUserNameandTouxiangUrl(object.get(0).getObjectId(), object.get(0).getNick(),object.get(0).getTouXiangUrl());
 								if(!object.get(0).getTouXiangUrl().equals(""))
-								     checkJiaZai();
+								     checkJiaZai(object.get(0).getObjectId());
 								 else {
-								 	  addSanMarker2();     //如果touxiangUrl为空的话，直接加载
-								     }
+									 if(yongbDb.checkJiaZai(object.get(0).getObjectId())!=1)  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载
+								 	    addSanMarker2(object.get(0).getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
+									 else{                                         //如果等于1，就是加载完毕，这个设置它最新的地理位置坐标                    
+										for (int j = 0; j < zmarkNum; j++) {
+											if(mZFujinMarker[j].getObject().equals(object.get(0).getObjectId())){
+												double la=yongbDb.loadLatbyId(object.get(0).getObjectId())[0];
+												double lo=yongbDb.loadLatbyId(object.get(0).getObjectId())[1];
+												mZFujinMarker[j].setPosition(new LatLng(la,lo));
+											}
+										} 
+									   }
+								 }
 							}else {
 								Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT);
 							 }
@@ -763,7 +776,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
 	   }
-	   private void checkJiaZai(){
+	   private void checkJiaZai(final String obString){
 		   urlList=yongbDb.loadJiaZai0Url();
 		   if(urlList.size()>0){
 			  new Thread(new Runnable() {
@@ -773,13 +786,43 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					for (int i = 0; i < urlList.size(); i++) {
 						bitmaptou[bitmapNum]=Utility.getTouxiangBitmap(urlList.get(i), context,yongbDb);
 						bitmapNum++;
+						
 					}
-					
+					((Activity)context).runOnUiThread(new Runnable() {  //加载了所有bitmap就可以放在地图上了
+						
+						@Override
+						public void run() {
+							for (int i = 0; i <bitmapNum; i++) {
+								addSanMarker2(obString, bitmaptou[i]);
+							}
+							
+						}
+					});
 				}
 			}).run();
-		   }
+		   }else {
+			    
+		    }
 	   }
-	   private void addSanMarker2(){
-		   
+	   private void addSanMarker2(String objectId,Bitmap bitmap1){
+		   Bitmap bitmap2;
+		   if(bitmap1==null){
+		        bitmap2=BitmapFactory.decodeResource(getResources(),R.drawable.userpicture);
+		    }else {
+				bitmap2=bitmap1;
+			}
+		   ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+		    userPicture1.setImageBitmap(bitmap2);
+		    BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
+	    	MarkerOptions options=new MarkerOptions();
+	    	options.icon(descriptor);
+	    	options.anchor(0.5f, 1f);
+	    	double [] yonghuLatlon=new double [2];
+	    	yonghuLatlon=yongbDb.loadLatbyId(objectId);
+	    	options.position(new LatLng(yonghuLatlon[0], yonghuLatlon[1]));
+	    	mZFujinMarker[zmarkNum]=aMap.addMarker(options);
+	    	mZFujinMarker[zmarkNum].setObject(objectId);
+	    	yongbDb.updateJiaZai1(objectId);
+	    	zmarkNum++;
 	   }
 }
