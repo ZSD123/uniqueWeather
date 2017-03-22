@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import cn.bmob.push.a.in;
 
 public class yonghuDB {
@@ -34,6 +35,7 @@ public class yonghuDB {
     	    	values.put("lat", lat);
     	    	values.put("lon", lon);
     	    	values.put("jiazai", 0);
+    	    	values.put("touxiangUrl","0");
     	    	db.insert("yonghu", null, values);
     	    }
       }
@@ -77,7 +79,7 @@ public class yonghuDB {
       }
       public List<String> loadobjectIdWhereUrlemp(){
       	List<String> list=new ArrayList<String>();
-      	Cursor cursor=db.query("yonghu",new String[]{"objectId"},"touxiangUrl= ?", new String []{""}, null, null,null);
+      	Cursor cursor=db.query("yonghu",new String []{"objectId"}, "touxiangUrl=?",new String []{"0"},null, null, null);
       	if(cursor.moveToFirst()){
       		do {
 				list.add(cursor.getString(cursor.getColumnIndex("objectId")));
@@ -87,7 +89,7 @@ public class yonghuDB {
       }
       public List<String> loadJiaZai0Url(){
     	  List<String> list=new ArrayList<String>();
-    	  Cursor cursor=db.query("yonghu",null,"jiazai=?", new String []{"0"}, null, null,null);
+    	  Cursor cursor=db.query("yonghu",null,"jiazai=? and touxiangUrl!=?", new String []{"0","0"}, null, null,null);
     	  if(cursor.moveToFirst()){
     		  do {
 				  list.add(cursor.getString(cursor.getColumnIndex("touxiangUrl")));
@@ -95,7 +97,7 @@ public class yonghuDB {
     	  }
     	  ContentValues values=new ContentValues();
     	  values.put("jiazai", 1);
-    	  db.update("yonghu", values,"jiazai=?", new String[]{"0"});
+    	  db.update("yonghu", values,"jiazai=? and touxiangUrl!=?", new String[]{"0","0"});
     	  return list;
       }
       public  void updateJiaZai0(String url){   
@@ -133,5 +135,8 @@ public class yonghuDB {
     	  }
     	  return jiazai;
       }
+      public void deleteAll(){
+				db.delete("yonghu",null,null);
+	  }
        
 }

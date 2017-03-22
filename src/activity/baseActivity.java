@@ -42,15 +42,10 @@ public class baseActivity extends Activity {
 			    try {
 					JSONObject jsonObject=data.getJSONObject("data");
 					String webinstallationId=jsonObject.getString("installationId");
-					Log.d("Main", "web="+webinstallationId);
-					Log.d("Main","loc="+loginAct.installationId);
 					if(!webinstallationId.equals(loginAct.installationId)){
 						MyUser.logOut();
-						Log.d("Main","1");
 						MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
-						Log.d("Main","2");
 						showLogOutDialog();
-						Log.d("Main","3");
 					}
 				} catch (JSONException e) {
 					Log.d("Main","e.gt"+e.getMessage());
@@ -77,12 +72,10 @@ public class baseActivity extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				Log.d("Main","4"); 
 				Intent intent=new Intent(getApplicationContext(),loginAct.class);
-				Log.d("Main","5"); 
 				startActivity(intent);
 				 finish();
-					Log.d("Main","6");
+
 			}
 		});
         builder.setCancelable(false);

@@ -52,6 +52,7 @@ import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.QueryListener;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -116,10 +117,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     
     public String  yonghuUrl;   //其他用户url    
     public int yonghuNum=0;      //加载头像Url组的
-    public Bitmap bitmaptou[]=new Bitmap[1000];    //其他用户头
+    public List<Bitmap> bitmaptou=new ArrayList<Bitmap>();    //其他用户头
     public int bitmapNum=0;       //其他用户头的个数
-    private Marker [] mFujinMarker=new Marker[1000];;   //设置有头像添加头像的附近用户Marker
-    private int markNum=0;
     
     public Handler handler;     
     
@@ -141,13 +140,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public LatLng searchLatLng;   //同上
     public NearbyQuery query;  
     public NearbySearch mNearbySearch;
-      
+    
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private SensorEventHelper mSensorEventHelper;
 	private Circle mCircle;
 	private Marker mLocMarker;    //定位Marker
-	private Marker [] mZFujinMarker=new Marker[1000];;   //没有设置头像直接添加头像的附近用户Marker
+	private List<Marker> mFujinMarker=new ArrayList<Marker>(); //没有设置头像直接添加头像的附近用户Marker
 	private  List<String> urlList=new ArrayList<String>();;
 	
 	private int zmarkNum=0;//直接添加用户头像的Marker个数
@@ -158,7 +157,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private OnLocationChangedListener mListener;
 	private String yuanLocation;
 	
-	private yonghuDB yongbDb;
+	public static  yonghuDB yongbDb;
 	public fragmentPart(){
 		
 	}
@@ -329,6 +328,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		else if(theKey.equals("map"))
 		{   
 			view=inflater.inflate(R.layout.map,container,false);
+			
 			lat=pre.getFloat("lat", 39);
 			lon=pre.getFloat("lon",116);
 			zoom=pre.getFloat("zoom", 18);
@@ -340,6 +340,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			userPicture1=(MapCircleImageView)mapView.findViewById(R.id.mapCircle);
 			
 			yongbDb=yonghuDB.getInstance(context);
+
 			if(aMap==null)
 			{   
 				aMap=mMapView.getMap();
@@ -391,7 +392,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             //设置搜索的坐标体系
             query.setCoordType(NearbySearch.AMAP);
             //设置搜索半径
-            query.setRadius(1000);
+            query.setRadius(500);
             //设置查询的时间
             query.setTimeRange(10000);
             //调用异步查询接口
@@ -598,6 +599,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{   mLocationClient.stopLocation();
 				mLocationClient.onDestroy();
 			}
+
             Log.d("Main","onDestroy");
 		}
 		@Override
@@ -639,9 +641,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			options.position(latlng);
 			mLocMarker = aMap.addMarker(options);
 		}
-		private boolean ketongguo=true;
 		private boolean cunzai=false;
-		private boolean fangzhiduoci=false;    //防止多次调用返回用户函数
 		@Override
 		public void onNearbyInfoSearched(NearbySearchResult nearbySearchResult, int resultCode) 
 		{  
@@ -649,12 +649,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				  
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
-				        && nearbySearchResult.getNearbyInfoList().size() > 0) 
+				        && ((nearbySearchResult.getNearbyInfoList().size() > 1&&nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId")))||(nearbySearchResult.getNearbyInfoList().size()>0)&&!nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId"))))
 				    {   
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {    cunzai=false;
 				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  {
-				                List<String> list=yongbDb.loadObjectId();
+				                List<String> list=yongbDb.loadObjectId();  //查询数据表中所有的objectId
 				                if(list.size()==0){
 				                	yongbDb.saveObjectIdandlatlon(nearbySearchResult.getNearbyInfoList().get(i).getUserID(), nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLatitude()+"",  nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLongitude()+"");
 				                  
@@ -672,8 +672,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 								}
 				                
 				             }
-				       }
-				        addSanMarker1();
+				       }    
+				       
+				            addSanMarker1();
 				     
 				   } 
 				        else {
@@ -696,40 +697,59 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 		}
 		private  void addSanMarker1() 
-		{   List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();
+		{    
+		   
+			List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();//加载没有Url的objectId
+		    Log.d("Main","objectIdList.size="+objectIdList.size());
 		    if(objectIdList.size()>0){
 		    	for (int i = 0; i < objectIdList.size(); i++) {
 		    		BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-				    query.addWhereEqualTo("objectId",yongbDb.loadUserTouxiangUrl(objectIdList.get(i)));
-				    query.findObjects(new FindListener<MyUser>() {
-
+		    		Log.d("Main","objectIdList.get(i)="+objectIdList.get(i));
+		    		Log.d("Main","loadUserUrl="+yongbDb.loadUserTouxiangUrl(objectIdList.get(i)));
+		    		query.getObject(objectIdList.get(i), new QueryListener<MyUser>() {
+						
 						@Override
-						public void done(List<MyUser> object, BmobException e) {
+						public void done(MyUser object, BmobException e) {
 							if(e==null){
 								Log.d("Main","查询返回");
-								yongbDb.saveUserNameandTouxiangUrl(object.get(0).getObjectId(), object.get(0).getNick(),object.get(0).getTouXiangUrl());
-								if(!object.get(0).getTouXiangUrl().equals(""))
-								     checkJiaZai(object.get(0).getObjectId());
+								yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
+								if(!object.getTouXiangUrl().equals(""))
+								     checkJiaZai(object.getObjectId());
 								 else {
-									 if(yongbDb.checkJiaZai(object.get(0).getObjectId())!=1)  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载
-								 	    addSanMarker2(object.get(0).getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
+									 if(yongbDb.checkJiaZai(object.getObjectId())!=1)  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载
+								 	    addSanMarker2(object.getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
 									 else{                                         //如果等于1，就是加载完毕，这个设置它最新的地理位置坐标                    
 										for (int j = 0; j < zmarkNum; j++) {
-											if(mZFujinMarker[j].getObject().equals(object.get(0).getObjectId())){
-												double la=yongbDb.loadLatbyId(object.get(0).getObjectId())[0];
-												double lo=yongbDb.loadLatbyId(object.get(0).getObjectId())[1];
-												mZFujinMarker[j].setPosition(new LatLng(la,lo));
+											if(mFujinMarker.get(j).getObject().equals(object.getObjectId())){
+												double la=yongbDb.loadLatbyId(object.getObjectId())[0];
+												double lo=yongbDb.loadLatbyId(object.getObjectId())[1];
+												mFujinMarker.get(j).setPosition(new LatLng(la,lo));
 											}
 										} 
 									   }
 								 }
-							}else {
-								Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT);
-							 }
+							}else if(e.getErrorCode()!=9015){
+								Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
+								Log.d("Main","失败，"+e.getMessage()+e.getErrorCode());
+							}
+							
 						}
 					});
+				   
 				}
-		    }
+		    }else {             //当Url都存在的时候，设置相应图标的地理位置
+				List<String> obList=new ArrayList<String>();
+				obList=yongbDb.loadObjectId();
+		    	for (int i = 0; i < obList.size(); i++) {
+					for (int j = 0; j < zmarkNum; j++) {
+						if(obList.get(i).equals(mFujinMarker.get(j).getObject())){
+							double la=yongbDb.loadLatbyId(obList.get(i))[0];
+							double lo=yongbDb.loadLatbyId(obList.get(i))[1];
+							mFujinMarker.get(j).setPosition(new LatLng(la,lo));
+						}
+					}
+				}
+			}
 		
 		   
 			
@@ -757,15 +777,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		@Override
 		public void onCameraChangeFinish(CameraPosition cameraPosition) {
-		          if(yuanLatLng==null){
+		       
+			      if(yuanLatLng==null){
 		        	  yuanLatLng=cameraPosition.target;
 		          }
 		          searchLatLng=cameraPosition.target;
-		          if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>500)
+		          if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>1000)
 		          {   yuanLatLng=searchLatLng;
 		        	  query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
 				      mNearbySearch.searchNearbyInfoAsyn(query);
-				      ketongguo=true;
 		          }
 		
 			   
@@ -777,14 +797,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
 	   }
 	   private void checkJiaZai(final String obString){
-		   urlList=yongbDb.loadJiaZai0Url();
+		   urlList=yongbDb.loadJiaZai0Url();   //加载没有加载过并且Url不为空的Url
 		   if(urlList.size()>0){
 			  new Thread(new Runnable() {
 				
 				@Override
 				public void run() {
 					for (int i = 0; i < urlList.size(); i++) {
-						bitmaptou[bitmapNum]=Utility.getTouxiangBitmap(urlList.get(i), context,yongbDb);
+						bitmaptou.add(bitmapNum,Utility.getTouxiangBitmap(urlList.get(i), context,yongbDb));
 						bitmapNum++;
 						
 					}
@@ -793,15 +813,21 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						@Override
 						public void run() {
 							for (int i = 0; i <bitmapNum; i++) {
-								addSanMarker2(obString, bitmaptou[i]);
+								addSanMarker2(obString, bitmaptou.get(i));
 							}
 							
 						}
 					});
 				}
 			}).run();
-		   }else {
-			    
+		   }else {                            //有头像Url的objectId加载过了的话就设置position
+			    for (int i = 0; i < zmarkNum; i++) {
+					if(mFujinMarker.get(i).getObject().equals(obString)){
+						double la=yongbDb.loadLatbyId(obString)[0];
+						double lo=yongbDb.loadLatbyId(obString)[1];
+						mFujinMarker.get(i).setPosition(new LatLng(la, lo));
+					}
+				 }
 		    }
 	   }
 	   private void addSanMarker2(String objectId,Bitmap bitmap1){
@@ -820,8 +846,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	    	double [] yonghuLatlon=new double [2];
 	    	yonghuLatlon=yongbDb.loadLatbyId(objectId);
 	    	options.position(new LatLng(yonghuLatlon[0], yonghuLatlon[1]));
-	    	mZFujinMarker[zmarkNum]=aMap.addMarker(options);
-	    	mZFujinMarker[zmarkNum].setObject(objectId);
+	    	mFujinMarker.add(zmarkNum, aMap.addMarker(options));
+	    	mFujinMarker.get(zmarkNum).setObject(objectId);
 	    	yongbDb.updateJiaZai1(objectId);
 	    	zmarkNum++;
 	   }

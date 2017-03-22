@@ -131,6 +131,8 @@ public class weather_info extends baseFragmentActivity {
 		}
 	   };
 	   
+	   
+	   
 	   MyUser newUser=new MyUser();
 	   newUser.setInstallationId(BmobInstallation.getInstallationId(weather_info.this));
 	   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
