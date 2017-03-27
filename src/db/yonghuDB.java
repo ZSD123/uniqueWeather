@@ -87,17 +87,14 @@ public class yonghuDB {
       	}
       	return list;
       }
-      public List<String> loadJiaZai0Url(){
+      public List<String> loadUrl(){
     	  List<String> list=new ArrayList<String>();
-    	  Cursor cursor=db.query("yonghu",null,"jiazai=? and touxiangUrl!=?", new String []{"0","0"}, null, null,null);
+    	  Cursor cursor=db.query("yonghu",null,"touxiangUrl!=?", new String []{"0"}, null, null,null);
     	  if(cursor.moveToFirst()){
     		  do {
 				  list.add(cursor.getString(cursor.getColumnIndex("touxiangUrl")));
 			} while (cursor.moveToNext());
     	  }
-    	  ContentValues values=new ContentValues();
-    	  values.put("jiazai", 1);
-    	  db.update("yonghu", values,"jiazai=? and touxiangUrl!=?", new String[]{"0","0"});
     	  return list;
       }
       public  void updateJiaZai0(String url){   
@@ -138,5 +135,6 @@ public class yonghuDB {
       public void deleteAll(){
 				db.delete("yonghu",null,null);
 	  }
+   
        
 }

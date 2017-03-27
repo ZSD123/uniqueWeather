@@ -97,6 +97,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	public static CircleImageView userPicture;
 	public static MapCircleImageView userPicture1;  //地图上userPicture
 	
+	private TextView yonghuString;
+	private Bitmap bitmap11;
 	private TextView myCity;
     private Button button_refresh;
     public static String countyName;
@@ -117,8 +119,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     
     public String  yonghuUrl;   //其他用户url    
     public int yonghuNum=0;      //加载头像Url组的
-    public List<Bitmap> bitmaptou=new ArrayList<Bitmap>();    //其他用户头
     public int bitmapNum=0;       //其他用户头的个数
+    public List<String> objStrings =new ArrayList<String>();//加载过其他用户的obj
     
     public Handler handler;     
     
@@ -203,9 +205,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    String touxiangUrl=(String)BmobUser.getObjectByKey("touxiangUrl");
 		    if(nick!=null){
 		    	userName.setText(nick);
-		    }else {
-				Toast.makeText(context, "连接失败，请稍后再试", Toast.LENGTH_SHORT).show();
-			}
+		    }
 			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
@@ -336,9 +336,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mMapView=(MapView)view.findViewById(R.id.map);
 			mMapView.onCreate(savedInstanceState);
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
+			yonghuString=(TextView)view.findViewById(R.id.yonghuString);
 			View mapView=LayoutInflater.from(context).inflate(R.layout.mapcircleimageview, null);
 			userPicture1=(MapCircleImageView)mapView.findViewById(R.id.mapCircle);
-			
+			LayoutParams layoutParams=new LayoutParams(getPixelsFromDp(100),getPixelsFromDp(100));
+			userPicture1.setLayoutParams(layoutParams);
 			yongbDb=yonghuDB.getInstance(context);
 
 			if(aMap==null)
@@ -462,6 +464,34 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				e.printStackTrace();
 			}
 		}
+	  public  void saveYonghuPic(Bitmap bitmap,String obj){
+		  Log.d("Main", "这里");
+		  File file1=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head");
+		  Log.d("Main", "obj1");  
+		  if(!file1.exists())
+		    	file1.mkdirs();
+		  Log.d("Main", "obj2");  
+			File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+			Log.d("Main","obj="+obj);
+			Log.d("Main", "我在obj的下面");
+			try{
+			FileOutputStream out=new FileOutputStream(file);
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+			out.flush();
+			out.close();
+			}catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+	  }
+	  public Bitmap getYonghuPic(String obj){
+		  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+		  return bitmap;
+	  }
+	  private boolean checkYonghuPic(String obj){
+		  File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+		  return file.exists();
+	  }
 	  public static void showWeather(Context context)
 		{
 		    
@@ -541,6 +571,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			     	{
 				  	
 					Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
+					Log.d("Main", "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo());
 					chucuoonce=1;
 			     	}
 			  }
@@ -646,13 +677,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		public void onNearbyInfoSearched(NearbySearchResult nearbySearchResult, int resultCode) 
 		{  
 			 if(resultCode == 1000){
-				  
+				    
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && ((nearbySearchResult.getNearbyInfoList().size() > 1&&nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId")))||(nearbySearchResult.getNearbyInfoList().size()>0)&&!nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId"))))
-				    {   
+				    {   yonghuString.setText("当前用户有:"+nearbySearchResult.getNearbyInfoList().size());
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
-				       {    cunzai=false;
+				       {    Log.d("Main", "yonghu="+nearbySearchResult.getNearbyInfoList().get(i).getUserID());
+				            
+				        	cunzai=false;
 				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  {
 				                List<String> list=yongbDb.loadObjectId();  //查询数据表中所有的objectId
 				                if(list.size()==0){
@@ -713,8 +746,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 							if(e==null){
 								Log.d("Main","查询返回");
 								yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
-								if(!object.getTouXiangUrl().equals(""))
-								     checkJiaZai(object.getObjectId());
+								if(!object.getTouXiangUrl().equals("")){
+								     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
+								     Log.d("Main", "object.getObjectId="+object.getObjectId());
+								}
 								 else {
 									 if(yongbDb.checkJiaZai(object.getObjectId())!=1)  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载
 								 	    addSanMarker2(object.getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
@@ -731,6 +766,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 							}else if(e.getErrorCode()!=9015){
 								Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
 								Log.d("Main","失败，"+e.getMessage()+e.getErrorCode());
+							}else {
+								Log.d("Main",e.getMessage()+e.getErrorCode());
+						
+								
 							}
 							
 						}
@@ -796,39 +835,45 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
 	   }
-	   private void checkJiaZai(final String obString){
-		   urlList=yongbDb.loadJiaZai0Url();   //加载没有加载过并且Url不为空的Url
-		   if(urlList.size()>0){
-			  new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					for (int i = 0; i < urlList.size(); i++) {
-						bitmaptou.add(bitmapNum,Utility.getTouxiangBitmap(urlList.get(i), context,yongbDb));
-						bitmapNum++;
-						
-					}
-					((Activity)context).runOnUiThread(new Runnable() {  //加载了所有bitmap就可以放在地图上了
-						
-						@Override
-						public void run() {
-							for (int i = 0; i <bitmapNum; i++) {
-								addSanMarker2(obString, bitmaptou.get(i));
-							}
-							
-						}
-					});
-				}
-			}).run();
-		   }else {                            //有头像Url的objectId加载过了的话就设置position
-			    for (int i = 0; i < zmarkNum; i++) {
-					if(mFujinMarker.get(i).getObject().equals(obString)){
-						double la=yongbDb.loadLatbyId(obString)[0];
-						double lo=yongbDb.loadLatbyId(obString)[1];
-						mFujinMarker.get(i).setPosition(new LatLng(la, lo));
-					}
-				 }
+	   private void checkJiaZai(String obString,String touxiangUrl){
+		   if(zmarkNum>0) {
+		   for (int i = 0; i < zmarkNum; i++) {
+				if(mFujinMarker.get(i).getObject().equals(obString)){
+					double la=yongbDb.loadLatbyId(obString)[0];
+					double lo=yongbDb.loadLatbyId(obString)[1];
+					mFujinMarker.get(i).setPosition(new LatLng(la,lo));
+				}else {
+					JiaZai(obString, touxiangUrl);
+				  }
+			    }
+		   }else {
+			    JiaZai(obString, touxiangUrl);
 		    }
+	   }
+	   private void JiaZai(final String obString,final String touxiangUrl){ 
+	           new Thread(new Runnable() {
+	        	            @Override
+							public void run() {
+							
+						    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
+						
+						    	 if(bitmap11!=null){
+							     	saveYonghuPic(bitmap11,obString);
+								    bitmapNum++;
+								    objStrings.add(obString);   //objStrings列表是加载了自己图片的用户的列表obj
+								}	
+							((Activity)context).runOnUiThread(new Runnable() {  //加载了所有bitmap就可以放在地图上了
+								
+								@Override
+								public void run() {
+										addSanMarker2(obString,getYonghuPic(obString));
+								}
+							});
+							}
+						}).start();
+                           //有头像Url的objectId加载过了的话就设置position
+			    
+		    
 	   }
 	   private void addSanMarker2(String objectId,Bitmap bitmap1){
 		   Bitmap bitmap2;
@@ -837,7 +882,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    }else {
 				bitmap2=bitmap1;
 			}
-		   ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+		    if((ViewGroup)userPicture1.getParent()!=null)
+		        ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
 		    userPicture1.setImageBitmap(bitmap2);
 		    BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
 	    	MarkerOptions options=new MarkerOptions();

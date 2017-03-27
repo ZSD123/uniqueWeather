@@ -100,9 +100,7 @@ public class Utility {
         }catch(Exception e)
         {
         	e.printStackTrace();
-        	
-        	bitmap=BitmapFactory.decodeResource(context.getResources(),R.drawable.userpicture);//м╛ио
-			yonghudB.updateJiaZai0(urlstring);       
+        	    
         }
 
         return bitmap;
