@@ -160,6 +160,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private String yuanLocation;
 	
 	public static  yonghuDB yongbDb;
+	private String username;
 	public fragmentPart(){
 		
 	}
@@ -184,7 +185,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    userName=(TextView)view.findViewById(R.id.userName);
 			time=(TextView)view.findViewById(R.id.time);
 	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
-
+            
+	        username=(String)MyUser.getObjectByKey("username");
+	        
 	        realtime=(TextView)view.findViewById(R.id.realTime);
 			weather_layout=(RelativeLayout)view.findViewById(R.id.weather_info);
 			weather=(TextView)view.findViewById(R.id.weather);
@@ -209,7 +212,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
-			accountName=pre.getString("accountName","");
+			accountName=weather_info.myUserdb.loadUserName(username);
 			if(!accountName.isEmpty())
 			{Toast.makeText(context,accountName + ",欢迎您", Toast.LENGTH_SHORT).show();
 			 userName.setText(accountName);
@@ -218,8 +221,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{
 				userName.setText("未命名");
 			}
-			String userPictString=pre.getString("userPicture", "");
-            if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
+			String userPictString=weather_info.myUserdb.loadUserPic(username);
+            if(userPictString!=null)
+		    	if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
             	File file=new File(userPictString);
             	if(file.exists()){
             	    bitmap1=BitmapFactory.decodeFile(userPictString);
@@ -465,15 +469,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			}
 		}
 	  public  void saveYonghuPic(Bitmap bitmap,String obj){
-		  Log.d("Main", "这里");
 		  File file1=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head");
-		  Log.d("Main", "obj1");  
+  
 		  if(!file1.exists())
 		    	file1.mkdirs();
-		  Log.d("Main", "obj2");  
-			File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
-			Log.d("Main","obj="+obj);
-			Log.d("Main", "我在obj的下面");
+           File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+
 			try{
 			FileOutputStream out=new FileOutputStream(file);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
@@ -733,22 +734,18 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		{    
 		   
 			List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();//加载没有Url的objectId
-		    Log.d("Main","objectIdList.size="+objectIdList.size());
 		    if(objectIdList.size()>0){
 		    	for (int i = 0; i < objectIdList.size(); i++) {
 		    		BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-		    		Log.d("Main","objectIdList.get(i)="+objectIdList.get(i));
-		    		Log.d("Main","loadUserUrl="+yongbDb.loadUserTouxiangUrl(objectIdList.get(i)));
 		    		query.getObject(objectIdList.get(i), new QueryListener<MyUser>() {
 						
 						@Override
 						public void done(MyUser object, BmobException e) {
 							if(e==null){
-								Log.d("Main","查询返回");
+
 								yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
 								if(!object.getTouXiangUrl().equals("")){
 								     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
-								     Log.d("Main", "object.getObjectId="+object.getObjectId());
 								}
 								 else {
 									 if(yongbDb.checkJiaZai(object.getObjectId())!=1)  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载
@@ -764,12 +761,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 									   }
 								 }
 							}else if(e.getErrorCode()!=9015){
-								Toast.makeText(context,"失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
-								Log.d("Main","失败，"+e.getMessage()+e.getErrorCode());
-							}else {
-								Log.d("Main",e.getMessage()+e.getErrorCode());
-						
-								
+								Toast.makeText(context,"失败，"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
+				                Log.d("Main", "失败，"+e.getErrorCode()+e.getMessage());
 							}
 							
 						}

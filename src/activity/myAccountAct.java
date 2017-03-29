@@ -70,7 +70,6 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
     private EditText editText6;  //所在地EditText
     private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
 	private AMapLocationClient mLocationClient=null;
-	private SharedPreferences pre;
 	private AMapLocationClientOption mLocationClientOption=null;
 	private EditText editText7;   //故乡EditText
 	private EditText editText1;   //尊称EditText
@@ -133,7 +132,6 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	    editText6.setText((String)MyUser.getObjectByKey("suozaidi"));
 	    editText7.setText((String)MyUser.getObjectByKey("guxiang"));
 	    
-	    pre=PreferenceManager.getDefaultSharedPreferences(this);
 	    final String arr[]=new String[]{
 	    	"男",
 	    	"女",
@@ -228,9 +226,7 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	            	button.setText("编    辑");
 	            	button1.setVisibility(View.GONE);
 	            	
-	            	SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(myAccountAct.this).edit();
-	            	editor.putString("accountName", editText1.getText().toString());
-	            	editor.commit();
+	            	weather_info.myUserdb.checkandSaveUpdateN((String)MyUser.getObjectByKey("username"), editText1.getText().toString());
 	            	
 	            	MyUser newUser=new MyUser();
 	            	newUser.setNick(editText1.getText().toString());

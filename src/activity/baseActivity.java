@@ -48,7 +48,6 @@ public class baseActivity extends Activity {
 						showLogOutDialog();
 					}
 				} catch (JSONException e) {
-					Log.d("Main","e.gt"+e.getMessage());
 					e.printStackTrace();
 				}
 			    
@@ -56,7 +55,6 @@ public class baseActivity extends Activity {
 			
 			@Override
 			public void onConnectCompleted(Exception e) {
-				Log.d("Main", "连接成功:"+rtd.isConnected());
 				 if(rtd.isConnected()){
 				    	rtd.subRowUpdate("_User", bmobObjectId);
 				    }

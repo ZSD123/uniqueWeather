@@ -23,6 +23,9 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
+import db.myUserDB;
+import db.myUserdbHelper;
+
 
 import android.R.integer;
 import android.app.AlertDialog;
@@ -61,13 +64,12 @@ public class weather_info extends baseFragmentActivity {
 	 private String [] title=new String[]{
 	    		"weather","map"
 	         };
-	 public static String provider;
-	 public String yuanLocation;
-	 public String xianLocation;
+	 public static myUserdbHelper dbHelper;
+	 public static myUserDB myUserdb;
+
 	 public  int chenhuonce=0;
-	 public SharedPreferences.Editor editor1;
-	 public  SharedPreferences pref;
 	 private FragmentPagerAdapter mAdapter;
+	 private String username;
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{   
@@ -76,9 +78,8 @@ public class weather_info extends baseFragmentActivity {
 		setContentView(R.layout.main);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	    editor1=PreferenceManager.getDefaultSharedPreferences(this).edit();
-	    pref=PreferenceManager.getDefaultSharedPreferences(this);
-	    chenhuonce=pref.getInt("chenhuonce",0);
+	    chenhuonce=myUserdb.loadChenhuOnce(username);
+	    Log.d("Main", "载入后="+myUserdb.loadChenhuOnce(username));
 		if(chenhuonce==0)
 		{
 		final EditText editText=new EditText(this);
@@ -89,8 +90,7 @@ public class weather_info extends baseFragmentActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				accountName=editText.getText().toString(); 
-				fragmentPart.editor.putString("accountName", accountName);
-				fragmentPart.editor.commit();
+				myUserdb.checkandSaveUpdateN(username, accountName);
 				if(!accountName.isEmpty())
 					{
 				       fragmentPart.refreshUserName(accountName);
@@ -98,9 +98,7 @@ public class weather_info extends baseFragmentActivity {
 			}
 		});
 		builder.show();
-		chenhuonce=1;
-	    editor1.putInt("chenhuonce",chenhuonce);
-		editor1.commit();
+		myUserdb.checkandSaveUpdateC(username, accountName, 1);
 		}
 	    
 	 }		
@@ -131,8 +129,9 @@ public class weather_info extends baseFragmentActivity {
 		}
 	   };
 	   
-	   
-	   
+	   myUserdb=myUserDB.getInstance(this);
+	   username=(String)MyUser.getObjectByKey("username");
+	  
 	   MyUser newUser=new MyUser();
 	   newUser.setInstallationId(BmobInstallation.getInstallationId(weather_info.this));
 	   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
@@ -168,8 +167,7 @@ public class weather_info extends baseFragmentActivity {
 			{final Uri uri=data.getData();
 			final String path=getPath(weather_info.this, uri);  //这里取得路径，将uri转化为路径
 			ContentResolver cr=this.getContentResolver();
-			fragmentPart.editor.putString("userPicture",path);
-			fragmentPart.editor.commit();
+			myUserdb.checkandSaveUpdateP(username, path);
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
 				fragmentPart.refreshUserPicture(bitmap);
