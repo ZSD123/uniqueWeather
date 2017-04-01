@@ -469,7 +469,7 @@ public class loginAct extends Activity {
 		    return m.matches();  
 
 	}
-	public boolean isEmail(String email) 
+	public static boolean isEmail(String email) 
 	{
 
 		Pattern p =  Pattern.compile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");//∏¥‘”∆•≈‰  

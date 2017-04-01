@@ -67,7 +67,6 @@ public class weather_info extends baseFragmentActivity {
 	 public static myUserdbHelper dbHelper;
 	 public static myUserDB myUserdb;
 
-	 public  int chenhuonce=0;
 	 private FragmentPagerAdapter mAdapter;
 	 private String username;
 	@Override
@@ -78,28 +77,7 @@ public class weather_info extends baseFragmentActivity {
 		setContentView(R.layout.main);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	    chenhuonce=myUserdb.loadChenhuOnce(username);
-	    Log.d("Main", "载入后="+myUserdb.loadChenhuOnce(username));
-		if(chenhuonce==0)
-		{
-		final EditText editText=new EditText(this);
-		AlertDialog.Builder builder=new AlertDialog.Builder(this);
-		builder.setTitle("请输入对您的称呼").setNegativeButton("取消", null).setView(editText);
-		builder.setPositiveButton("确定",new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				accountName=editText.getText().toString(); 
-				myUserdb.checkandSaveUpdateN(username, accountName);
-				if(!accountName.isEmpty())
-					{
-				       fragmentPart.refreshUserName(accountName);
-					}
-			}
-		});
-		builder.show();
-		myUserdb.checkandSaveUpdateC(username, accountName, 1);
-		}
+	   
 	    
 	 }		
 	private void init() 

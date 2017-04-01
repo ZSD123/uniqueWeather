@@ -103,7 +103,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private Button button_refresh;
     public static String countyName;
     private static ImageView pic;
-    private static TextView userName;
+    public  static TextView userName;
     private static TextView countyname;
     public static SharedPreferences.Editor editor;
     public static SharedPreferences pre;
@@ -218,19 +218,38 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			 userName.setText(accountName);
 			}
 			else 
-			{
-				userName.setText("未命名");
+			{   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+			    query.getObject((String)MyUser.getObjectByKey("objectId"),new QueryListener<MyUser>() {
+
+					@Override
+					public void done(MyUser myUser, BmobException e) {
+						if(e==null){
+							weather_info.myUserdb.checkandSaveUpdateN((String)MyUser.getObjectByKey("username"),myUser.getNick());
+							userName.setText(weather_info.myUserdb.loadUserName(username));
+						}else {
+							Toast.makeText(context, "失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+						}
+					 }
+			    	});
+				
 			}
 			String userPictString=weather_info.myUserdb.loadUserPic(username);
-            if(userPictString!=null)
+            if(userPictString!=null){
 		    	if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
             	File file=new File(userPictString);
             	if(file.exists()){
             	    bitmap1=BitmapFactory.decodeFile(userPictString);
             		userPicture.setImageBitmap(bitmap1);
-      
             	}
             }
+            }else {
+				 File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
+				 if(file.exists()){
+					  weather_info.myUserdb.checkandSaveUpdateP((String)MyUser.getObjectByKey("username"),Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
+					  bitmap1=BitmapFactory.decodeFile(userPictString);
+	                  userPicture.setImageBitmap(bitmap1);
+				   }
+		    	}
 			 if(touxiangUrl!=null)       //这里防止更新图片后另外一台客户端没有更新
 				{  
 				   BmobFile bmobFile=new BmobFile("头像"+".png",null,touxiangUrl);//确定文件名字（头像.png）和网络地址
@@ -325,6 +344,18 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						startActivity(intent);
 						Activity activity=(Activity)context;
 						activity.finish();
+					}
+				});
+			    userName.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						Intent intent=new Intent(context,myAccountAct.class);
+						Bundle data=new Bundle();
+						data.putString("name",userName.getText().toString());
+						intent.putExtras(data);
+						startActivity(intent);
+						
 					}
 				});
 			    
@@ -489,10 +520,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
 		  return bitmap;
 	  }
-	  private boolean checkYonghuPic(String obj){
-		  File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
-		  return file.exists();
-	  }
+	
 	  public static void showWeather(Context context)
 		{
 		    
@@ -682,7 +710,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && ((nearbySearchResult.getNearbyInfoList().size() > 1&&nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId")))||(nearbySearchResult.getNearbyInfoList().size()>0)&&!nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId"))))
-				    {   yonghuString.setText("当前用户有:"+nearbySearchResult.getNearbyInfoList().size());
+				    {   yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {    Log.d("Main", "yonghu="+nearbySearchResult.getNearbyInfoList().get(i).getUserID());
 				            
@@ -844,10 +872,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    }
 	   }
 	   private void JiaZai(final String obString,final String touxiangUrl){ 
-	           new Thread(new Runnable() {
+	        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
+	        if(file.exists())
+            bitmap11=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
+	        new Thread(new Runnable() {
 	        	            @Override
 							public void run() {
-							
+							     
 						    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
 						
 						    	 if(bitmap11!=null){

@@ -43,13 +43,13 @@ xmlns:app="http://schemas.android.com/apk/res/com.uniqueweather.app">
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="horizontal"
-      
+      android:layout_marginTop="20dp"
       >
       <ImageView
         android:id="@+id/cityPicture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="20dp"
         android:src="@drawable/citypicture" />
 
     <TextView
@@ -59,6 +59,7 @@ xmlns:app="http://schemas.android.com/apk/res/com.uniqueweather.app">
         android:textColor="#fff"
         android:textSize="20sp" 
         android:text="我的城市"
+        android:layout_marginLeft="20dp"
         android:clickable="true"
         />
   </LinearLayout>
@@ -66,12 +67,13 @@ xmlns:app="http://schemas.android.com/apk/res/com.uniqueweather.app">
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="horizontal"
+            android:layout_marginTop="20dp"
       >
       <ImageView 
           android:id="@+id/accountPicture"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_marginLeft="10dp"
+          android:layout_marginLeft="20dp"
           android:src="@drawable/my_account"
           />
       <TextView 
@@ -81,10 +83,33 @@ xmlns:app="http://schemas.android.com/apk/res/com.uniqueweather.app">
           android:textColor="#fff"
           android:textSize="20sp" 
           android:text="我的名片"
+          android:layout_marginLeft="20dp"
           android:clickable="true"
         />
   </LinearLayout>
- 
+  <LinearLayout 
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+      >
+      <ImageView 
+          android:id="@+id/manage"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="20dp"
+          android:src="@drawable/manage"
+          />
+      <TextView 
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textColor="#fff"
+          android:textSize="20sp" 
+          android:text="账户管理"
+          android:layout_marginLeft="20dp"
+          android:clickable="true"
+        />
+  </LinearLayout>
     
 
 </LinearLayout>

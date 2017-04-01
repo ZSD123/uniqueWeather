@@ -76,10 +76,14 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	private EditText editText2;   //年龄EditText
 	private EditText editText4;   //星座EditText
 	private EditText editText5;   //学校EditText
-    
+    private EditText editText8;   //手机号EditText
+    private EditText editText9;    //邮箱EditText
+	
 	private Button button;       //编辑Button
 	private Button button1;      //取消Button
 	
+	private ArrayAdapter<String> arrayAdapter;
+	private ArrayAdapter<String> arrayAdapter2;
 	private int year;
 	private int month;
 	private int day;
@@ -98,7 +102,8 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	    editText5=(EditText)findViewById(R.id.xuexiao);
 	    editText6=(EditText)findViewById(R.id.suozaidi);
 	    editText7=(EditText)findViewById(R.id.guxiang);
-	    
+	    editText8=(EditText)findViewById(R.id.shoujihao);
+	    editText9=(EditText)findViewById(R.id.youxiang);
 	    
 	    button=(Button)findViewById(R.id.button);
 	    button1=(Button)findViewById(R.id.button1);
@@ -115,22 +120,19 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	    
 		final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 	    
-	    String sex=(String)MyUser.getObjectByKey("sex");
-	    if(sex!=null)
-	       if(sex.equals("男"))
-	    	  spinner1.setSelection(0);
-	      else if(sex.equals("女")){
-			  spinner1.setSelection(1);
-		   }else if(sex.equals("保密")){
-			  spinner1.setSelection(2);
-	    	}
+	   
 	    editText2.setText((String)MyUser.getObjectByKey("age"));
 	    editText3.setText((String)MyUser.getObjectByKey("shengri"));
 	    editText4.setText((String)MyUser.getObjectByKey("constellation"));
-	    spinner2.setSelection(Integer.parseInt(String.valueOf(MyUser.getObjectByKey("zhiye"))));
+
 	    editText5.setText((String)MyUser.getObjectByKey("school"));
 	    editText6.setText((String)MyUser.getObjectByKey("suozaidi"));
 	    editText7.setText((String)MyUser.getObjectByKey("guxiang"));
+	    if(loginAct.isMobileNO((String)MyUser.getObjectByKey("username"))){
+	    	editText8.setText((String)MyUser.getObjectByKey("username"));
+	    }else if(loginAct.isEmail((String)MyUser.getObjectByKey("username"))){
+			editText9.setText((String)MyUser.getObjectByKey("username"));
+		}
 	    
 	    final String arr[]=new String[]{
 	    	"男",
@@ -153,14 +155,33 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	     "学生",
 	     "其他"
 	    };
-	    ArrayAdapter<String> arrayAdapter=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,arr);
-	    ArrayAdapter<String> arrayAdapter2=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,arr1);
+	    arrayAdapter=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,arr);
+        arrayAdapter2=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,arr1);
 	    spinner1.setAdapter(arrayAdapter);
 	    spinner2.setAdapter(arrayAdapter2);
 	    
 	    spinner1.setEnabled(false);
 	    spinner2.setEnabled(false);
-	   
+	    
+	    String sex=(String)MyUser.getObjectByKey("sex");
+	    Log.d("Main","sex="+sex);
+	    if(sex!=null)
+	       if(sex.equals("男")){
+	    	  spinner1.setSelection(0);
+	    	  
+	       }
+	      else if(sex.equals("女")){
+			  spinner1.setSelection(1);
+		   }else if(sex.equals("保密")){
+			  spinner1.setSelection(2);
+	    	}
+	    int sel=0;
+	   for (int i = 0; i < arr1.length; i++) {
+			if(arr1[i].equals((String)MyUser.getObjectByKey("zhiye")))
+				sel=i;
+		}
+	    spinner2.setSelection(sel);
+	    
 	    editText2.setOnTouchListener(this);
 	    editText3.setOnTouchListener(this);
 	    editText4.setOnTouchListener(this);
@@ -227,6 +248,7 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	            	button1.setVisibility(View.GONE);
 	            	
 	            	weather_info.myUserdb.checkandSaveUpdateN((String)MyUser.getObjectByKey("username"), editText1.getText().toString());
+	            	fragmentPart.userName.setText(editText1.getText().toString());
 	            	
 	            	MyUser newUser=new MyUser();
 	            	newUser.setNick(editText1.getText().toString());
@@ -234,7 +256,7 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	            	newUser.setAge(editText2.getText().toString());
 	            	newUser.setShengri(editText3.getText().toString());
 	            	newUser.setConstellation(editText4.getText().toString());
-	            	newUser.setZhiye(spinner2.getSelectedItemPosition());
+	            	newUser.setZhiye(arr1[spinner2.getSelectedItemPosition()]);
 	            	newUser.setSchool(editText5.getText().toString());
 	            	newUser.setSuozaidi(editText6.getText().toString());
 	            	newUser.setGuxiang(editText7.getText().toString());
