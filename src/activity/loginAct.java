@@ -60,7 +60,10 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 public class loginAct extends Activity {
@@ -101,6 +104,11 @@ public class loginAct extends Activity {
     private static final int TOFASONG=1;
     
     private CheckBox checkBox;       //我同意服务条款checkbox
+    
+    private ProgressBar progressBar;
+    private RelativeLayout relativeLayout;
+    private RelativeLayout relativeRoot;
+    private TextView textView;
     
     public static String installationId;
     private int daojishi=30;   
@@ -167,14 +175,18 @@ public class loginAct extends Activity {
 	    
 	    editText1.setInputType(InputType.TYPE_CLASS_TEXT);
 	    button4=(Button)findViewById(R.id.sendYanzhengma);
+	    
+	    progressBar=(ProgressBar)findViewById(R.id.progressBar);
+	    progressBar.setVisibility(View.GONE);
+	    relativeLayout=(RelativeLayout)findViewById(R.id.relativelayout1);
+	    relativeLayout.setVisibility(View.GONE);
+	    relativeRoot=(RelativeLayout)findViewById(R.id.relativeRoot);
+	    textView=(TextView)findViewById(R.id.textDeng);
+	    textView.setVisibility(View.GONE);
+	    
 	    button2.setBackgroundColor(0);
 	   
-		
-			
-		
-	
-		
-	    button1.setOnTouchListener(new OnTouchListener() {
+		  button1.setOnTouchListener(new OnTouchListener() {
 			
 			@Override
 			public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -269,8 +281,15 @@ public class loginAct extends Activity {
 				   flag1=true;
 				   flag2=false;
 				}
-				if(action==MotionEvent.ACTION_UP)
+				if(action==MotionEvent.ACTION_UP){
+					
 					button1.setBackgroundColor(Color.parseColor("#00FF00"));
+					progressBar.setVisibility(View.VISIBLE);
+					relativeLayout.setVisibility(View.VISIBLE);
+					relativeLayout.setOnClickListener(null);
+					relativeRoot.setAlpha(0.3f);
+					textView.setVisibility(View.VISIBLE);
+				}
 				return false;
 			}
 		});
@@ -302,12 +321,12 @@ public class loginAct extends Activity {
 					    {
 						    BmobUser.loginBySMSCode(input, passwordString, new LogInListener<BmobUser>()
 						   {		
-
+                                  
 						           @Override
 					        	    public void done(BmobUser user, BmobException e) 
 						           {
 							             if(user!=null&&e==null)
-							             { Toast.makeText(loginAct.this,"登录成功",Toast.LENGTH_SHORT).show();
+							             {   Toast.makeText(loginAct.this,"登录成功",Toast.LENGTH_SHORT).show();
 							                 Intent intent=new Intent(loginAct.this,weather_info.class);
 										     startActivity(intent);
 										     finish();
@@ -318,13 +337,19 @@ public class loginAct extends Activity {
 						            }
 						   }
 						    		);
+						    progressBar.setVisibility(View.VISIBLE);
+							relativeLayout.setVisibility(View.VISIBLE);
+							relativeLayout.setOnClickListener(null);
+							relativeRoot.setAlpha(0.3f);
+							textView.setVisibility(View.VISIBLE);
 					    }
 					   flag1=false;
 					   flag2=true;
 					}
 				  
-				if(action==MotionEvent.ACTION_UP)
+				if(action==MotionEvent.ACTION_UP){
 					button2.setBackgroundColor(Color.parseColor("#00FF00"));
+				}
 				return false;
 			}
 		});
@@ -478,6 +503,18 @@ public class loginAct extends Activity {
         return m.matches();
 
 		}
-	
+	@Override
+	public void onBackPressed() {
+		if(relativeRoot.getAlpha()==0.3f){
+			progressBar.setVisibility(View.GONE);
+			relativeRoot.setAlpha(1);
+			relativeLayout.setVisibility(View.GONE);
+			textView.setVisibility(View.GONE);
+		}
+		else {
+			super.onBackPressed();
+		}
+	}
+	 
 	 
   }

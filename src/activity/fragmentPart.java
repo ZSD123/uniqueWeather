@@ -372,6 +372,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mMapView.onCreate(savedInstanceState);
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			yonghuString=(TextView)view.findViewById(R.id.yonghuString);
+			if(context==null)
+				context=(Context)getActivity();
+			
 			View mapView=LayoutInflater.from(context).inflate(R.layout.mapcircleimageview, null);
 			userPicture1=(MapCircleImageView)mapView.findViewById(R.id.mapCircle);
 			LayoutParams layoutParams=new LayoutParams(getPixelsFromDp(100),getPixelsFromDp(100));

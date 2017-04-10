@@ -53,6 +53,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -89,10 +91,13 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	private int day;
 	@Override
      public void onCreate(Bundle savedInstanceState)
-	 {
+	 { 
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.mydata);
+		setContentView(R.layout.mydata);  
+		
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		
 	    spinner1=(Spinner)findViewById(R.id.spinner1);
 	    spinner2=(Spinner)findViewById(R.id.spinner2);
 	    editText1=(EditText)findViewById(R.id.zunchen);

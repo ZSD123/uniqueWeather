@@ -1,6 +1,10 @@
 package activity;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URI;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -150,7 +154,14 @@ public class weather_info extends baseFragmentActivity {
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
 				fragmentPart.refreshUserPicture(bitmap);
 		        
-             	final BmobFile bmobFile=new BmobFile(new File(path));
+				bitmap=compressImage(bitmap);
+				File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.jpeg");
+				BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file));
+				bitmap.compress(Bitmap.CompressFormat.JPEG, 100,bos);
+				bos.flush();
+				bos.close();
+				
+             	final BmobFile bmobFile=new BmobFile(file);
 				bmobFile.uploadblock(new UploadFileListener() {
 					
 					
@@ -341,5 +352,19 @@ public class weather_info extends baseFragmentActivity {
 	public static boolean isGooglePhotosUri(Uri uri) {  
 	    return "com.google.android.apps.photos.content".equals(uri.getAuthority());  
 	}  
+	private Bitmap compressImage(Bitmap image) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);//质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
+        int options = 100;
+        while ( baos.toByteArray().length / 1024>200) {    //循环判断如果压缩后图片是否大于100kb,大于继续压缩        
+            baos.reset();//重置baos即清空baos
+            options -= 10;//每次都减少10
+            image.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中
+
+        }
+        ByteArrayInputStream isBm = new ByteArrayInputStream(baos.toByteArray());//把压缩后的数据baos存放到ByteArrayInputStream中
+        Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);//把ByteArrayInputStream数据生成图片
+        return bitmap;
+    }
 	
 }
