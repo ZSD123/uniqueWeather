@@ -61,23 +61,8 @@ public class myUserDB {
     	}
     	return username;
     }
-    public void saveUserPic(String account,String userPic){
-    	if(account!=null&&userPic!=null){
-    		ContentValues values=new ContentValues();
-    		values.put("userPic",userPic);
-    		db.update("myuser", values, "account=?", new String []{account});
-    	}
-    }
-    public String loadUserPic(String account){
-    	String userPic="";
-    	Cursor cursor=db.query("myuser",new String []{"userPic"}, "account=?", new String []{account}, null, null, null);
-    	if(cursor.moveToFirst()){
-    		do {
-				userPic=cursor.getString(cursor.getColumnIndex("userPic"));
-			} while (cursor.moveToNext());
-    	}
-    	return userPic;
-    }
+
+
     public int loadChenhuOnce(String account){
     	int chenhu=0;
     	Cursor cursor=db.query("myuser",new String []{"chenhuOnce"}, "account=?", new String []{account}, null, null, null);
@@ -88,13 +73,7 @@ public class myUserDB {
     	}
     	return chenhu;
     }
-    public void updateUserPic(String account,String userPic){
-    	if(userPic!=null&&account!=null){
-    		ContentValues values=new ContentValues();
-    		values.put("userPic", userPic);
-            db.update("myuser", values,"account=?", new String []{account});
-    	}
-    }
+ 
     public void updateChenhu(String account){
     	ContentValues values=new ContentValues();
     	values.put("chenhuOnce", 1);
@@ -121,13 +100,7 @@ public class myUserDB {
 			saveUserName(account, username,0);
 		  }
     }
-    public void checkandSaveUpdateP(String account,String userPic){
-    	  if(checkCunZai(account)){
-    		  updateUserPic(account, userPic);
-    	  }else {
-			saveUserPic(account, userPic);
-		  }
-    }
+   
     public void checkandSaveUpdateC(String account,String username,int chenhu){
     	 if(checkCunZai(account)){
     		 updateChenhu(account);

@@ -11,7 +11,6 @@ public class myUserdbHelper extends SQLiteOpenHelper {
 			+ "id integer primary key autoincrement,"
 			+ "account Text,"
 			+ "username Text,"
-			+ "userPic Text,"
 			+ "chenhuOnce integer)";
 			
 	public myUserdbHelper(Context context, String name, CursorFactory factory,

@@ -2,7 +2,9 @@ package activity;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,10 +31,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -159,6 +163,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private OnLocationChangedListener mListener;
 	private String yuanLocation;
 	
+
 	public static  yonghuDB yongbDb;
 	private String username;
 	public fragmentPart(){
@@ -206,13 +211,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			String nick=(String)BmobUser.getObjectByKey("nick");
 		    String touxiangUrl=(String)BmobUser.getObjectByKey("touxiangUrl");
+		    String accountString=(String)BmobUser.getObjectByKey("username");//就是账户名，比如159...或者邮箱
 		    if(nick!=null){
 		    	userName.setText(nick);
 		    }
 			
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
-			accountName=weather_info.myUserdb.loadUserName(username);
+			accountName=weather_info.myUserdb.loadUserName(username); 
 			if(!accountName.isEmpty())
 			{Toast.makeText(context,accountName + ",欢迎您", Toast.LENGTH_SHORT).show();
 			 userName.setText(accountName);
@@ -233,23 +239,16 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			    	});
 				
 			}
-			String userPictString=weather_info.myUserdb.loadUserPic(username);
-            if(userPictString!=null){
-		    	if(!userPictString.equals("")){       //如果有保存头像路径，并且头像路径的file存在，就可以快速取材，并且设置图片
-            	File file=new File(userPictString);
-            	if(file.exists()){
-            	    bitmap1=BitmapFactory.decodeFile(userPictString);
-            		userPicture.setImageBitmap(bitmap1);
-            	}
-            }
-            }else {
-				 File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
-				 if(file.exists()){
-					  weather_info.myUserdb.checkandSaveUpdateP((String)MyUser.getObjectByKey("username"),Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
-					  bitmap1=BitmapFactory.decodeFile(userPictString);
+		    touxiangUrl=(String)MyUser.getObjectByKey("touxiangUrl");
+		
+            File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
+		      if(file.exists()){
+					  bitmap1=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
 	                  userPicture.setImageBitmap(bitmap1);
 				   }
-		    	}
+            	
+            	
+		      
 			 if(touxiangUrl!=null)       //这里防止更新图片后另外一台客户端没有更新
 				{  
 				   BmobFile bmobFile=new BmobFile("头像"+".png",null,touxiangUrl);//确定文件名字（头像.png）和网络地址

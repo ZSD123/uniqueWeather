@@ -147,17 +147,15 @@ public class weather_info extends baseFragmentActivity {
 		case 2:
 			if(resultCode==RESULT_OK)
 			{final Uri uri=data.getData();
-			final String path=getPath(weather_info.this, uri);  //这里取得路径，将uri转化为路径
 			ContentResolver cr=this.getContentResolver();
-			myUserdb.checkandSaveUpdateP(username, path);
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
 				fragmentPart.refreshUserPicture(bitmap);
 		        
 				bitmap=compressImage(bitmap);
-				File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.jpeg");
+				File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
 				BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream(file));
-				bitmap.compress(Bitmap.CompressFormat.JPEG, 100,bos);
+				bitmap.compress(Bitmap.CompressFormat.PNG, 100,bos);
 				bos.flush();
 				bos.close();
 				
@@ -356,7 +354,7 @@ public class weather_info extends baseFragmentActivity {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos);//质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
         int options = 100;
-        while ( baos.toByteArray().length / 1024>200) {    //循环判断如果压缩后图片是否大于100kb,大于继续压缩        
+        while ( baos.toByteArray().length / 1024>1000) {    //循环判断如果压缩后图片是否大于100kb,大于继续压缩        
             baos.reset();//重置baos即清空baos
             options -= 10;//每次都减少10
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中

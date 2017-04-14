@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import cn.bmob.v3.BmobRealTimeData;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.listener.ValueEventListener;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -60,8 +61,15 @@ public class baseFragmentActivity extends FragmentActivity {
 		});
 	   
 	}
+	@SuppressWarnings("unused")
 	public void showLogOutDialog(){
-		AlertDialog.Builder builder=new AlertDialog.Builder(baseFragmentActivity.this);
+		Activity activity=baseFragmentActivity.this;
+		if(activity==null){
+			if(activity.getParent()!=null){
+				activity=activity.getParent();
+			}
+		}
+		AlertDialog.Builder builder=new AlertDialog.Builder(activity);
 		builder.setMessage("您当前账户在其他设备上登录，即将下线");
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 			

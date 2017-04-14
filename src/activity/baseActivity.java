@@ -62,8 +62,15 @@ public class baseActivity extends Activity {
 		});
 	   
 	}
+	@SuppressWarnings("unused")
 	public void showLogOutDialog(){
-		AlertDialog.Builder builder=new AlertDialog.Builder(baseActivity.this);
+		Activity activity=baseActivity.this;
+		if(activity==null){
+			if(activity.getParent()!=null){
+				activity=activity.getParent();
+			}
+		}
+		AlertDialog.Builder builder=new AlertDialog.Builder(activity.getParent());
 		
 		builder.setMessage("您当前账户在其他设备上登录，即将下线");
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
