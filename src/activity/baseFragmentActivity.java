@@ -82,7 +82,7 @@ public class baseFragmentActivity extends FragmentActivity {
 		});
 		builder.setCancelable(false);
 		 dialog=builder.create();
-		dialog.show();
+		 dialog.show();
 	}
 	@Override
     protected void onDestroy() {

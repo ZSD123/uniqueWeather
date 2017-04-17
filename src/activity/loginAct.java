@@ -267,6 +267,12 @@ public class loginAct extends Activity {
 										else {
 											 Toast.makeText(loginAct.this,"µÇÂ¼Ê§°Ü£¬"+e.getMessage(), Toast.LENGTH_SHORT).show();
 										}
+										 if(relativeRoot.getAlpha()==0.3f){
+												progressBar.setVisibility(View.GONE);
+												relativeRoot.setAlpha(1);
+												relativeLayout.setVisibility(View.GONE);
+												textView.setVisibility(View.GONE);
+											}
 									}
 									
 								}
@@ -333,6 +339,12 @@ public class loginAct extends Activity {
 							             }
 							             else {
 											  Toast.makeText(loginAct.this,"µÇÂ¼Ê§°Ü£¬"+e,Toast.LENGTH_SHORT).show();
+											  if(relativeRoot.getAlpha()==0.3f){
+													progressBar.setVisibility(View.GONE);
+													relativeRoot.setAlpha(1);
+													relativeLayout.setVisibility(View.GONE);
+													textView.setVisibility(View.GONE);
+												}
 										}
 						            }
 						   }

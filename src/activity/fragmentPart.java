@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,6 +46,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -139,7 +142,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private LatLonPoint latlng;
     private LatLng latLng1;
     public float zoom;
-    public int chucuoonce=0;
+    public volatile int chucuoonce=0;
     public double lat;
     public double lon;
     public LatLng yuanLatLng;   //原来的LatLng,即搜寻
@@ -155,17 +158,22 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private List<Marker> mFujinMarker=new ArrayList<Marker>(); //没有设置头像直接添加头像的附近用户Marker
 	private  List<String> urlList=new ArrayList<String>();;
 	
-	private int zmarkNum=0;//直接添加用户头像的Marker个数
+	private volatile int zmarkNum=0;//直接添加用户头像的Marker个数
 	private Marker mLoveMarker;    //当前Marker
 	private boolean mFirstFix = false;
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
 	private TextView myAccount;     //我的账户TextView 	
 	private OnLocationChangedListener mListener;
 	private String yuanLocation;
+	private ImageButton refreshBtn;  //地图刷新按钮
+    private Timer timer;
+	private TimerTask task;
+	private int daojishi=10;     //倒计时刷新
 	
-
 	public static  yonghuDB yongbDb;
 	private String username;
+	private boolean markCunzai=false;  //加载图片的时候为了加快速度检测是否存在相应的mark
+	
 	public fragmentPart(){
 		
 	}
@@ -205,8 +213,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			button2=(Button)view.findViewById(R.id.button1);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
-			
-			if(context==null)
+		
+				if(context==null)
 				context=(Context)getActivity();
 			
 			String nick=(String)BmobUser.getObjectByKey("nick");
@@ -371,6 +379,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			mMapView.onCreate(savedInstanceState);
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			yonghuString=(TextView)view.findViewById(R.id.yonghuString);
+			refreshBtn=(ImageButton)view.findViewById(R.id.refreshbtn);
+			
 			if(context==null)
 				context=(Context)getActivity();
 			
@@ -437,7 +447,22 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             //调用异步查询接口
             mNearbySearch.searchNearbyInfoAsyn(query);
             
-            
+        	timer=new Timer();
+			task=new TimerTask(){
+			 		@Override
+			 		public void run() 
+			 		{   daojishi--;
+			 		    if(daojishi==0)
+			 			{   
+							query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
+						    mNearbySearch.searchNearbyInfoAsyn(query);
+			 			    daojishi=10;
+	                        chucuoonce=0;
+	                        Log.d("Main","更新");
+			 			}
+			 		}
+			 	};
+			timer.schedule(task, 1000,1000);
             
 		    locButton.setOnClickListener(new OnClickListener() {
 				
@@ -452,7 +477,17 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
                      aMap.invalidate();
 				}
 			});
-		   
+		   refreshBtn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
+			    mNearbySearch.searchNearbyInfoAsyn(query);
+				RotateAnimation animation=new RotateAnimation(0, 360,Animation.RELATIVE_TO_SELF,0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+				animation.setDuration(1000);
+				refreshBtn.startAnimation(animation);
+			}
+		});
 			
 		}
 	
@@ -600,9 +635,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				   }
 				else if(chucuoonce==0)
 			     	{
-				  	
-					Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
-					Log.d("Main", "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo());
+				  	Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
 					chucuoonce=1;
 			     	}
 			  }
@@ -661,7 +694,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			{   mLocationClient.stopLocation();
 				mLocationClient.onDestroy();
 			}
-
+           zmarkNum=0;
+           NearbySearch.destroy();
+           if(timer!=null)
+              timer.cancel();
+           if(task!=null)
+              task.cancel();
             Log.d("Main","onDestroy");
 		}
 		@Override
@@ -692,6 +730,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			if(mLocMarker!=null){
 				mLocMarker.setPosition(latlng);
 			}
+
 			BitmapFactory.Options options1=new BitmapFactory.Options();
 			options1.inSampleSize=2;
 			Bitmap bitmap=BitmapFactory.decodeResource(this.getResources(), R.drawable.zhuanxiang, options1);
@@ -711,12 +750,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
-				        && ((nearbySearchResult.getNearbyInfoList().size() > 1&&nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId")))||(nearbySearchResult.getNearbyInfoList().size()>0)&&!nearbySearchResult.getNearbyInfoList().contains((String)MyUser.getObjectByKey("objectId"))))
+				        && nearbySearchResult.getNearbyInfoList().size() > 1)
 				    {   yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
-				       {    Log.d("Main", "yonghu="+nearbySearchResult.getNearbyInfoList().get(i).getUserID());
-				            
-				        	cunzai=false;
+				       {  
+				            cunzai=false;
 				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  {
 				                List<String> list=yongbDb.loadObjectId();  //查询数据表中所有的objectId
 				                if(list.size()==0){
@@ -741,12 +779,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				            addSanMarker1();
 				     
 				   } 
-				        else {
+				        else if(chucuoonce==0){
 				                     Toast.makeText(context, "周边为空",Toast.LENGTH_LONG).show();
+				                     chucuoonce=1;
+				                     Log.d("Main", "周边为空");
 				              }
 				}
-				     else{
+				     else if(chucuoonce==0){
 				             Toast.makeText(context,"周边搜索出现异常，异常码为："+resultCode ,Toast.LENGTH_LONG).show();
+				             chucuoonce=1;
 				         }
 
 			
@@ -765,7 +806,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   
 			List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();//加载没有Url的objectId
 		    if(objectIdList.size()>0){
+		    	Log.d("Main", "这里1");
 		    	for (int i = 0; i < objectIdList.size(); i++) {
+		    		
 		    		BmobQuery<MyUser> query=new BmobQuery<MyUser>();
 		    		query.getObject(objectIdList.get(i), new QueryListener<MyUser>() {
 						
@@ -774,12 +817,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 							if(e==null){
 
 								yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
-								if(!object.getTouXiangUrl().equals("")){
+								if(!object.getTouXiangUrl().equals("")){      //当存在有相应的Url值
 								     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
 								}
 								 else {
-									 if(yongbDb.checkJiaZai(object.getObjectId())!=1)  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载
-								 	    addSanMarker2(object.getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
+									 if(!markXianShi(object.getObjectId()))  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载(这里修改为了判断mark是否加载)
+								 	    addSanMarkerDir(object.getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
 									 else{                                         //如果等于1，就是加载完毕，这个设置它最新的地理位置坐标                    
 										for (int j = 0; j < zmarkNum; j++) {
 											if(mFujinMarker.get(j).getObject().equals(object.getObjectId())){
@@ -799,16 +842,22 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					});
 				   
 				}
-		    }else {             //当Url都存在的时候，设置相应图标的地理位置
-				List<String> obList=new ArrayList<String>();
+		    }else {             //当Url都存在的时候，设置相应图标的地理位置(修正:当url都存在的时候，也无法判断它是否已经在地图上加载显示了，先判断是否加载显示，再设置地理位置)
+		    	List<String> obList=new ArrayList<String>();
 				obList=yongbDb.loadObjectId();
+				boolean cun=false;
 		    	for (int i = 0; i < obList.size(); i++) {
+		    		cun=false;
 					for (int j = 0; j < zmarkNum; j++) {
-						if(obList.get(i).equals(mFujinMarker.get(j).getObject())){
+						if(obList.get(i).equals(mFujinMarker.get(j).getObject())&&mFujinMarker.get(j).isVisible()){
 							double la=yongbDb.loadLatbyId(obList.get(i))[0];
 							double lo=yongbDb.loadLatbyId(obList.get(i))[1];
 							mFujinMarker.get(j).setPosition(new LatLng(la,lo));
+							cun=true;
 						}
+					}
+					if(!cun){
+						JiaZai(obList.get(i), yongbDb.loadUserTouxiangUrl(obList.get(i)));
 					}
 				}
 			}
@@ -861,7 +910,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	   private void checkJiaZai(String obString,String touxiangUrl){
 		   if(zmarkNum>0) {
 		   for (int i = 0; i < zmarkNum; i++) {
-				if(mFujinMarker.get(i).getObject().equals(obString)){
+				if(mFujinMarker.get(i).getObject().equals(obString)&&mFujinMarker.get(i).isVisible()){
 					double la=yongbDb.loadLatbyId(obString)[0];
 					double lo=yongbDb.loadLatbyId(obString)[1];
 					mFujinMarker.get(i).setPosition(new LatLng(la,lo));
@@ -875,52 +924,123 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	   }
 	   private void JiaZai(final String obString,final String touxiangUrl){ 
 	        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
-	        if(file.exists())
+	        if(file.exists()){
+	        Log.d("Main", "文件存在");
             bitmap11=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
-	        new Thread(new Runnable() {
-	        	            @Override
-							public void run() {
-							     
-						    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
+            addSanMarkerDir(obString,bitmap11);     
+            new Thread(new Runnable() {
+ 	            @Override
+					public void run() {
+					     
+				    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
+				
+				    	 if(bitmap11!=null){
+					     	saveYonghuPic(bitmap11,obString);
+						    bitmapNum++;
+						    objStrings.add(obString);   //objStrings列表是加载了自己图片的用户的列表obj
+						}	
+					((Activity)context).runOnUiThread(new Runnable() {  
 						
-						    	 if(bitmap11!=null){
-							     	saveYonghuPic(bitmap11,obString);
-								    bitmapNum++;
-								    objStrings.add(obString);   //objStrings列表是加载了自己图片的用户的列表obj
-								}	
-							((Activity)context).runOnUiThread(new Runnable() {  //加载了所有bitmap就可以放在地图上了
-								
-								@Override
-								public void run() {
-										addSanMarker2(obString,getYonghuPic(obString));
-								}
-							});
+						@Override
+						public void run() {
+								addSanMarkerRefresh(obString,getYonghuPic(obString));
+						}
+					});
+					}
+				}).start();
+                //有头像Url的objectId加载过了的话就设置position
+            
+	        }else {
+	        	 new Thread(new Runnable() {
+     	            @Override
+						public void run() {
+						     
+					    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
+					
+					    	 if(bitmap11!=null){
+						     	saveYonghuPic(bitmap11,obString);
+							    bitmapNum++;
+							    objStrings.add(obString);   //objStrings列表是加载了自己图片的用户的列表obj
+							}	
+						((Activity)context).runOnUiThread(new Runnable() {  //加载了所有bitmap就可以放在地图上了
+							
+							@Override
+							public void run() {
+									addSanMarkerDir(obString,getYonghuPic(obString));
 							}
-						}).start();
-                           //有头像Url的objectId加载过了的话就设置position
+						});
+						}
+					}).start();
+                    //有头像Url的objectId加载过了的话就设置position
+			}
+	       
 			    
 		    
 	   }
-	   private void addSanMarker2(String objectId,Bitmap bitmap1){
+	   private void addSanMarkerDir(String objectId,Bitmap bitmap1){
 		   Bitmap bitmap2;
+		   Log.d("Main", "直接加载marker");
 		   if(bitmap1==null){
 		        bitmap2=BitmapFactory.decodeResource(getResources(),R.drawable.userpicture);
 		    }else {
 				bitmap2=bitmap1;
 			}
-		    if((ViewGroup)userPicture1.getParent()!=null)
-		        ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
-		    userPicture1.setImageBitmap(bitmap2);
-		    BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
-	    	MarkerOptions options=new MarkerOptions();
-	    	options.icon(descriptor);
-	    	options.anchor(0.5f, 1f);
-	    	double [] yonghuLatlon=new double [2];
-	    	yonghuLatlon=yongbDb.loadLatbyId(objectId);
-	    	options.position(new LatLng(yonghuLatlon[0], yonghuLatlon[1]));
-	    	mFujinMarker.add(zmarkNum, aMap.addMarker(options));
-	    	mFujinMarker.get(zmarkNum).setObject(objectId);
-	    	yongbDb.updateJiaZai1(objectId);
-	    	zmarkNum++;
+	                if((ViewGroup)userPicture1.getParent()!=null)
+				        ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+				    userPicture1.setImageBitmap(bitmap2);
+				    BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
+			    	MarkerOptions options=new MarkerOptions();
+			    	options.icon(descriptor);
+			    	options.anchor(0.5f, 1f);
+			    	double [] yonghuLatlon=new double [2];
+			    	yonghuLatlon=yongbDb.loadLatbyId(objectId);
+			    	options.position(new LatLng(yonghuLatlon[0], yonghuLatlon[1]));
+			    	mFujinMarker.add(zmarkNum, aMap.addMarker(options));
+			    	mFujinMarker.get(zmarkNum).setObject(objectId);
+			    	yongbDb.updateJiaZai1(objectId);
+			    	zmarkNum++;
+	    	    Log.d("Main","1zmarkNum="+zmarkNum);
+		   
 	   }
+	   public void addSanMarkerRefresh(String objectId,Bitmap bitmap){
+		   Log.d("Main", "刷新marker");
+		   if(zmarkNum>0) {
+			   for (int i = 0; i < zmarkNum; i++) {
+					if(mFujinMarker.get(i).getObject().equals(objectId)){
+						  if((ViewGroup)userPicture1.getParent()!=null)
+						        ((ViewGroup)userPicture1.getParent()).removeView(userPicture1);
+						    userPicture1.setImageBitmap(bitmap);
+						    BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
+					    	mFujinMarker.get(i).setIcon(descriptor);
+					    	Log.d("Main", "2zarkNum="+zmarkNum);
+					}
+			   }
+		   }
+	   }
+	   public void setYonghuPoi(){
+			List<String> obList=new ArrayList<String>();
+			obList=yongbDb.loadObjectId();
+	    	for (int i = 0; i < obList.size(); i++) {
+				for (int j = 0; j < zmarkNum; j++) {
+					if(obList.get(i).equals(mFujinMarker.get(j).getObject())){
+						double la=yongbDb.loadLatbyId(obList.get(i))[0];
+						double lo=yongbDb.loadLatbyId(obList.get(i))[1];
+						mFujinMarker.get(j).setPosition(new LatLng(la,lo));
+					}
+				}
+			}
+	   }
+	   public boolean markXianShi(String objectId){
+		   boolean ti=false;
+		   if(zmarkNum>0) {
+			   for (int i = 0; i < zmarkNum; i++) {
+					if(mFujinMarker.get(i).getObject().equals(objectId)){
+						 if(mFujinMarker.get(i).isVisible())
+							 ti=true;
+					}
+			   }
+		   }
+	    	return ti;
+	   }
+	   
 }
