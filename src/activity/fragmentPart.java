@@ -781,6 +781,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				   } 
 				        else if(chucuoonce==0){
 				                     Toast.makeText(context, "周边为空",Toast.LENGTH_LONG).show();
+				                     yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
 				                     chucuoonce=1;
 				                     Log.d("Main", "周边为空");
 				              }
@@ -908,19 +909,17 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
 	   }
 	   private void checkJiaZai(String obString,String touxiangUrl){
-		   if(zmarkNum>0) {
-		   for (int i = 0; i < zmarkNum; i++) {
-				if(mFujinMarker.get(i).getObject().equals(obString)&&mFujinMarker.get(i).isVisible()){
-					double la=yongbDb.loadLatbyId(obString)[0];
-					double lo=yongbDb.loadLatbyId(obString)[1];
-					mFujinMarker.get(i).setPosition(new LatLng(la,lo));
-				}else {
-					JiaZai(obString, touxiangUrl);
-				  }
-			    }
+		   if(!markXianShi(obString)){
+			   JiaZai(obString, touxiangUrl);
 		   }else {
-			    JiaZai(obString, touxiangUrl);
-		    }
+				for (int j = 0; j < zmarkNum; j++) {
+					if(mFujinMarker.get(j).getObject().equals(obString)){
+						double la=yongbDb.loadLatbyId(obString)[0];
+						double lo=yongbDb.loadLatbyId(obString)[1];
+						mFujinMarker.get(j).setPosition(new LatLng(la,lo));
+					}
+				} 
+		}
 	   }
 	   private void JiaZai(final String obString,final String touxiangUrl){ 
 	        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
