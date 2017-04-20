@@ -47,13 +47,10 @@ public class Utility {
 	}
 	public static void saveWeatherInfo(String time,String weatherInfo,String temperature,String weather_pic,Context context)
 	{
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyyƒÍMM‘¬dd»’");
-		Date currentDate=new Date(System.currentTimeMillis());
+		
 		SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putString("time", time);
 		editor.putString("weatherInfo", weatherInfo);
 		editor.putString("temperature", temperature+"°Ê");
-		editor.putString("realtime", sdf.format(currentDate));
 		editor.putString("weather_pic", weather_pic);
 		editor.commit();
 	}

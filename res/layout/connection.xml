@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
         <include layout="@layout/leftmenu"/>
-        <include layout="@layout/weather_layout"/>
+        <include layout="@layout/chat_main"/>
      </LinearLayout>
 </activity.MyHorizontalView>
 </RelativeLayout>

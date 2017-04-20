@@ -45,7 +45,8 @@ public class chooseAreaActivity extends baseActivity {
 	 private int provinceLevel=0;
 	 private int cityLevel=1;
 	 private int countyLevel=2;
-	 private ArrayAdapter adapter;
+	 @SuppressWarnings("rawtypes")
+	private ArrayAdapter adapter;
 	 private WeatherDB weatherDB;
 	 private List<Province> provinceList;
 	 private List<City> cityList;

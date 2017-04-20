@@ -210,10 +210,17 @@ public class loginAct extends Activity {
 					  Toast.makeText(loginAct.this, "帐号或密码不能为空", Toast.LENGTH_SHORT).show();
 				   else if((isMobileNO(input)||isEmail(input))&&flag1)
 				   {   
+					   progressBar.setVisibility(View.VISIBLE);
+					   relativeLayout.setVisibility(View.VISIBLE);
+					   relativeLayout.setOnClickListener(null);
+					   relativeRoot.setAlpha(0.3f);
+					   textView.setVisibility(View.VISIBLE);
+					   
 					   bu.setUsername(input);
 					   bu.setPassword(MD5Util.getMD5String(passwordString));			  
 					   
 					   if(isEmail(input)){
+					   Log.d("Main", "3");
 					   BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
 					   query.addWhereEqualTo("username",input);
 				       query.findObjects(new FindListener<MyUser>() {
@@ -221,6 +228,15 @@ public class loginAct extends Activity {
 						@Override
 						public void done(List<MyUser> object, BmobException e) {
 						     if(e==null){
+						    	if(object.size()==0){
+						    		Toast.makeText(loginAct.this, "对不起，您当前账户并未注册，请再确认一遍", Toast.LENGTH_SHORT).show();
+						    		 if(relativeRoot.getAlpha()==0.3f){
+											progressBar.setVisibility(View.GONE);
+											relativeRoot.setAlpha(1);
+											relativeLayout.setVisibility(View.GONE);
+											textView.setVisibility(View.GONE);
+										}
+						    	}else{
 						    	 for(MyUser myUser : object){
 						    		 if(myUser.getEmailVerified()){
 						    			 bu.login(new SaveListener<MyUser>(){
@@ -233,9 +249,22 @@ public class loginAct extends Activity {
 													  startActivity(intent);
 													  finish();
 												}else {
-													Toast.makeText(loginAct.this,"登录失败,"+e.getMessage(),Toast.LENGTH_SHORT ).show();
-												}
+													 if(e.getErrorCode()==101)
+												      	Toast.makeText(loginAct.this,"登录失败,密码错误",Toast.LENGTH_SHORT ).show();
+													 else if(e.getErrorCode()==9016)
+													    Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
+													 else{
+														 Toast.makeText(loginAct.this,"登录失败,"+e.getMessage(),Toast.LENGTH_SHORT ).show();
+													 }
+														 
+													 if(relativeRoot.getAlpha()==0.3f){
+															progressBar.setVisibility(View.GONE);
+															relativeRoot.setAlpha(1);
+															relativeLayout.setVisibility(View.GONE);
+															textView.setVisibility(View.GONE);
+														}
 												
+										      }
 											}
 						    				 
 						    			 });
@@ -243,6 +272,7 @@ public class loginAct extends Activity {
 						    			 Toast.makeText(loginAct.this,"请先验证您的邮箱，如果邮件被删，请在注册页面输入您的邮箱，点击发送验证",Toast.LENGTH_SHORT).show();
 									}
 						    	 }
+						    	}
 						     }else if(e.getErrorCode()==9016){
 						    	  Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
 						     } else{
@@ -250,6 +280,8 @@ public class loginAct extends Activity {
 							}
 							
 						}
+						
+						 
 					});
 					   }else if(isMobileNO(input)){
 						    bu.login(new SaveListener<MyUser>(){
@@ -266,7 +298,7 @@ public class loginAct extends Activity {
 											  Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
 										else {
 											 Toast.makeText(loginAct.this,"登录失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
-										}
+									  	}
 										 if(relativeRoot.getAlpha()==0.3f){
 												progressBar.setVisibility(View.GONE);
 												relativeRoot.setAlpha(1);
@@ -290,11 +322,7 @@ public class loginAct extends Activity {
 				if(action==MotionEvent.ACTION_UP){
 					
 					button1.setBackgroundColor(Color.parseColor("#00FF00"));
-					progressBar.setVisibility(View.VISIBLE);
-					relativeLayout.setVisibility(View.VISIBLE);
-					relativeLayout.setOnClickListener(null);
-					relativeRoot.setAlpha(0.3f);
-					textView.setVisibility(View.VISIBLE);
+					
 				}
 				return false;
 			}

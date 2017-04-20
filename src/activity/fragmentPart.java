@@ -48,9 +48,11 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,6 +71,7 @@ import com.amap.api.location.AMapLocationListener;
 import com.amap.api.mapcore2d.db;
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMap.OnCameraChangeListener;
+import com.amap.api.maps2d.AMap.OnMarkerClickListener;
 import com.amap.api.maps2d.AMapUtils;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
@@ -93,25 +96,24 @@ import com.amap.api.services.nearby.UploadInfoCallback;
 import com.uniqueweather.app.R;
 
 import db.yonghuDB;
-public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener
+public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener,OnMarkerClickListener
 {   public static String keyToGet="begin";
     private String theKey;
-	private static TextView time;
-	private static TextView realtime;
-	private static RelativeLayout weather_layout;
+    
+    private RelativeLayout fuzhiMap;
 	private static TextView weather;
 	private static TextView temper;
 	public static CircleImageView userPicture;
 	public static MapCircleImageView userPicture1;  //地图上userPicture
 	
+	private RelativeLayout fujinData;    //附近用户的资料名片
+	
+	private ListView chatList;      //聊天列表
 	private TextView yonghuString;
 	private Bitmap bitmap11;
 	private TextView myCity;
-    private Button button_refresh;
-    public static String countyName;
     private static ImageView pic;
     public  static TextView userName;
-    private static TextView countyname;
     public static SharedPreferences.Editor editor;
     public static SharedPreferences pre;
     private String accountName;
@@ -196,18 +198,48 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		{   
 			view=inflater.inflate(R.layout.connection,container,false);
 		    userName=(TextView)view.findViewById(R.id.userName);
-			time=(TextView)view.findViewById(R.id.time);
 	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
             
 	        username=(String)MyUser.getObjectByKey("username");
 	        
-	        realtime=(TextView)view.findViewById(R.id.realTime);
-			weather_layout=(RelativeLayout)view.findViewById(R.id.weather_info);
+            chatList=(ListView)view.findViewById(R.id.chatList);
+	        
+            BaseAdapter baseAdapter=new BaseAdapter() {
+				
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					if(convertView==null){
+						LayoutInflater layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					    view=(RelativeLayout) layoutInflater.inflate(R.layout.item_conversation, null);
+						
+					}else {
+						view=(RelativeLayout) convertView;
+					}
+
+		            return view;
+				}
+				
+				@Override
+				public long getItemId(int position) {
+
+					return 0;
+				}
+				
+				@Override
+				public Object getItem(int position) {
+					return null;
+				}
+				
+				@Override
+				public int getCount() {
+					return 0;
+				}
+			};
+			chatList.setAdapter(baseAdapter);
+			
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
 			myCity=(TextView)view.findViewById(R.id.myCity);
-			button_refresh=(Button)view.findViewById(R.id.refresh);
-			countyname=(TextView)view.findViewById(R.id.countyName);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
 			button2=(Button)view.findViewById(R.id.button1);
@@ -263,44 +295,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				   download.downloadFile(bmobFile,context);//进行下载操作
 				   
 				}
-		        countyName=pre.getString("locDistrict","");
 				pic.setImageBitmap(getPicture());
-			    countyname.setText(pre.getString("locCity","")+countyName);
 				weather.setText(pre.getString("weatherInfo", ""));
 				temper.setText(pre.getString("temperature", ""));
-				realtime.setText(pre.getString("realtime", ""));
-				String publishTime=pre.getString("time", "");
-				char[]b=publishTime.toCharArray();
-				    if(b.length>0)
-				    { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
-				    time.setText(c);
-				    }
-				
-		   
-				button_refresh.setOnClickListener(new OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{   
-					    Http.queryAreaByXY(pre.getFloat("lat", 0),pre.getFloat("lon",0), address, new HttpCallbackListener() {
-						   @Override
-						    public void onFinish(String response) {
-						    Utility.handleAreaByXY(response, context);
-						    queryWeather(context);
-							   ((Activity) context).runOnUiThread(new Runnable(){
-							    @Override
-							    public void run(){
-							    	countyname.setText(pre.getString("locCity","")+pre.getString("locDistrict",""));
-							    	yuanLocation=pre.getString("locCity","")+pre.getString("locDistrict","");
-				            }});
-					       
-						}
-					  });
-					    
-					    Toast.makeText(getActivity(), "刷新中...", Toast.LENGTH_SHORT).show();
-					}
-				});
-				userPicture.setOnClickListener(new OnClickListener() {
+		  
+		    	userPicture.setOnClickListener(new OnClickListener() {
 					
 					@Override
 					public void onClick(View V) {
@@ -370,6 +369,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		else if(theKey.equals("map"))
 		{   
 			view=inflater.inflate(R.layout.map,container,false);
+			fuzhiMap=(RelativeLayout)view;
 			
 			lat=pre.getFloat("lat", 39);
 			lon=pre.getFloat("lon",116);
@@ -405,6 +405,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    aMap.setLocationSource(this);
 		    aMap.setMyLocationEnabled(true); 
 		    aMap.setOnCameraChangeListener(this);
+		    aMap.setOnMarkerClickListener(this);
 		    uiSettings=aMap.getUiSettings();
 		    uiSettings.setAllGesturesEnabled(true);
 		    if(context==null)
@@ -561,16 +562,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	  public static void showWeather(Context context)
 		{
 		    
-		     weather_layout.setVisibility(View.VISIBLE);
+
 		     weather.setText(pre.getString("weatherInfo", ""));
 		     temper.setText(pre.getString("temperature", ""));
-		     realtime.setText(pre.getString("realtime", ""));
-		     String publishTime=pre.getString("time", "");
-		     char[]b=publishTime.toCharArray();
-		     if(b.length>0)
-		     { String c=""+b[0]+b[1]+b[2]+b[3]+"年"+b[4]+b[5]+"月"+b[6]+b[7]+"日"+" "+b[8]+b[9]+":"+b[10]+b[11]+":"+b[12]+b[13]+"发布";
-		     time.setText(c);
-		     }
+
 		     if(bitmap!=null)
 		         pic.setImageBitmap(bitmap);
 		     Intent intent=new Intent(context,autoUqdateService.class);
@@ -580,10 +575,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
         {   
         	userName.setText(response);
         }
-        public static void refreshCountyName(String response)
-        {
-        	countyname.setText(response);
-        }
+  
         public static void refreshUserPicture(Bitmap bitmap)
         {
         	userPicture.setImageBitmap(bitmap);
@@ -615,16 +607,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 							public void onFinish(String response) {
 							    Utility.handleAreaByXY(response, context);
 								queryWeather(context);
-								if(!pre.getString("locCity","").equals("")&&!pre.getString("locDistrict","").equals(""))
-								{    
-									
-									((Activity) context).runOnUiThread(new Runnable(){
-								    @Override
-								    public void run(){
-								    	countyname.setText(pre.getString("locCity","")+pre.getString("locDistrict",""));
-								    	
-								   }});
-								}
+								
 							}
 						});
 					} else {
@@ -780,10 +763,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				     
 				   } 
 				        else if(chucuoonce==0){
-				                     Toast.makeText(context, "周边为空",Toast.LENGTH_LONG).show();
+				              
 				                     yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
 				                     chucuoonce=1;
-				                     Log.d("Main", "周边为空");
+				                  
 				              }
 				}
 				     else if(chucuoonce==0){
@@ -1016,19 +999,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			   }
 		   }
 	   }
-	   public void setYonghuPoi(){
-			List<String> obList=new ArrayList<String>();
-			obList=yongbDb.loadObjectId();
-	    	for (int i = 0; i < obList.size(); i++) {
-				for (int j = 0; j < zmarkNum; j++) {
-					if(obList.get(i).equals(mFujinMarker.get(j).getObject())){
-						double la=yongbDb.loadLatbyId(obList.get(i))[0];
-						double lo=yongbDb.loadLatbyId(obList.get(i))[1];
-						mFujinMarker.get(j).setPosition(new LatLng(la,lo));
-					}
-				}
-			}
-	   }
+	
 	   public boolean markXianShi(String objectId){
 		   boolean ti=false;
 		   if(zmarkNum>0) {
@@ -1041,5 +1012,20 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   }
 	    	return ti;
 	   }
+	@Override
+	public boolean onMarkerClick(Marker marker) {
+		Log.d("Main", "点");
+		View yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
+		fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
+		RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,getPixelsFromDp(100));
+        layoutParams.addRule(RelativeLayout.ABOVE, R.id.refreshbtn);
+		fujinData.setLayoutParams(layoutParams);
+		ImageView imageView=(ImageView)fujinData.findViewById(R.id.yonghu_data_image);
+		BitmapDescriptor descriptor=marker.getIcons().get(0);
+		imageView.setImageBitmap(descriptor.getBitmap());
+	    fuzhiMap.addView(fujinData);
+	    Log.d("Main", "点击事件");
+		return false; 
+	}
 	   
 }
