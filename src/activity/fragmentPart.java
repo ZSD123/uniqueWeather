@@ -14,6 +14,7 @@ import java.util.TimerTask;
 
 import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
+import myCustomView.myChatPager;
 import service.autoUqdateService;
 import Util.Http;
 import Util.HttpCallbackListener;
@@ -31,6 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.icu.util.BuddhistCalendar;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +41,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -126,6 +130,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public MyHorizontalView horizontalView;
     public Button button2;     //退出登录Button
     
+    private myChatPager chatPager;
+    
     public String  yonghuUrl;   //其他用户url    
     public int yonghuNum=0;      //加载头像Url组的
     public int bitmapNum=0;       //其他用户头的个数
@@ -172,9 +178,18 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private TimerTask task;
 	private int daojishi=10;     //倒计时刷新
 	
+	private View view3;    //消息界面View
+	private View view4;     //联系人界面view
+	private List<View> views;    //装载消息界面view和联系人界面view的views
+	
+	
+	private View  yonghuDataView;  //附近用户资料卡View
+	
 	public static  yonghuDB yongbDb;
 	private String username;
 	private boolean markCunzai=false;  //加载图片的时候为了加快速度检测是否存在相应的mark
+	private Button buttonMes;    //消息按钮
+	private Button buttonCon;    //联系人按钮
 	
 	public fragmentPart(){
 		
@@ -187,7 +202,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) 
+			 Bundle savedInstanceState) 
     {   
 		if(getArguments()!=null)
 		{
@@ -202,40 +217,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             
 	        username=(String)MyUser.getObjectByKey("username");
 	        
-            chatList=(ListView)view.findViewById(R.id.chatList);
-	        
-            BaseAdapter baseAdapter=new BaseAdapter() {
-				
-				@Override
-				public View getView(int position, View convertView, ViewGroup parent) {
-					if(convertView==null){
-						LayoutInflater layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					    view=(RelativeLayout) layoutInflater.inflate(R.layout.item_conversation, null);
-						
-					}else {
-						view=(RelativeLayout) convertView;
-					}
-
-		            return view;
-				}
-				
-				@Override
-				public long getItemId(int position) {
-
-					return 0;
-				}
-				
-				@Override
-				public Object getItem(int position) {
-					return null;
-				}
-				
-				@Override
-				public int getCount() {
-					return 0;
-				}
-			};
-			chatList.setAdapter(baseAdapter);
+       
 			
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
@@ -245,9 +227,79 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			button2=(Button)view.findViewById(R.id.button1);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
-		
-				if(context==null)
-				context=(Context)getActivity();
+		    buttonMes=(Button)view.findViewById(R.id.chat_mes);
+		    buttonCon=(Button)view.findViewById(R.id.chat_con);
+			
+			chatPager=(myChatPager)view.findViewById(R.id.chatPager);
+            final LayoutInflater layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			view3=layoutInflater.inflate(R.layout.chatlist,null);
+			view4=layoutInflater.inflate(R.layout.contactslist,null);
+			
+			BaseAdapter baseAdapter=new BaseAdapter() {
+				
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					View view5;
+					if(convertView==null){
+						view5=layoutInflater.inflate(R.layout.item_conversation, null);
+						}else {
+							view5=convertView;
+						}
+					return view5;
+				}
+				
+				@Override
+				public long getItemId(int position) {
+					return position;
+				}
+				
+				@Override
+				public Object getItem(int position) {
+					return position;
+				}
+				
+				@Override
+				public int getCount() {
+					return 1;
+				}
+			};
+			((ListView)view3).setAdapter(baseAdapter);
+			
+			views=new ArrayList<View>();
+			views.add(view3);
+			views.add(view4);
+			
+            PagerAdapter pagerAdapter=new PagerAdapter() {
+				
+				@Override
+				public boolean isViewFromObject(View arg0, Object arg1) {
+
+					return arg0==arg1;
+				}
+				
+				@Override
+				public int getCount() {
+					
+					return views.size();
+				}
+
+				@Override
+				public void destroyItem(ViewGroup container, int position,
+						Object object) {
+					container.removeView(views.get(position));
+				}
+
+				@Override
+				public Object instantiateItem(final ViewGroup container, int position) {  //将参数里给定的position的视图，增加到container中，以及返回当前position的view作为此图的key
+				    container.addView(views.get(position));
+					return views.get(position);
+				}
+			};
+			
+			chatPager.setAdapter(pagerAdapter);
+			
+			if(context==null)
+			    context=(Context)getActivity();
 			
 			String nick=(String)BmobUser.getObjectByKey("nick");
 		    String touxiangUrl=(String)BmobUser.getObjectByKey("touxiangUrl");
@@ -298,7 +350,25 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				pic.setImageBitmap(getPicture());
 				weather.setText(pre.getString("weatherInfo", ""));
 				temper.setText(pre.getString("temperature", ""));
-		  
+		       
+				buttonMes.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						chatPager.setCurrentItem(0);
+						
+					}
+				});
+				
+				buttonCon.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						chatPager.setCurrentItem(1);
+						
+					}
+				});
+				
 		    	userPicture.setOnClickListener(new OnClickListener() {
 					
 					@Override
@@ -406,6 +476,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    aMap.setMyLocationEnabled(true); 
 		    aMap.setOnCameraChangeListener(this);
 		    aMap.setOnMarkerClickListener(this);
+		    
 		    uiSettings=aMap.getUiSettings();
 		    uiSettings.setAllGesturesEnabled(true);
 		    if(context==null)
@@ -734,7 +805,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && nearbySearchResult.getNearbyInfoList().size() > 1)
-				    {   yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
+				    	
+				    {   
+				    	yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {  
 				            cunzai=false;
@@ -801,11 +874,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 							if(e==null){
 
 								yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
+								yongbDb.saveData(object.getObjectId(),object.getNick(),object.getSex(), object.getAge(), object.getZhiye());
+								
 								if(!object.getTouXiangUrl().equals("")){      //当存在有相应的Url值
 								     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
 								}
 								 else {
-									 if(!markXianShi(object.getObjectId()))  //在它不等于1的时候进行加载，等于1就是加载完毕,是为了避免反复加载(这里修改为了判断mark是否加载)
+									 if(!markXianShi(object.getObjectId()))  //这里修改为了判断mark是否加载
 								 	    addSanMarkerDir(object.getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
 									 else{                                         //如果等于1，就是加载完毕，这个设置它最新的地理位置坐标                    
 										for (int j = 0; j < zmarkNum; j++) {
@@ -826,7 +901,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					});
 				   
 				}
-		    }else {             //当Url都存在的时候，设置相应图标的地理位置(修正:当url都存在的时候，也无法判断它是否已经在地图上加载显示了，先判断是否加载显示，再设置地理位置)
+		    }else {             //修正:当url都存在的时候，也无法判断它是否已经在地图上加载显示了，先判断是否加载显示，再设置地理位置
 		    	List<String> obList=new ArrayList<String>();
 				obList=yongbDb.loadObjectId();
 				boolean cun=false;
@@ -981,11 +1056,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			    	mFujinMarker.get(zmarkNum).setObject(objectId);
 			    	yongbDb.updateJiaZai1(objectId);
 			    	zmarkNum++;
-	    	    Log.d("Main","1zmarkNum="+zmarkNum);
 		   
 	   }
 	   public void addSanMarkerRefresh(String objectId,Bitmap bitmap){
-		   Log.d("Main", "刷新marker");
 		   if(zmarkNum>0) {
 			   for (int i = 0; i < zmarkNum; i++) {
 					if(mFujinMarker.get(i).getObject().equals(objectId)){
@@ -994,7 +1067,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						    userPicture1.setImageBitmap(bitmap);
 						    BitmapDescriptor descriptor=BitmapDescriptorFactory.fromView(userPicture1);
 					    	mFujinMarker.get(i).setIcon(descriptor);
-					    	Log.d("Main", "2zarkNum="+zmarkNum);
 					}
 			   }
 		   }
@@ -1014,18 +1086,54 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	   }
 	@Override
 	public boolean onMarkerClick(Marker marker) {
-		Log.d("Main", "点");
-		View yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
-		fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
-		RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,getPixelsFromDp(100));
-        layoutParams.addRule(RelativeLayout.ABOVE, R.id.refreshbtn);
-		fujinData.setLayoutParams(layoutParams);
-		ImageView imageView=(ImageView)fujinData.findViewById(R.id.yonghu_data_image);
-		BitmapDescriptor descriptor=marker.getIcons().get(0);
-		imageView.setImageBitmap(descriptor.getBitmap());
-	    fuzhiMap.addView(fujinData);
+		if(yonghuDataView==null){
+	    addYonghuDataView(marker);
 	    Log.d("Main", "点击事件");
+		}else {
+		    fuzhiMap.removeView(yonghuDataView);
+		    addYonghuDataView(marker);
+		}
 		return false; 
 	}
-	   
+	private void addYonghuDataView(Marker marker){
+	          yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
+			  fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
+			  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+			  layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		      layoutParams.addRule(RelativeLayout.ABOVE, R.id.refreshbtn);
+		      layoutParams.setMarginStart(getPixelsFromDp(15));
+		      layoutParams.setMarginEnd(getPixelsFromDp(15));
+		      fujinData.setLayoutParams(layoutParams);
+			  ImageView imageView=(ImageView)fujinData.findViewById(R.id.yonghu_data_image);
+			  BitmapDescriptor descriptor=marker.getIcons().get(0);
+			  imageView.setImageBitmap(descriptor.getBitmap());
+			  Bundle bundle=new Bundle(yongbDb.loadData((String) marker.getObject()));
+			  if(bundle!=null){
+				  String nizhen=bundle.getString("nickName");
+				  String sex=bundle.getString("sex");
+				  String age=bundle.getString("age");
+				  String zhiye=bundle.getString("zhiye");
+				  TextView nizhenText=(TextView)fujinData.findViewById(R.id.yonghu_data_nick);
+				  TextView sexText=(TextView)fujinData.findViewById(R.id.yonghu_data_sex);
+				  TextView ageText=(TextView)fujinData.findViewById(R.id.yonghu_data_age);
+				  TextView zhiyeText=(TextView)fujinData.findViewById(R.id.yonghu_data_zhiye);
+                  nizhenText.setText(nizhen);
+                  sexText.setText(sex);
+                  ageText.setText(age);
+                  zhiyeText.setText(zhiye);
+			  }
+			  ImageView jiaImage=(ImageView)fujinData.findViewById(R.id.jiatu);
+			  jiaImage.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+	                 
+					
+					
+				}
+			});
+			  fuzhiMap.addView(fujinData);
+	}
+
+	
 }

@@ -7,6 +7,7 @@
     android:orientation="vertical" >
 
 <LinearLayout 
+    android:id="@+id/lin1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#8A2BE2"
@@ -36,13 +37,40 @@
             android:layout_gravity="center_vertical"
             />
 </LinearLayout>
-  
-<ListView 
-    android:id="@+id/chatList"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    ></ListView>
+ <LinearLayout 
+     android:id="@+id/lin2"
+     android:layout_width="match_parent"
+     android:layout_height="30dp"
+     android:orientation="horizontal"
+     android:layout_below="@id/lin1"
+     >
+     <Button
+         android:id="@+id/chat_mes"
+         android:layout_width="0dp"
+         android:layout_height="wrap_content"
+          android:gravity="center_horizontal"
+         android:text="消息"
+         android:textSize="20sp"
+         android:layout_weight="1"
+         android:background="@drawable/contact_stapre"
+         />
 
+     <Button
+         android:id="@+id/chat_con"
+         android:layout_width="0dp"
+         android:layout_height="wrap_content"
+         android:gravity="center_horizontal"
+         android:layout_weight="1"
+        android:background="@drawable/contact_stapre"
+         android:textSize="20sp"
+          android:text="联系人"/>
+     
+ </LinearLayout>
+ <myCustomView.myChatPager
+     android:id="@+id/chatPager"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:layout_below="@id/lin2"/>
     
          <Button 
          android:id="@+id/button_map"

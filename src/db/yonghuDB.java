@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.util.Log;
 import cn.bmob.push.a.in;
 
@@ -135,6 +136,29 @@ public class yonghuDB {
       public void deleteAll(){
 				db.delete("yonghu",null,null);
 	  }
-   
-       
+      public void saveData(String objectId,String nickName,String sex,String age,String zhiye){
+    		ContentValues values=new ContentValues();
+	    	values.put("nickName", nickName);
+	    	values.put("sex", sex);
+	    	values.put("age", age);
+	    	values.put("zhiye", zhiye);
+	    	db.update("yonghu", values,"objectId=?",new String[]{objectId});
+      }
+       public Bundle loadData(String objectId){
+    	   Bundle bundle=new Bundle();
+    	   Cursor cursor=db.query("yonghu", new String []{"nickName","sex","age","zhiye"}, "objectId=?",new String[]{objectId}, null,null, null);
+    	   if(cursor.moveToFirst()){
+    		   do {
+				  String nickName=cursor.getString(cursor.getColumnIndex("nickName"));
+				  String sex=cursor.getString(cursor.getColumnIndex("sex"));
+				  String age=cursor.getString(cursor.getColumnIndex("age"));
+				  String zhiye=cursor.getString(cursor.getColumnIndex("zhiye"));
+                  bundle.putString("nickName", nickName);
+                  bundle.putString("sex", sex);
+                  bundle.putString("age", age);
+                  bundle.putString("zhiye", zhiye);
+			} while (cursor.moveToNext());
+    	   }
+    	   return bundle;
+       }
 }

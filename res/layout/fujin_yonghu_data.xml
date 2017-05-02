@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fujin_relative"
-     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    
     >
-<RelativeLayout 
+
+<RelativeLayout
     android:id="@+id/fujin_sha"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-  <myCustomView.CircleImageView 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF" >
+
+  <myCustomView.CircleImageView
       android:id="@+id/yonghu_data_image"
+      android:src="@drawable/ic_launcher"
       android:layout_width="100dp"
-      android:layout_height="100dp"
-      />
+      android:layout_height="100dp"/>
   <TableLayout 
       android:layout_toRightOf="@id/yonghu_data_image"
+      android:layout_marginLeft="20dp"
+      android:layout_marginStart="20dp"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       >
       <TableRow >
      <TextView 
       android:id="@+id/yonghu_data_nicktext"
-      android:text="姓名:"
+      android:text="昵称:"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textSize="20sp"
@@ -86,7 +92,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-      />
+      />   
      </TableRow>
      </TableLayout>
   </RelativeLayout>
@@ -95,29 +101,27 @@
       android:layout_height="wrap_content"
       android:orientation="horizontal"
       android:layout_below="@id/fujin_sha"
+      android:background="#F0FFFF"
       >
       <ImageView 
           android:id="@+id/jiatu"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:src="@drawable/jia"
           android:layout_weight="1"
-          />
+          android:src="@drawable/jia" />
       <ImageView 
           android:id="@+id/chattu"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:src="@drawable/chattu"
-          android:layout_weight="1"
-          />
-       <ImageView 
+              android:layout_weight="1"
+          android:src="@drawable/chattu"/>
+
+      <ImageView
           android:id="@+id/calltu"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:src="@drawable/calltu"
           android:layout_weight="1"
-          
-          />
+          android:src="@drawable/calltu" />
       
   </LinearLayout>
 </RelativeLayout>
