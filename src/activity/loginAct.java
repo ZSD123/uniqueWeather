@@ -9,10 +9,13 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import message.myMessageHandler;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import cn.bmob.newim.BmobIM;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobInstallation;
 import cn.bmob.v3.BmobQuery;
@@ -140,7 +143,12 @@ public class loginAct extends Activity {
 	    SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(loginAct.this);	
 		  
 	    
-		Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");
+	  //  Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");	
+	    
+	    BmobIM.init(this);
+	    BmobIM.registerDefaultMessageHandler(new myMessageHandler());
+	  
+	    
 		final MyUser bu=new MyUser();
 	    
         final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);

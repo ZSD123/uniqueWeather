@@ -22,4 +22,6 @@ public class myChatPager extends ViewPager {
 	    public boolean onInterceptTouchEvent(MotionEvent arg0) {
 	        return false;
 	    }
+		
+		
 }

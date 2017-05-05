@@ -11,7 +11,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
-import cn.bmob.push.a.in;
 
 public class yonghuDB {
       private int VERSION=1;

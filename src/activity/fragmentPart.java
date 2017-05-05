@@ -2,16 +2,18 @@ package activity;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import message.AddFriendMessage;
+import message.AgreeAddFriendMessage;
+import message.myMessageHandler;
+import model.NewFriend;
 import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
 import myCustomView.myChatPager;
@@ -60,12 +62,22 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import cn.bmob.newim.BmobIM;
+import cn.bmob.newim.bean.BmobIMConversation;
+import cn.bmob.newim.bean.BmobIMMessage;
+import cn.bmob.newim.bean.BmobIMUserInfo;
+import cn.bmob.newim.core.BmobIMClient;
+import cn.bmob.newim.db.dao.UserDao;
+import cn.bmob.newim.listener.ConnectListener;
+import cn.bmob.newim.listener.ConversationListener;
+import cn.bmob.newim.listener.MessageSendListener;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
+import cn.bmob.v3.listener.SaveListener;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -99,6 +111,8 @@ import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
 import com.uniqueweather.app.R;
 
+import db.messageDB;
+import db.messagedbHelper;
 import db.yonghuDB;
 public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener,OnMarkerClickListener
 {   public static String keyToGet="begin";
@@ -111,6 +125,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	public static MapCircleImageView userPicture1;  //地图上userPicture
 	
 	private RelativeLayout fujinData;    //附近用户的资料名片
+	
+	public static messageDB meDb;
 	
 	private ListView chatList;      //聊天列表
 	private TextView yonghuString;
@@ -157,6 +173,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public LatLng searchLatLng;   //同上
     public NearbyQuery query;  
     public NearbySearch mNearbySearch;
+    
+    
     
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
@@ -217,8 +235,27 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             
 	        username=(String)MyUser.getObjectByKey("username");
 	        
-       
+	        
+            meDb=messageDB.getInstance(context);
 			
+              
+            
+            MyUser user=MyUser.getCurrentUser(MyUser.class);
+            if(user.getObjectId()!=null)
+              BmobIM.connect(user.getObjectId(),new ConnectListener() {
+				
+				@Override
+				public void done(String uid, BmobException e) {
+					if(e==null){
+						Log.d("Main","连接成功");
+						
+					}else {
+						Toast.makeText(context, "连接失败，"+e.getErrorCode(),Toast.LENGTH_SHORT).show();
+					}
+					
+				}
+			});
+            
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
 			myCity=(TextView)view.findViewById(R.id.myCity);
@@ -234,6 +271,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             final LayoutInflater layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view3=layoutInflater.inflate(R.layout.chatlist,null);
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
+			
+			List<BmobIMConversation> conversations=BmobIM.getInstance().loadAllConversation();
+			
 			
 			BaseAdapter baseAdapter=new BaseAdapter() {
 				
@@ -265,6 +305,36 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			};
 			((ListView)view3).setAdapter(baseAdapter);
 			
+			BaseAdapter baseAdapter2=new BaseAdapter() {
+				
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					View view6;
+					if(convertView==null){
+						view6=layoutInflater.inflate(R.layout.add_friend, null);
+						}else {
+							view6=convertView;
+						}
+					return view6;
+				}
+				
+				@Override
+				public long getItemId(int position) {
+					return position;
+				}
+				
+				@Override
+				public Object getItem(int position) {
+					return position;
+				}
+				
+				@Override
+				public int getCount() {
+					return 1;
+				}
+			};
+			((ListView)view4).setAdapter(baseAdapter2);
+		
 			views=new ArrayList<View>();
 			views.add(view3);
 			views.add(view4);
@@ -356,7 +426,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					@Override
 					public void onClick(View v) {
 						chatPager.setCurrentItem(0);
-						
+					 	horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth,0);
 					}
 				});
 				
@@ -1134,6 +1204,64 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			});
 			  fuzhiMap.addView(fujinData);
 	}
+     private void sendAddFriendMessage(BmobIMUserInfo bmobIMUserInfo){    //发送添加好友请求
+    	 BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo, true,new ConversationListener() {
+			
+			@Override
+			public void done(BmobIMConversation arg0, BmobException e) {
+				if(e==null){
+					
+				}else {
+					Toast.makeText(context, "失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
+				}
+				
+			}
+		});
+    	 BmobIMConversation conversation=BmobIMConversation.obtain(BmobIMClient.getInstance(),c);
+    	 AddFriendMessage msg=new AddFriendMessage();
+         MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+         msg.setContent("很高兴认识你，可以加个好友吗？");
+         Map<String,Object> map=new HashMap<String,Object>();
+         map.put("name", currentUser.getNick());
+         map.put("avatar", currentUser.getTouXiangUrl());
+         map.put("uid", currentUser.getObjectId());
+         msg.setExtraMap(map);
+         conversation.sendMessage(msg, new MessageSendListener() {
+			
+			@Override
+			public void done(BmobIMMessage msg, BmobException e) {
+				if(e==null){
+					Toast.makeText(context, "好友请求发送成功，等待验证",Toast.LENGTH_SHORT).show();
+				}else {
+					Toast.makeText(context, "发送失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
 
+				}
+				
+			}
+		});
+     }
+     private void sendAgreeAddFriendMessage(NewFriend add,SaveListener listener){
+    	BmobIMUserInfo info=new BmobIMUserInfo(add.getUid(), add.getName(),add.getAvatar());
+    	BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(info, true, null);
+    	BmobIMConversation conversation=BmobIMConversation.obtain(BmobIMClient.getInstance(), c);
+    	AgreeAddFriendMessage msg=new AgreeAddFriendMessage();
+    	MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+    	msg.setContent("我通过了你的好友验证请求，我们可以开始聊天了!");
+    	Map<String ,Object> map=new HashMap<String, Object>();
+    	   map.put("msg",currentUser.getUsername()+"同意添加你为好友");//显示在通知栏上面的内容
+    	    map.put("uid",add.getUid());//发送者的uid-方便请求添加的发送方找到该条添加好友的请求
+    	    map.put("time", add.getTime());//添加好友的请求时间
+    	    msg.setExtraMap(map);
+    	 conversation.sendMessage(msg,new MessageSendListener() {
+			
+			@Override
+			public void done(BmobIMMessage msg, BmobException e) {
+				
+				if(e==null){
+					
+				}
+			}
+		});
+     }
 	
 }

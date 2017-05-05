@@ -12,6 +12,9 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import message.myMessageHandler;
+
+import cn.bmob.newim.BmobIM;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobInstallation;
 import cn.bmob.v3.BmobQuery;
@@ -81,7 +84,8 @@ public class weather_info extends baseFragmentActivity {
 		setContentView(R.layout.main);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	   
+	
+	
 	    
 	 }		
 	private void init() 

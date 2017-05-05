@@ -64,6 +64,10 @@
             android:name="com.amap.api.v2.apikey"
             android:value="6542302695f67952ee25f1a984dd6ccd"
             />
+         <meta-data 
+             android:name="Bmob_APP_KEY"
+             android:value="f3065817051f7c298d2e49d9329a2a6b"
+             />
         <activity
             android:name="activity.loginAct"
             android:screenOrientation="portrait"
@@ -95,9 +99,27 @@
         <service 
             android:name="com.amap.api.location.APSService">
          </service>
-        <receiver 
+         <service
+         android:name="cn.bmob.newim.core.service.BmobIMService"
+         android:process=":bmobcore" />
+         <service
+        android:name="cn.bmob.newim.core.service.NotifyService"
+        android:process=":bmobcore" />
+          <service android:name="cn.bmob.newim.core.service.ReConnectService" />
+        <service android:name="cn.bmob.newim.core.service.HeartBeatService" />
+           <receiver 
             android:name="receiver.uqdateReceive"
             ></receiver>
+        <receiver 
+            android:name="cn.bmob.newim.core.ConnectChangeReceiver"
+            >
+            <intent-filter>
+            <action android:name="cn.bmob.action.RECONNECT" />
+            <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            <action android:name="android.intent.action.BOOT_COMPLETED" />
+            <action android:name="android.intent.action.USER_PRESENT" />
+        </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
