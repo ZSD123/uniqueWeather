@@ -1,6 +1,5 @@
 package activity;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -54,6 +53,8 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -175,7 +176,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public NearbySearch mNearbySearch;
     
     
-    
+    private View view6;
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private SensorEventHelper mSensorEventHelper;
@@ -304,14 +305,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				}
 			};
 			((ListView)view3).setAdapter(baseAdapter);
-			
 			BaseAdapter baseAdapter2=new BaseAdapter() {
 				
 				@Override
 				public View getView(int position, View convertView, ViewGroup parent) {
-					View view6;
+				
 					if(convertView==null){
-						view6=layoutInflater.inflate(R.layout.add_friend, null);
+						view6=layoutInflater.inflate(R.layout.new_friend, null);
 						}else {
 							view6=convertView;
 						}
@@ -334,7 +334,20 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				}
 			};
 			((ListView)view4).setAdapter(baseAdapter2);
-		
+			ListView contactsList=(ListView)view4;
+		    contactsList.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view,
+						int position, long id) {
+					if(view==view6){
+						Intent intent=new Intent(context,newFriendActivity.class);
+						startActivity(intent);
+					}
+					
+				}
+			});
+			
 			views=new ArrayList<View>();
 			views.add(view3);
 			views.add(view4);

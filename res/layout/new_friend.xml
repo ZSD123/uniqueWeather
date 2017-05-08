@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <LinearLayout 
+      xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+    >
+ 
+  <RelativeLayout
+      android:id="@+id/addfriendview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+   <ImageView 
+     android:id="@+id/image"
+     android:layout_width="50dp"
+     android:layout_height="50dp"
+     android:src="@drawable/addfriend"
+     android:layout_marginLeft="5dp"
+     />
+   <TextView 
+       
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_gravity="center_vertical"
+       android:layout_toRightOf="@id/image"
+       android:text="新的朋友"
+       android:layout_margin="10dp"
+       />
+   <RelativeLayout 
+       android:layout_alignParentRight="true"
+       android:layout_width="50dp"
+       android:layout_height="50dp"
+       android:background="@drawable/bullet_red"
+       android:gravity="center"
+       >
+   <TextView 
+       android:id="@+id/new_friend_num"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentRight="true"
+       android:layout_margin="10dp"
+       android:text="1"
+       android:textColor="#FFF"
+       />
+</RelativeLayout>
+   </RelativeLayout>
+</LinearLayout>

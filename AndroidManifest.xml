@@ -94,6 +94,9 @@
         <activity 
             android:name="activity.myCityAction"
             ></activity>
+        <activity
+            android:name="activity.newFriendActivity"
+            ></activity>
         <service
             android:name="service.autoUqdateService"/>
         <service 
