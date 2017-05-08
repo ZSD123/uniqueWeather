@@ -43,6 +43,7 @@
      android:layout_height="30dp"
      android:orientation="horizontal"
      android:layout_below="@id/lin1"
+     android:background="@drawable/danblue"
      >
      <Button
          android:id="@+id/chat_mes"
@@ -55,8 +56,13 @@
          android:background="@drawable/contact_stapre"
          />
 
+      <ImageView
+          android:layout_width="wrap_content"
+          android:layout_height="30dp"
+          android:src="@drawable/blackline" />
+  
      <Button
-         android:id="@+id/chat_con"
+         android:id="@+id/chat_con"    
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:gravity="center_horizontal"
@@ -64,14 +70,15 @@
         android:background="@drawable/contact_stapre"
          android:textSize="20sp"
           android:text="联系人"/>
-        <RelativeLayout 
-       android:layout_alignParentRight="true"
-       android:layout_width="50dp"
-       android:layout_height="50dp"
-       android:background="@drawable/bullet_red"
-       android:gravity="center"
-       >
-   <TextView 
+    <RelativeLayout 
+        android:id="@+id/friend_num_relative"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bullet_red"
+        android:layout_gravity="center"
+        android:gravity="center"
+        >     
+         <TextView 
        android:id="@+id/new_friend_num"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
@@ -80,7 +87,9 @@
        android:text="1"
        android:textColor="#FFF"
        />
-</RelativeLayout>
+    </RelativeLayout>
+  
+
      
  </LinearLayout>
  <myCustomView.myChatPager
