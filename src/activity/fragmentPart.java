@@ -12,6 +12,7 @@ import java.util.TimerTask;
 import message.AddFriendMessage;
 import message.AgreeAddFriendMessage;
 import message.myMessageHandler;
+import model.Friend;
 import model.NewFriend;
 import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
@@ -275,6 +276,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			List<BmobIMConversation> conversations=BmobIM.getInstance().loadAllConversation();
 			
+			final BmobIM bmobIM=BmobIM.getInstance();
 			
 			BaseAdapter baseAdapter=new BaseAdapter() {
 				
@@ -286,6 +288,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						}else {
 							view5=convertView;
 						}
+					CircleImageView circle=(CircleImageView)view5.findViewById(R.id.iv_recent_avatar);
+					TextView nameText=(TextView)view5.findViewById(R.id.tv_recent_name);
+					TextView messageText=(TextView)view5.findViewById(R.id.tv_recent_msg);
+					TextView unReadText=(TextView)view5.findViewById(R.id.tv_recent_unread);
+					circle.setImageBitmap(Utility.getPicture(bmobIM.loadAllConversation().get(position).getConversationIcon()));
+					nameText.setText(bmobIM.loadAllConversation().get(position).getConversationTitle());
+					if(bmobIM.loadAllConversation().get(position).getMessages().size()>0)
+				     	messageText.setText(bmobIM.loadAllConversation().get(position).getMessages().get(bmobIM.loadAllConversation().get(position).getMessages().size()-1).toString());
+					unReadText.setText(""+bmobIM.loadAllConversation().get(position).getUnreadCount());
 					return view5;
 				}
 				
@@ -301,7 +312,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				
 				@Override
 				public int getCount() {
-					return 1;
+					return bmobIM.loadAllConversation().size();
 				}
 			};
 			((ListView)view3).setAdapter(baseAdapter);
@@ -946,7 +957,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		   
 			List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();//加载没有Url的objectId
 		    if(objectIdList.size()>0){
-		    	Log.d("Main", "这里1");
 		    	for (int i = 0; i < objectIdList.size(); i++) {
 		    		
 		    		BmobQuery<MyUser> query=new BmobQuery<MyUser>();
@@ -1253,26 +1263,27 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			}
 		});
      }
-     private void sendAgreeAddFriendMessage(NewFriend add,SaveListener listener){
-    	BmobIMUserInfo info=new BmobIMUserInfo(add.getUid(), add.getName(),add.getAvatar());
-    	BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(info, true, null);
-    	BmobIMConversation conversation=BmobIMConversation.obtain(BmobIMClient.getInstance(), c);
-    	AgreeAddFriendMessage msg=new AgreeAddFriendMessage();
-    	MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
-    	msg.setContent("我通过了你的好友验证请求，我们可以开始聊天了!");
-    	Map<String ,Object> map=new HashMap<String, Object>();
-    	   map.put("msg",currentUser.getUsername()+"同意添加你为好友");//显示在通知栏上面的内容
-    	    map.put("uid",add.getUid());//发送者的uid-方便请求添加的发送方找到该条添加好友的请求
-    	    map.put("time", add.getTime());//添加好友的请求时间
-    	    msg.setExtraMap(map);
-    	 conversation.sendMessage(msg,new MessageSendListener() {
-			
+  
+     private void queryFriends(final FindListener<Friend> listener){
+    	 BmobQuery<Friend> query=new BmobQuery<Friend>();
+    	 MyUser myUser=MyUser.getCurrentUser(MyUser.class);
+    	 query.addWhereEqualTo("myUser",myUser ); // 查询当前用户的所有好友
+    	 query.order("-updatedAt");
+    	 query.include("friendUser");//希望在查询的同时也把该用户的
+    	 query.findObjects(new FindListener<Friend>() {
+
 			@Override
-			public void done(BmobIMMessage msg, BmobException e) {
-				
+			public void done(List<Friend> list, BmobException e) {
 				if(e==null){
-					
+					if(list!=null&&list.size()>0){
+						Log.d("Main", list.get(0).getFriendUser().getNick());
+					}else {
+						Log.d("Main", "没有好友");
+					}
+				}else {
+					Log.d("Main","出错，"+e.getMessage());
 				}
+				
 			}
 		});
      }
