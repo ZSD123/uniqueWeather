@@ -6,14 +6,15 @@ import activity.MyUser;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.util.Config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 
-import cn.bmob.newim.db.dao.DaoSession;
 import cn.bmob.v3.BmobUser;
+import db.messageDB;
 
 
 /**
@@ -92,7 +93,7 @@ public class NewFriendManager {
      * @return
      */
     public List<NewFriend> getAllNewFriend(){
-        NewFriendDao dao =openReadableDb().getNewFriendDao();
+        NewFriendDao dao = openReadableDb().getNewFriendDao();
         return dao.queryBuilder().orderDesc(NewFriendDao.Properties.Time).list();
     }
 
@@ -101,7 +102,7 @@ public class NewFriendManager {
      * @return long:返回插入或修改的id
      */
     public long insertOrUpdateNewFriend(NewFriend info){
-        NewFriendDao dao = openWritableDb().getNewFriendDao();
+        NewFriendDao dao =  openWritableDb().getNewFriendDao();
         NewFriend local = getNewFriend(info.getUid(), info.getTime());
         if(local==null){
             return dao.insertOrReplace(info);
@@ -153,7 +154,7 @@ public class NewFriendManager {
      */
     private List<NewFriend> getNoVerifyNewFriend(){
         NewFriendDao dao =  openReadableDb().getNewFriendDao();
-        return dao.queryBuilder().where(NewFriendDao.Properties.Status.eq(Config.STATUS_VERIFY_NONE))
+        return dao.queryBuilder().where(NewFriendDao.Properties.Status.eq(message.Config.STATUS_VERIFY_NONE))
                 .build().list();
     }
 
@@ -164,10 +165,10 @@ public class NewFriendManager {
         List<NewFriend> infos =getNoVerifyNewFriend();
         if(infos!=null && infos.size()>0){
             int size =infos.size();
-            List<NewFriend> all =new ArrayList<>();
+            List<NewFriend> all =new ArrayList<NewFriend>();
             for (int i = 0; i < size; i++) {
                 NewFriend msg =infos.get(i);
-                msg.setStatus(Config.STATUS_VERIFY_READED);
+                msg.setStatus(message.Config.STATUS_VERIFY_READED);
                 all.add(msg);
             }
             insertBatchMessages(infos);

@@ -22,7 +22,7 @@ import cn.bmob.newim.bean.BmobIMMessage;
  */
 public class AddFriendMessage extends BmobIMExtraMessage{
 
-    public AddFriendMessage(){}
+    public AddFriendMessage(){};
 
     /**将BmobIMMessage转成NewFriend
      * @param msg 消息

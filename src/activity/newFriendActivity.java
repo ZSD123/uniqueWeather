@@ -90,7 +90,7 @@ public class newFriendActivity extends Activity {
 		EventBus.getDefault().post(new RefreshEvent());
 		if(type.equals("add")){
 			NewFriend friend=AddFriendMessage.convert(msg);
-			long id=
+			//long id=
 		}
 		
 		

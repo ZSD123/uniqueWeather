@@ -4,24 +4,24 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/Amap_2DMap_V2.9.2_20161026.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/AMap_Location_V3.3.0_20170118.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/AMap_Search_V3.6.1_20161122.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/androidasync-2.1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/android-support-v4.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/BmobNewIM_2.0.6_20170428.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/BmobSDK_3.5.5_20170420.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/gson-2.6.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/nineoldandroids-2.4.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/okhttp-3.3.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/okio-1.7.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/org.apache.http.legacy.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/rxandroid-1.2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/rxjava-1.1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/showapi_sdk.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/Volley.jar"/>
-	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/eventbus-3.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/android/UniqueWeather/libs/universal-image-loader-1.9.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/Amap_2DMap_V2.9.2_20161026.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/AMap_Location_V3.3.0_20170118.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/AMap_Search_V3.6.1_20161122.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/androidasync-2.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/android-support-v4.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/Bmob_Push_V0.6beta_20150408.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/BmobNewIM_2.0.6_20170428.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/BmobSDK_3.5.5_20170420.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/eventbus-3.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/gson-2.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/nineoldandroids-2.4.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/okhttp-3.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/okio-1.7.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/org.apache.http.legacy.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/rxandroid-1.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/rxjava-1.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/showapi_sdk.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/universal-image-loader-1.9.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="D:/xiazai/UniqueWeather/libs/Volley.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

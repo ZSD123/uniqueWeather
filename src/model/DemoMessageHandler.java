@@ -2,6 +2,8 @@ package model;
 
 
 
+import activity.MyUser;
+import activity.weather_info;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -14,6 +16,7 @@ import message.AddFriendMessage;
 import message.AgreeAddFriendMessage;
 
 import org.greenrobot.eventbus.EventBus;
+
 
 import java.util.List;
 import java.util.Map;
@@ -81,7 +84,7 @@ public class DemoMessageHandler extends BmobIMMessageHandler {
                     processCustomMessage(msg, event.getFromUserInfo());
                 } else {//SDK内部内部支持的消息类型
                     if (BmobNotificationManager.getInstance(context).isShowNotification()) {//如果需要显示通知栏，SDK提供以下两种显示方式：
-                        Intent pendingIntent = new Intent(context, MainActivity.class);
+                        Intent pendingIntent = new Intent(context, weather_info.class);
                         pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         //1、多个用户的多条消息合并成一条通知：有XX个联系人发来了XX条消息
                         BmobNotificationManager.getInstance(context).showNotification(event, pendingIntent);
@@ -135,10 +138,10 @@ public class DemoMessageHandler extends BmobIMMessageHandler {
      * @param friend
      */
     private void showAddNotify(NewFriend friend) {
-        Intent pendingIntent = new Intent(context, MainActivity.class);
+        Intent pendingIntent = new Intent(context, weather_info.class);
         pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         //这里可以是应用图标，也可以将聊天头像转成bitmap
-        Bitmap largetIcon = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
+        Bitmap largetIcon = BitmapFactory.decodeResource(context.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
         BmobNotificationManager.getInstance(context).showNotification(largetIcon,
                 friend.getName(), friend.getMsg(), friend.getName() + "请求添加你为朋友", pendingIntent);
     }
@@ -150,9 +153,9 @@ public class DemoMessageHandler extends BmobIMMessageHandler {
      * @param agree
      */
     private void showAgreeNotify(BmobIMUserInfo info, AgreeAddFriendMessage agree) {
-        Intent pendingIntent = new Intent(context, MainActivity.class);
+        Intent pendingIntent = new Intent(context, weather_info.class);
         pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        Bitmap largetIcon = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
+        Bitmap largetIcon = BitmapFactory.decodeResource(context.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
         BmobNotificationManager.getInstance(context).showNotification(largetIcon, info.getName(), agree.getMsg(), agree.getMsg(), pendingIntent);
     }
 
@@ -162,16 +165,16 @@ public class DemoMessageHandler extends BmobIMMessageHandler {
      * @param uid
      */
     private void addFriend(String uid) {
-        User user = new User();
+        MyUser user = new MyUser();
         user.setObjectId(uid);
         UserModel.getInstance()
                 .agreeAddFriend(user, new SaveListener<String>() {
                     @Override
                     public void done(String s, BmobException e) {
                         if (e == null) {
-                            Logger.e("success");
+                            Log.e("Main","success");
                         } else {
-                            Logger.e(e.getMessage());
+                            Log.e("Main",e.getMessage());
                         }
                     }
                 });

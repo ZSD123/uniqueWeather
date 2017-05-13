@@ -1,5 +1,4 @@
 package model;
-import cn.bmob.newim.db.dao.DaoSession;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
