@@ -8,21 +8,28 @@ import org.greenrobot.eventbus.EventBus;
 
 import message.AddFriendMessage;
 import message.AgreeAddFriendMessage;
+import model.DemoMessageHandler;
 import model.NewFriend;
+import model.NewFriendManager;
 import model.RefreshEvent;
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.core.BmobIMClient;
+import cn.bmob.newim.core.a.b;
+import cn.bmob.newim.core.d.b.h;
+import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.listener.MessageSendListener;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.SaveListener;
 
+import com.amap.api.services.a.v;
 import com.uniqueweather.app.R;
 
 import android.app.Activity;
+import android.app.DownloadManager.Query;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -33,6 +40,7 @@ import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class newFriendActivity extends Activity {
 
@@ -54,6 +62,9 @@ public class newFriendActivity extends Activity {
 				}else {
 					view=convertView;
 				}
+				TextView textView=(TextView)view.findViewById(R.id.agreefriendbeizhu);
+				textView.setText(NewFriendManager.getInstance(newFriendActivity.this).getAllNewFriend().get(0).getName());
+				
 				Button button=(Button)view.findViewById(R.id.btn_add);
 				button.setOnClickListener(new OnClickListener() {
 					
@@ -80,22 +91,29 @@ public class newFriendActivity extends Activity {
 			@Override
 			public int getCount() {
 				// TODO Auto-generated method stub
-				return 0;
+				return 1;
 			}
 		};
 		listView.setAdapter(baseAdapter);
 	}
-	private void processCustomMessage(BmobIMMessage msg,BmobIMUserInfo info){
-		String type=msg.getMsgType();
-		EventBus.getDefault().post(new RefreshEvent());
-		if(type.equals("add")){
-			NewFriend friend=AddFriendMessage.convert(msg);
-			//long id=
-		}
+	
+	   @Override
+	protected void onResume() {
+		super.onResume();
 		
-		
+		query();
 	}
-	   private void sendAgreeAddFriendMessage(NewFriend add,SaveListener listener){
+    private void query(){
+    	DemoMessageHandler handler=new DemoMessageHandler(newFriendActivity.this);
+    	BmobIMMessage bmobIMMessage=new BmobIMMessage();
+    	bmobIMMessage.setMsgType("add");
+    	BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+    	bmobIMUserInfo.setName("add");
+    	BmobIMConversation bmobIMConversation=new BmobIMConversation();
+    	MessageEvent event=new MessageEvent(bmobIMMessage,bmobIMConversation, bmobIMUserInfo);
+    	handler.onMessageReceive(event);
+    }
+	private void sendAgreeAddFriendMessage(NewFriend add,SaveListener listener){
 	    	BmobIMUserInfo info=new BmobIMUserInfo(add.getUid(), add.getName(),add.getAvatar());
 	    	BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(info, true, null);
 	    	BmobIMConversation conversation=BmobIMConversation.obtain(BmobIMClient.getInstance(), c);

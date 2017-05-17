@@ -1186,7 +1186,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		return false; 
 	}
-	private void addYonghuDataView(Marker marker){
+	String nizhen;
+	private void addYonghuDataView(final Marker marker){
+		     
+		   
 	          yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
 			  fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
 			  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
@@ -1200,7 +1203,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			  imageView.setImageBitmap(descriptor.getBitmap());
 			  Bundle bundle=new Bundle(yongbDb.loadData((String) marker.getObject()));
 			  if(bundle!=null){
-				  String nizhen=bundle.getString("nickName");
+				  nizhen=bundle.getString("nickName");
 				  String sex=bundle.getString("sex");
 				  String age=bundle.getString("age");
 				  String zhiye=bundle.getString("zhiye");
@@ -1213,14 +1216,17 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
                   ageText.setText(age);
                   zhiyeText.setText(zhiye);
 			  }
+			 // final BmobIMUserInfo bmobIMUserInfo=;
 			  ImageView jiaImage=(ImageView)fujinData.findViewById(R.id.jiatu);
 			  jiaImage.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
-	                 
-					
-					
+				  BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();   //这里出现的问题把我折磨死了，我查了好久，折腾好久，原来就是String的nizhen没办法加在setName中
+				  bmobIMUserInfo.setUserId((String) marker.getObject());
+				  bmobIMUserInfo.setAvatar(yongbDb.loadUserTouxiangUrl((String)marker.getObject()));
+				  bmobIMUserInfo.setName(nizhen);
+				  sendAddFriendMessage(bmobIMUserInfo);
 				}
 			});
 			  fuzhiMap.addView(fujinData);

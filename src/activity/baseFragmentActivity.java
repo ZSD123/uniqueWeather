@@ -20,7 +20,8 @@ public class baseFragmentActivity extends FragmentActivity {
 	private Dialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
+     
+		
 		super.onCreate(savedInstanceState);
 		//自动登陆状态下检测是否在其他设备登陆
 		checkLogin();

@@ -3,6 +3,7 @@ package model;
 
 
 import activity.MyUser;
+import activity.newFriendActivity;
 import activity.weather_info;
 import android.content.Context;
 import android.content.Intent;
@@ -50,7 +51,7 @@ public class DemoMessageHandler extends BmobIMMessageHandler {
     @Override
     public void onMessageReceive(final MessageEvent event) {
         //当接收到服务器发来的消息时，此方法被调用
-        Log.i("Main",event.getConversation().getConversationTitle() + "," + event.getMessage().getMsgType() + "," + event.getMessage().getContent());
+      //  Log.i("Main",event.getConversation().getConversationTitle() + "," + event.getMessage().getMsgType() + "," + event.getMessage().getContent());
         excuteMessage(event);
     }
 
@@ -138,7 +139,7 @@ public class DemoMessageHandler extends BmobIMMessageHandler {
      * @param friend
      */
     private void showAddNotify(NewFriend friend) {
-        Intent pendingIntent = new Intent(context, weather_info.class);
+        Intent pendingIntent = new Intent(context, newFriendActivity.class);
         pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         //这里可以是应用图标，也可以将聊天头像转成bitmap
         Bitmap largetIcon = BitmapFactory.decodeResource(context.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
