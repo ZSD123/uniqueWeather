@@ -83,7 +83,6 @@ protected void onScrollChanged(int l, int t, int oldl, int oldt)
 	ViewHelper.setAlpha(mMenu,(1-scale)*0.7f+0.3f);  
     ViewHelper.setTranslationX(mMenu, l*((1-scale)*0.7f+0.3f));//当左侧菜单完全显示，偏移量就为0，这个就是使指定的控件在X方向移动多少的距离啊，你不设置，菜单会慢慢画出来，因为外层继承了HorizontalScrollView，默认menu会慢慢向右滑出，ViewHelper.setTranslationX（menu,L）L不断减小，它每次都是移动到相同的位置，就是正屏幕位置。
 	super.onScrollChanged(l, t, oldl, oldt);
-	Log.d("Main", "l="+l);
 }
    
   

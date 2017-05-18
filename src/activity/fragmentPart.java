@@ -206,8 +206,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	public static  yonghuDB yongbDb;
 	private String username;
 	private boolean markCunzai=false;  //加载图片的时候为了加快速度检测是否存在相应的mark
-	private Button buttonMes;    //消息按钮
-	private Button buttonCon;    //联系人按钮
+	private  Button buttonMes;    //消息按钮
+	private Button  buttonCon;    //联系人按钮
+	
+	public static ImageView newFriendImage;
+	public static ImageView newFriendImage1;
 	
 	public fragmentPart(){
 		
@@ -266,15 +269,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
 		    buttonMes=(Button)view.findViewById(R.id.chat_mes);
 		    buttonCon=(Button)view.findViewById(R.id.chat_con);
-			
+			newFriendImage=(ImageView)view.findViewById(R.id.newfriend_image);
+		    
+		    
 			chatPager=(myChatPager)view.findViewById(R.id.chatPager);
             final LayoutInflater layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view3=layoutInflater.inflate(R.layout.chatlist,null);
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
 			
-			List<BmobIMConversation> conversations=BmobIM.getInstance().loadAllConversation();
-			
-			final BmobIM bmobIM=BmobIM.getInstance();
+            final BmobIM bmobIM=BmobIM.getInstance();
 			
 			BaseAdapter baseAdapter=new BaseAdapter() {
 				
@@ -310,7 +313,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				
 				@Override
 				public int getCount() {
-					return bmobIM.loadAllConversation().size();
+
+					return 0;
+
 				}
 			};
 			((ListView)view3).setAdapter(baseAdapter);
@@ -323,7 +328,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						view6=layoutInflater.inflate(R.layout.new_friend, null);
 						}else {
 							view6=convertView;
+					
 						}
+					newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
 					return view6;
 				}
 				
@@ -622,7 +629,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						    mNearbySearch.searchNearbyInfoAsyn(query);
 			 			    daojishi=10;
 	                        chucuoonce=0;
-	                        Log.d("Main","更新");
+	                
 			 			}
 			 		}
 			 	};

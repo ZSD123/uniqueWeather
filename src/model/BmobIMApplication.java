@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.logging.Logger;
 
+import message.myMessageHandler;
+
 
 import cn.bmob.newim.BmobIM;
 
@@ -41,8 +43,9 @@ public class BmobIMApplication extends Application{
         if (getApplicationInfo().packageName.equals(getMyProcessName())){
             //im初始化
             BmobIM.init(this);
+            Log.d("Main", "这里注册");
             //注册消息接收器
-            BmobIM.registerDefaultMessageHandler(new DemoMessageHandler(this));
+            BmobIM.registerDefaultMessageHandler(new myMessageHandler(getApplicationContext()));
         }
         //uil初始化
         UniversalImageLoader.initImageLoader(this);

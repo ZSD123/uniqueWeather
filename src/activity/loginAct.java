@@ -146,7 +146,7 @@ public class loginAct extends Activity {
 	  //  Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");	
 	    
 	    BmobIM.init(this);
-	    BmobIM.registerDefaultMessageHandler(new myMessageHandler());
+	    BmobIM.registerDefaultMessageHandler(new myMessageHandler(loginAct.this));
 	  
 	    
 		final MyUser bu=new MyUser();

@@ -2,6 +2,7 @@ package activity;
 
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.greenrobot.eventbus.EventBus;
@@ -43,27 +44,29 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class newFriendActivity extends Activity {
-
+   public static TextView newFriendBeizhu;
+   private List<NewFriend> newFriends;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.new_friend_list);
 		
+		newFriends=NewFriendManager.getInstance(this).getAllNewFriend();
 		ListView listView=(ListView)findViewById(R.id.add_friend_list);
-		final LayoutInflater layoutInflater=(LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		BaseAdapter baseAdapter=new BaseAdapter() {
 			
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View view;
 				if(convertView==null){
+					LayoutInflater layoutInflater=getLayoutInflater();
 					view=layoutInflater.inflate(R.layout.agreefriend, null);
 				}else {
 					view=convertView;
 				}
-				TextView textView=(TextView)view.findViewById(R.id.agreefriendbeizhu);
-				textView.setText(NewFriendManager.getInstance(newFriendActivity.this).getAllNewFriend().get(0).getName());
+				newFriendBeizhu=(TextView)view.findViewById(R.id.agreefriendbeizhu);
+				newFriendBeizhu.setText(newFriends.get(position).getName()+newFriends.get(position).getMsg());
 				
 				Button button=(Button)view.findViewById(R.id.btn_add);
 				button.setOnClickListener(new OnClickListener() {
@@ -79,40 +82,25 @@ public class newFriendActivity extends Activity {
 			
 			@Override
 			public long getItemId(int position) {
-				return 0;
+				return newFriends.get(position).getId();
 			}
 			
 			@Override
 			public Object getItem(int position) {
 				// TODO Auto-generated method stub
-				return null;
+				return newFriends.get(position);
 			}
 			
 			@Override
 			public int getCount() {
 				// TODO Auto-generated method stub
-				return 1;
+				return newFriends.size();
 			}
 		};
 		listView.setAdapter(baseAdapter);
 	}
 	
-	   @Override
-	protected void onResume() {
-		super.onResume();
-		
-		query();
-	}
-    private void query(){
-    	DemoMessageHandler handler=new DemoMessageHandler(newFriendActivity.this);
-    	BmobIMMessage bmobIMMessage=new BmobIMMessage();
-    	bmobIMMessage.setMsgType("add");
-    	BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
-    	bmobIMUserInfo.setName("add");
-    	BmobIMConversation bmobIMConversation=new BmobIMConversation();
-    	MessageEvent event=new MessageEvent(bmobIMMessage,bmobIMConversation, bmobIMUserInfo);
-    	handler.onMessageReceive(event);
-    }
+
 	private void sendAgreeAddFriendMessage(NewFriend add,SaveListener listener){
 	    	BmobIMUserInfo info=new BmobIMUserInfo(add.getUid(), add.getName(),add.getAvatar());
 	    	BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(info, true, null);

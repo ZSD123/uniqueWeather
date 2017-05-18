@@ -76,6 +76,7 @@ public class weather_info extends baseFragmentActivity {
 
 	 private FragmentPagerAdapter mAdapter;
 	 private String username;
+	 public myMessageHandler handler;
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{   
@@ -84,7 +85,7 @@ public class weather_info extends baseFragmentActivity {
 		setContentView(R.layout.main);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	
+
 	
 	    
 	 }		
