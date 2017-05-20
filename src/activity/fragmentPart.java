@@ -328,7 +328,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						view6=layoutInflater.inflate(R.layout.new_friend, null);
 						}else {
 							view6=convertView;
-					
+					       
 						}
 					newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
 					return view6;
@@ -1080,7 +1080,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	   private void JiaZai(final String obString,final String touxiangUrl){ 
 	        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
 	        if(file.exists()){
-	        Log.d("Main", "文件存在");
+	            Log.d("Main", "文件存在");
             bitmap11=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
             addSanMarkerDir(obString,bitmap11);     
             new Thread(new Runnable() {
