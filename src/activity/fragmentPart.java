@@ -14,6 +14,7 @@ import message.AgreeAddFriendMessage;
 import message.myMessageHandler;
 import model.Friend;
 import model.NewFriend;
+import model.UserModel;
 import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
 import myCustomView.myChatPager;
@@ -212,6 +213,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	public static ImageView newFriendImage;
 	public static ImageView newFriendImage1;
 	
+	private List<Friend> friends=new ArrayList<Friend>(); 
 	public fragmentPart(){
 		
 	}
@@ -278,7 +280,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
 			
             final BmobIM bmobIM=BmobIM.getInstance();
-			
+		
+            
 			BaseAdapter baseAdapter=new BaseAdapter() {
 				
 				@Override
@@ -319,44 +322,98 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				}
 			};
 			((ListView)view3).setAdapter(baseAdapter);
-			BaseAdapter baseAdapter2=new BaseAdapter() {
-				
+			
+			UserModel.getInstance().queryFriends(new FindListener<Friend>() {
+
 				@Override
-				public View getView(int position, View convertView, ViewGroup parent) {
-				
-					if(convertView==null){
-						view6=layoutInflater.inflate(R.layout.new_friend, null);
-						}else {
-							view6=convertView;
-					       
-						}
-					newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
-					return view6;
+				public void done(List<Friend> list, BmobException e) {
+					
+					if(e==null||e.getErrorCode()==0){
+						friends=list;
+						BaseAdapter baseAdapter2=new BaseAdapter() {
+							
+							@Override
+							public View getView(final int position, View convertView, ViewGroup parent) {
+							  
+							    if(position==0){
+								if(convertView==null){
+									view6=layoutInflater.inflate(R.layout.new_friend, null);
+									}else {
+										view6=convertView;
+								       
+									}
+							    
+								newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
+								return view6;
+							    }
+							   else if(position>0) {
+								   
+							    	if(convertView==null||position==1){
+							    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
+							    	}else if(convertView!=null&&position!=1){
+							    		view6=convertView;
+							    	}
+							    		final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
+								    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
+								        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_");
+										if(file.exists()){
+											circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
+										}
+										textView.setText(friends.get(position-1).getFriendUser().getNick());
+									    new Thread(new Runnable() {
+											
+											@Override
+											public void run() {
+												Bitmap bitmap=Utility.getPicture(friends.get(position-1).getFriendUser().getTouXiangUrl());
+												
+												if(bitmap!=null)
+													circleImageView.setImageBitmap(bitmap);
+											}
+										});
+										
+										
+								    	return view6;
+							    	}
+							    
+							 return view6;
+							}
+							
+							@Override
+							public long getItemId(int position) {
+								return position;
+							}
+							
+							@Override
+							public Object getItem(int position) {
+								return position;
+							}
+							
+							@Override
+							public int getCount() {
+								if(friends==null){
+									return 1;
+								}else {
+									return (friends.size()+1);
+								}
+							
+							}
+						};
+						((ListView)view4).setAdapter(baseAdapter2);
+					}else{
+						Log.d("Main","查询朋友有误,"+e.getMessage()+e.getErrorCode());
+					}
+					
 				}
-				
-				@Override
-				public long getItemId(int position) {
-					return position;
-				}
-				
-				@Override
-				public Object getItem(int position) {
-					return position;
-				}
-				
-				@Override
-				public int getCount() {
-					return 1;
-				}
-			};
-			((ListView)view4).setAdapter(baseAdapter2);
+			});
+			
+		
 			ListView contactsList=(ListView)view4;
 		    contactsList.setOnItemClickListener(new OnItemClickListener() {
 
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
-					if(view==view6){
+					if(position==0){
 						Intent intent=new Intent(context,newFriendActivity.class);
 						startActivity(intent);
 					}
@@ -905,8 +962,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && nearbySearchResult.getNearbyInfoList().size() > 1)
 				    	
-				    {   
-				    	yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
+				    {   if(nearbySearchResult.getNearbyInfoList().size()-1==-1){
+				    	yonghuString.setText("当前附近用户有:"+"0");
+				       }else{
+				        yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
+				       }
+				    
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {  
 				            cunzai=false;

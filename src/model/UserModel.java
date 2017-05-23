@@ -259,6 +259,7 @@ public class UserModel extends BaseModel {
             @Override
             public void done(List<Friend> list, BmobException e) {
                 if (e == null) {
+                	
                     if (list != null && list.size() > 0) {
                         listener.done(list, e);
                     } else {

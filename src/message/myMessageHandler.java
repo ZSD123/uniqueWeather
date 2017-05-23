@@ -5,15 +5,20 @@ import java.util.Map;
 
 import model.NewFriend;
 import model.NewFriendManager;
+import model.UserModel;
+import activity.MyUser;
 import activity.fragmentPart;
 import android.content.Context;
 import android.opengl.Visibility;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.event.OfflineMessageEvent;
 import cn.bmob.newim.listener.BmobIMMessageHandler;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.SaveListener;
 
 public class myMessageHandler extends BmobIMMessageHandler {
     private NewFriendManager newFriendManager;
@@ -54,7 +59,28 @@ public class myMessageHandler extends BmobIMMessageHandler {
     			  Log.d("Main","添加成功");
     		  fragmentPart.newFriendImage.setVisibility(View.VISIBLE);
     		  fragmentPart.newFriendImage1.setVisibility(View.VISIBLE);
-    	  }
+    	  } else if (bmobIMMessage.getMsgType().equals("agree")) {//接收到的对方同意添加自己为好友,此时需要做的事情：1、添加对方为好友，2、显示通知
+              AgreeAddFriendMessage agree = AgreeAddFriendMessage.convert(bmobIMMessage);
+              addFriend(agree.getFromId());//添加消息的发送方为好友
+              //这里应该也需要做下校验--来检测下是否已经同意过该好友请求，我这里省略了
+          } else {
+              Toast.makeText(mContext, "接收到的自定义消息：" + bmobIMMessage.getMsgType() + "," + bmobIMMessage.getContent() + "," + bmobIMMessage.getExtra(), Toast.LENGTH_SHORT).show();
+          }
     		  
+     }
+     private void addFriend(String uid) {
+         MyUser user = new MyUser();
+         user.setObjectId(uid);
+         UserModel.getInstance()
+                 .agreeAddFriend(user, new SaveListener<String>() {
+                     @Override
+                     public void done(String s, BmobException e) {
+                         if (e == null) {
+                             Log.e("Main","success");
+                         } else {
+                             Log.e("Main",e.getMessage());
+                         }
+                     }
+                 });
      }
 }
