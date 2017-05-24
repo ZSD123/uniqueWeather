@@ -169,7 +169,6 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	    spinner2.setEnabled(false);
 	    
 	    String sex=(String)MyUser.getObjectByKey("sex");
-	    Log.d("Main","sex="+sex);
 	    if(sex!=null)
 	       if(sex.equals("ÄÐ")){
 	    	  spinner1.setSelection(0);

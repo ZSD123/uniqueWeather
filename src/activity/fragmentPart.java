@@ -244,7 +244,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	        
             meDb=messageDB.getInstance(context);
 			
-              
+            Log.d("Main", "id="+MyUser.getCurrentUser().getObjectId());  
             
             MyUser user=MyUser.getCurrentUser(MyUser.class);
             if(user.getObjectId()!=null)

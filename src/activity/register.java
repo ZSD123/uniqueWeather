@@ -276,7 +276,8 @@ public class register extends Activity {
 								bangzhufasongM=false;
 							}
 							if(!editText3.getText().toString().equals("")){
-								MyUser.signOrLoginByMobilePhone(input,editText3.getText().toString(),new LogInListener<MyUser>() {
+								
+								bu.signOrLogin(editText3.getText().toString(),new SaveListener<MyUser>() {
 									 @Override
 									    public void done(MyUser user, BmobException e) {
 									        if(user!=null){

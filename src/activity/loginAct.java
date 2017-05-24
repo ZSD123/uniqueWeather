@@ -1,6 +1,6 @@
 package activity;
 
-
+//一定要精益求精，努力做到最好，为社会创造价值！
 
 import java.util.List;
 import java.util.Set;
@@ -144,7 +144,6 @@ public class loginAct extends Activity {
 		  
 	    
 	  //  Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");	
-	    
 	    BmobIM.init(this);
 	    BmobIM.registerDefaultMessageHandler(new myMessageHandler(loginAct.this));
 	  
@@ -228,7 +227,6 @@ public class loginAct extends Activity {
 					   bu.setPassword(MD5Util.getMD5String(passwordString));			  
 					   
 					   if(isEmail(input)){
-					   Log.d("Main", "3");
 					   BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
 					   query.addWhereEqualTo("username",input);
 				       query.findObjects(new FindListener<MyUser>() {
@@ -361,7 +359,7 @@ public class loginAct extends Activity {
 						   Toast.makeText(loginAct.this, "验证码不能为空", Toast.LENGTH_SHORT).show();
 					   else if(flag2&&!passwordString.isEmpty())
 					    {
-						    BmobUser.loginBySMSCode(input, passwordString, new LogInListener<BmobUser>()
+						    BmobUser.signOrLoginByMobilePhone(input, passwordString, new LogInListener<BmobUser>()
 						   {		
                                   
 						           @Override
@@ -374,7 +372,7 @@ public class loginAct extends Activity {
 										     finish();
 							             }
 							             else {
-											  Toast.makeText(loginAct.this,"登录失败，"+e,Toast.LENGTH_SHORT).show();
+											  Toast.makeText(loginAct.this,"登录失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
 											  if(relativeRoot.getAlpha()==0.3f){
 													progressBar.setVisibility(View.GONE);
 													relativeRoot.setAlpha(1);
