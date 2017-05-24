@@ -104,6 +104,7 @@ import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.nearby.NearbyInfo;
 import com.amap.api.services.nearby.NearbySearch;
 import com.amap.api.services.nearby.NearbySearch.NearbyListener;
 import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
@@ -960,18 +961,23 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				    
 				    if (nearbySearchResult != null
 				        && nearbySearchResult.getNearbyInfoList() != null
-				        && nearbySearchResult.getNearbyInfoList().size() > 1)
+				        && nearbySearchResult.getNearbyInfoList().size() > 0)
 				    	
-				    {   if(nearbySearchResult.getNearbyInfoList().size()-1==-1){
-				    	yonghuString.setText("当前附近用户有:"+"0");
-				       }else{
-				        yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
-				       }
-				    
+				    {   Log.d("Main", "total="+nearbySearchResult.getTotalNum());
+				    	if(benyonghucunzai(nearbySearchResult.getNearbyInfoList())==1){
+				    		Log.d("Main", "1total="+nearbySearchResult.getTotalNum());
+				    		  yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getTotalNum()-1));
+				    	}else{
+				    		Log.d("Main", "2total="+nearbySearchResult.getTotalNum());
+				    		yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getTotalNum()));
+				    	}
+				    	
+				    	
+				    	
 				        for (int i = 0; i < nearbySearchResult.getNearbyInfoList().size(); i++) 
 				       {  
 				            cunzai=false;
-				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getObjectByKey("objectId")))  {
+				        	if(!nearbySearchResult.getNearbyInfoList().get(i).getUserID().equals((String)MyUser.getCurrentUser().getObjectId()))  {
 				                List<String> list=yongbDb.loadObjectId();  //查询数据表中所有的objectId
 				                if(list.size()==0){
 				                	yongbDb.saveObjectIdandlatlon(nearbySearchResult.getNearbyInfoList().get(i).getUserID(), nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLatitude()+"",  nearbySearchResult.getNearbyInfoList().get(i).getPoint().getLongitude()+"");
@@ -995,10 +1001,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				            addSanMarker1();
 				     
 				   } 
-				        else if(chucuoonce==0){
+				        else if(nearbySearchResult.getTotalNum()==0){
 				              
-				                     yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getNearbyInfoList().size()-1));
-				                     chucuoonce=1;
+				                     yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getTotalNum()));
+				                     
 				                  
 				              }
 				}
@@ -1358,6 +1364,16 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				
 			}
 		});
+     }
+     private int benyonghucunzai(List<NearbyInfo> list){   //返回1的时候表示有本用户
+    	 for (int i = 0; i < list.size(); i++) {
+			   if(list.get(i).getUserID().equals((String)MyUser.getCurrentUser().getObjectId())){
+				   return 1;
+			   }
+			
+		}
+    	  return 0;     //返回0的时候表示没有本用户
+    	 
      }
 	
 }
