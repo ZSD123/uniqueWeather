@@ -7,6 +7,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Config;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,6 +105,7 @@ public class NewFriendManager {
     public long insertOrUpdateNewFriend(NewFriend info){
         NewFriendDao dao =  openWritableDb().getNewFriendDao();
         NewFriend local = getNewFriend(info.getUid(), info.getTime());
+        
         if(local==null){
             return dao.insertOrReplace(info);
         }else{
@@ -118,6 +120,8 @@ public class NewFriendManager {
      * @return
      */
     private NewFriend getNewFriend(String uid,Long time){
+    	Log.d("Main", "uid="+uid);
+    	Log.d("Main", "time="+time);
         NewFriendDao dao =  openReadableDb().getNewFriendDao();
         return dao.queryBuilder().where(NewFriendDao.Properties.Uid.eq(uid))
                 .where(NewFriendDao.Properties.Time.eq(time)).build().unique();

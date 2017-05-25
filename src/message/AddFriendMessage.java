@@ -28,7 +28,7 @@ public class AddFriendMessage extends BmobIMExtraMessage{
      * @param msg 消息
      * @return
      */
-    public static NewFriend convert(BmobIMMessage msg){
+    public static NewFriend convert(BmobIMMessage msg){  //这部分是接收者当接收信息的时候处理的
         NewFriend add =new NewFriend();
         String content = msg.getContent();
         add.setMsg(content);

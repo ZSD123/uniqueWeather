@@ -177,7 +177,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public NearbySearch mNearbySearch;
     
     
-    private View view6;
+    private static View view6;
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
 	private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private SensorEventHelper mSensorEventHelper;
@@ -199,7 +199,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private int daojishi=10;     //倒计时刷新
 	
 	private View view3;    //消息界面View
-	private View view4;     //联系人界面view
+	private static View view4;     //联系人界面view
 	private List<View> views;    //装载消息界面view和联系人界面view的views
 	
 	
@@ -214,7 +214,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	public static ImageView newFriendImage;
 	public static ImageView newFriendImage1;
 	
-	private List<Friend> friends=new ArrayList<Friend>(); 
+	private static List<Friend> friends=new ArrayList<Friend>(); 
+	public static LayoutInflater layoutInflater;
 	public fragmentPart(){
 		
 	}
@@ -276,7 +277,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		    
 		    
 			chatPager=(myChatPager)view.findViewById(R.id.chatPager);
-            final LayoutInflater layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view3=layoutInflater.inflate(R.layout.chatlist,null);
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
 			
@@ -324,89 +325,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			};
 			((ListView)view3).setAdapter(baseAdapter);
 			
-			UserModel.getInstance().queryFriends(new FindListener<Friend>() {
-
-				@Override
-				public void done(List<Friend> list, BmobException e) {
-					
-					if(e==null||e.getErrorCode()==0){
-						friends=list;
-						BaseAdapter baseAdapter2=new BaseAdapter() {
-							
-							@Override
-							public View getView(final int position, View convertView, ViewGroup parent) {
-							  
-							    if(position==0){
-								if(convertView==null){
-									view6=layoutInflater.inflate(R.layout.new_friend, null);
-									}else {
-										view6=convertView;
-								       
-									}
-							    
-								newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
-								return view6;
-							    }
-							   else if(position>0) {
-								   
-							    	if(convertView==null||position==1){
-							    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
-							    	}else if(convertView!=null&&position!=1){
-							    		view6=convertView;
-							    	}
-							    		final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
-								    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
-								        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_");
-										if(file.exists()){
-											circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
-										}
-										textView.setText(friends.get(position-1).getFriendUser().getNick());
-									    new Thread(new Runnable() {
-											
-											@Override
-											public void run() {
-												Bitmap bitmap=Utility.getPicture(friends.get(position-1).getFriendUser().getTouXiangUrl());
-												
-												if(bitmap!=null)
-													circleImageView.setImageBitmap(bitmap);
-											}
-										});
-										
-										
-								    	return view6;
-							    	}
-							    
-							 return view6;
-							}
-							
-							@Override
-							public long getItemId(int position) {
-								return position;
-							}
-							
-							@Override
-							public Object getItem(int position) {
-								return position;
-							}
-							
-							@Override
-							public int getCount() {
-								if(friends==null){
-									return 1;
-								}else {
-									return (friends.size()+1);
-								}
-							
-							}
-						};
-						((ListView)view4).setAdapter(baseAdapter2);
-					}else{
-						Log.d("Main","查询朋友有误,"+e.getMessage()+e.getErrorCode());
-					}
-					
-				}
-			});
-			
+		
 		
 			ListView contactsList=(ListView)view4;
 		    contactsList.setOnItemClickListener(new OnItemClickListener() {
@@ -422,6 +341,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				}
 			});
 			
+		    refreshNewFriend();
+		    
 			views=new ArrayList<View>();
 			views.add(view3);
 			views.add(view4);
@@ -963,12 +884,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				        && nearbySearchResult.getNearbyInfoList() != null
 				        && nearbySearchResult.getNearbyInfoList().size() > 0)
 				    	
-				    {   Log.d("Main", "total="+nearbySearchResult.getTotalNum());
+				    {   
 				    	if(benyonghucunzai(nearbySearchResult.getNearbyInfoList())==1){
-				    		Log.d("Main", "1total="+nearbySearchResult.getTotalNum());
 				    		  yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getTotalNum()-1));
 				    	}else{
-				    		Log.d("Main", "2total="+nearbySearchResult.getTotalNum());
+				    	
 				    		yonghuString.setText("当前附近用户有:"+(nearbySearchResult.getTotalNum()));
 				    	}
 				    	
@@ -1375,5 +1295,89 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     	  return 0;     //返回0的时候表示没有本用户
     	 
      }
-	
+	public static void refreshNewFriend(){    //当通过或者对方通过好友的时候刷新联系人列表
+		UserModel.getInstance().queryFriends(new FindListener<Friend>() {
+
+			@Override
+			public void done(List<Friend> list, BmobException e) {
+				
+				if(e==null||e.getErrorCode()==0){
+					friends=list;
+					BaseAdapter baseAdapter2=new BaseAdapter() {
+						
+						@Override
+						public View getView(final int position, View convertView, ViewGroup parent) {
+						  
+						    if(position==0){
+							if(convertView==null){
+								view6=layoutInflater.inflate(R.layout.new_friend, null);
+								}else {
+									view6=convertView;
+							       
+								}
+						    
+							newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
+							return view6;
+						    }
+						   else if(position>0) {
+							   
+						    	if(convertView==null||position==1){
+						    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
+						    	}else if(convertView!=null&&position!=1){
+						    		view6=convertView;
+						    	}
+						    		final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
+							    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
+							        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_");
+									if(file.exists()){
+										circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
+									}
+									textView.setText(friends.get(position-1).getFriendUser().getNick());
+								    new Thread(new Runnable() {
+										
+										@Override
+										public void run() {
+											Bitmap bitmap=Utility.getPicture(friends.get(position-1).getFriendUser().getTouXiangUrl());
+											
+											if(bitmap!=null)
+												circleImageView.setImageBitmap(bitmap);
+										}
+									});
+									
+									
+							    	return view6;
+						    	}
+						    
+						 return view6;
+						}
+						
+						@Override
+						public long getItemId(int position) {
+							return position;
+						}
+						
+						@Override
+						public Object getItem(int position) {
+							return position;
+						}
+						
+						@Override
+						public int getCount() {
+							if(friends==null){
+								return 1;
+							}else {
+								return (friends.size()+1);
+							}
+						
+						}
+					};
+					((ListView)view4).setAdapter(baseAdapter2);
+				}else{
+					Log.d("Main","查询朋友有误,"+e.getMessage()+e.getErrorCode());
+				}
+				
+			}
+		});
+		
+	}
 }
