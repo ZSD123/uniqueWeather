@@ -41,6 +41,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
@@ -58,12 +60,25 @@ public class newFriendAdapter extends BaseAdapter {
 		this.manager=manager;
 	}
    
-	
-	
+	 
 	
 	@Override
-	public View getView(  int position, View convertView, ViewGroup parent) {
+	public void notifyDataSetChanged() {
 		newFriends=manager.getAllNewFriend();
+		super.notifyDataSetChanged();
+	}
+
+
+
+
+	@Override
+	public View getView(  int position, View convertView, ViewGroup parent) {
+		for (int i = 0; i < newFriends.size(); i++) {
+			Log.d("Main", "getViewPos="+position);
+			Log.d("Main","getViewstatus="+newFriends.get(position).getStatus());
+			
+		}
+		
 		View view;
 		final int mPosition=position;
 		if(convertView==null){
@@ -76,22 +91,22 @@ public class newFriendAdapter extends BaseAdapter {
 		Button button=(Button)view.findViewById(R.id.btn_add);
 		Button button2=(Button)view.findViewById(R.id.btn_decline);
 		TextView textView=(TextView)view.findViewById(R.id.agreefriend_msg);
-		Log.d("Main", "这里的status="+newFriends.get(position).getStatus());
-		Log.d("Main", "这里的个数="+newFriends.size());
-		Log.d("Main", "manager="+manager.getAllNewFriend().get(position).getStatus());
 		if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_IREFUSE){
 			 
 			 button.setVisibility(View.GONE);
 			 button2.setVisibility(View.GONE);
 			 textView.setVisibility(View.VISIBLE);
 			 textView.setText("您已拒绝对方的好友请求");
+			 newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
 			 
 		}else if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_REFUSE){
 			 button.setVisibility(View.GONE);
 			 button2.setVisibility(View.GONE);
 			 textView.setVisibility(View.VISIBLE);
 			 textView.setText("对方已拒绝您的好友请求");
-			 newFriendBeizhu.setVisibility(View.GONE);
+			 newFriendBeizhu.setVisibility(View.VISIBLE);
+			 newFriendBeizhu.setText("\n"+newFriends.get(position).getName());
+			 
 		}else {
 			newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
 		}
@@ -159,20 +174,23 @@ public class newFriendAdapter extends BaseAdapter {
 	
 	@Override
 	public long getItemId(int position) {
-		newFriends=manager.getAllNewFriend();
 		return newFriends.get(position).getId();
 	}
 	
 	@Override
 	public Object getItem(int position) {
-		newFriends=manager.getAllNewFriend();
+		for (int i = 0; i < newFriends.size(); i++) {
+			Log.d("Main","getItemstatus="+newFriends.get(position).getStatus());
+			
+		}
+	
 		// TODO Auto-generated method stub
 		return newFriends.get(position);
 	}
 	
 	@Override
 	public int getCount() {
-		newFriends=manager.getAllNewFriend();
+		Log.d("Main","count="+newFriends.size());
 		return newFriends.size();
 	}
 	private void sendAgreeAddFriendMessage(final NewFriend add,final SaveListener listener){
@@ -230,9 +248,8 @@ public class newFriendAdapter extends BaseAdapter {
 				public void done(BmobIMMessage msg, BmobException e) {
 					if(e==null){
 						Toast.makeText(mContext, "拒绝成功",Toast.LENGTH_SHORT).show();
-						NewFriend newFriend=declineFriendMessage.Iconvert(bmobIMUserInfo);
+						NewFriend newFriend=declineFriendMessage.Iconvert(bmobIMUserInfo,newFriend1);
 						newFriend.setTime(newFriend1.getTime()+1);
-						Log.d("Main", "status="+newFriend.getStatus());
 					    manager.insertOrUpdateNewFriend(newFriend);
 					    manager.deleteNewFriend(newFriend1);
 						newFriendActivity.bAdapter.notifyDataSetChanged();

@@ -59,9 +59,9 @@ public class declineFriendMessage extends BmobIMExtraMessage {
         }
         return add;
     }
-    public static NewFriend Iconvert(BmobIMUserInfo bmobIMUserInfo){  //这里是点击拒绝之后显示在本地消息变成“您已经拒绝对方的好友请求”
+    public static NewFriend Iconvert(BmobIMUserInfo bmobIMUserInfo,NewFriend newFriend){  //这里是点击拒绝之后显示在本地消息变成“您已经拒绝对方的好友请求”
     	NewFriend add=new NewFriend();
-    	add.setMsg("您已拒绝对方的好友请求");
+    	add.setMsg(newFriend.getMsg());
     	add.setStatus(Config.STATUS_VERIFY_IREFUSE);
     	add.setName(bmobIMUserInfo.getName());
     	add.setAvatar(bmobIMUserInfo.getAvatar());

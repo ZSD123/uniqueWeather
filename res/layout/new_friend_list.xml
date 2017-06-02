@@ -6,7 +6,6 @@
  <RelativeLayout 
      android:layout_width="match_parent"
      android:layout_height="50dp"
-     android:gravity="center"
      android:background="@drawable/danblue"
      >
      <TextView 
@@ -14,10 +13,20 @@
          android:layout_height="wrap_content"
          android:text="新的朋友"
          android:textSize="20sp"
+         android:layout_centerInParent="true"
          />
+     <Button 
+         android:id="@+id/btnGuan"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentRight="true"
+         android:layout_marginRight="10dp"
+         android:text="清空"
+         />
+      
  </RelativeLayout>    
  <ListView 
-     android:id="@+id/add_friend_list"
+     android:id="@+id/new_friend_list"
      android:layout_width="match_parent"
      android:layout_height="match_parent"
      ></ListView> 
