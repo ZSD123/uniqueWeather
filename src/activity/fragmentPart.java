@@ -10,10 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import message.AddFriendMessage;
-import message.AgreeAddFriendMessage;
-import message.myMessageHandler;
 import model.Friend;
-import model.NewFriend;
 import model.UserModel;
 import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
@@ -24,8 +21,6 @@ import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
 import Util.download;
-import android.R.anim;
-import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -33,17 +28,13 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,6 +48,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -68,7 +60,6 @@ import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.core.BmobIMClient;
-import cn.bmob.newim.db.dao.UserDao;
 import cn.bmob.newim.listener.ConnectListener;
 import cn.bmob.newim.listener.ConversationListener;
 import cn.bmob.newim.listener.MessageSendListener;
@@ -78,14 +69,12 @@ import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
-import cn.bmob.v3.listener.SaveListener;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
-import com.amap.api.mapcore2d.db;
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMap.OnCameraChangeListener;
 import com.amap.api.maps2d.AMap.OnMarkerClickListener;
@@ -114,7 +103,6 @@ import com.amap.api.services.nearby.UploadInfoCallback;
 import com.uniqueweather.app.R;
 
 import db.messageDB;
-import db.messagedbHelper;
 import db.yonghuDB;
 public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener,OnMarkerClickListener
 {   public static String keyToGet="begin";
@@ -141,7 +129,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private String accountName;
     private View view;
     private static Bitmap bitmap;
-    private String uriUserPicture;
     private static Bitmap bitmap1;
     public Context context;
     public Button button1;
@@ -184,7 +171,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private Circle mCircle;
 	private Marker mLocMarker;    //定位Marker
 	private List<Marker> mFujinMarker=new ArrayList<Marker>(); //没有设置头像直接添加头像的附近用户Marker
-	private  List<String> urlList=new ArrayList<String>();;
 	
 	private volatile int zmarkNum=0;//直接添加用户头像的Marker个数
 	private Marker mLoveMarker;    //当前Marker
@@ -192,7 +178,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private String address="http://route.showapi.com/238-2";  //经纬度转化为地址
 	private TextView myAccount;     //我的账户TextView 	
 	private OnLocationChangedListener mListener;
-	private String yuanLocation;
 	private ImageButton refreshBtn;  //地图刷新按钮
     private Timer timer;
 	private TimerTask task;
@@ -207,9 +192,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	public static  yonghuDB yongbDb;
 	private String username;
-	private boolean markCunzai=false;  //加载图片的时候为了加快速度检测是否存在相应的mark
-	private  Button buttonMes;    //消息按钮
-	private Button  buttonCon;    //联系人按钮
+	
 	
 	public static ImageView newFriendImage;
 	public static ImageView newFriendImage1;
@@ -245,9 +228,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	        
             meDb=messageDB.getInstance(context);
 			
-            Log.d("Main", "id="+MyUser.getCurrentUser().getObjectId());  
-            
-            MyUser user=MyUser.getCurrentUser(MyUser.class);
+             MyUser user=MyUser.getCurrentUser(MyUser.class);
             if(user.getObjectId()!=null)
               BmobIM.connect(user.getObjectId(),new ConnectListener() {
 				
@@ -271,11 +252,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			button2=(Button)view.findViewById(R.id.button1);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
-		    buttonMes=(Button)view.findViewById(R.id.chat_mes);
-		    buttonCon=(Button)view.findViewById(R.id.chat_con);
+		    final Button  buttonMes=(Button)view.findViewById(R.id.chat_mes);
+		    final Button buttonCon=(Button)view.findViewById(R.id.chat_con);
 			newFriendImage=(ImageView)view.findViewById(R.id.newfriend_image);
-		    
-		    
+			
 			chatPager=(myChatPager)view.findViewById(R.id.chatPager);
             layoutInflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view3=layoutInflater.inflate(R.layout.chatlist,null);
@@ -333,13 +313,19 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
+				
 					if(position==0){
 						Intent intent=new Intent(context,newFriendActivity.class);
+						startActivity(intent);
+					
+					}else if(position>0){
+						Intent intent=new Intent(context,talkActivity.class);
 						startActivity(intent);
 					}
 					
 				}
 			});
+		    
 			
 		    refreshNewFriend();
 		    
@@ -381,7 +367,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
 			String nick=(String)BmobUser.getObjectByKey("nick");
 		    String touxiangUrl=(String)BmobUser.getObjectByKey("touxiangUrl");
-		    String accountString=(String)BmobUser.getObjectByKey("username");//就是账户名，比如159...或者邮箱
 		    if(nick!=null){
 		    	userName.setText(nick);
 		    }
@@ -435,6 +420,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					public void onClick(View v) {
 						chatPager.setCurrentItem(0);
 					 	horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth,0);
+					 	
+						buttonMes.setBackgroundResource(R.drawable.danblue);
+						buttonMes.setTextColor(Color.parseColor("#FF68B4FF"));
+						
+						buttonCon.setBackgroundResource(R.drawable.white);
+						buttonCon.setTextColor(Color.parseColor("black"));
 					}
 				});
 				
@@ -443,6 +434,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					@Override
 					public void onClick(View v) {
 						chatPager.setCurrentItem(1);
+						
+						buttonCon.setBackgroundResource(R.drawable.danblue);
+						buttonCon.setTextColor(Color.parseColor("#FF68B4FF"));
+						
+						buttonMes.setBackgroundResource(R.drawable.white);
+						buttonMes.setTextColor(Color.parseColor("black"));
 						
 					}
 				});
@@ -1295,7 +1292,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     	  return 0;     //返回0的时候表示没有本用户
     	 
      }
-	public static void refreshNewFriend(){    //当通过或者对方通过好友的时候刷新联系人列表
+	  public static void refreshNewFriend(){    //当通过或者对方通过好友的时候刷新联系人列表
 		UserModel.getInstance().queryFriends(new FindListener<Friend>() {
 
 			@Override

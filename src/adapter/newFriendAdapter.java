@@ -17,6 +17,7 @@ import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.SaveListener;
 
+import com.amap.api.mapcore2d.p;
 import com.amap.api.services.a.m;
 import com.uniqueweather.app.R;
 
@@ -31,6 +32,7 @@ import Util.Utility;
 import activity.MyUser;
 import activity.fragmentPart;
 import activity.newFriendActivity;
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -45,6 +47,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,7 +58,8 @@ public class newFriendAdapter extends BaseAdapter {
 	private NewFriendManager manager;
 	private Context mContext;
 	private List<NewFriend> newFriends=new ArrayList<NewFriend>();
-
+    public  int state=8;
+   private  List<Integer> intlist=new ArrayList<Integer>();
 	public newFriendAdapter(Context context,NewFriendManager manager){
 		mContext=context;
 		newFriends=manager.getAllNewFriend();
@@ -68,16 +74,25 @@ public class newFriendAdapter extends BaseAdapter {
 		super.notifyDataSetChanged();
 	}
 
-
-
+    public List<NewFriend> getNewFriendToDelete(){
+    	 List<NewFriend> list=new ArrayList<NewFriend>();
+    	 for (int i = 0; i <intlist.size(); i++) {
+			  list.add((NewFriend) getItem(i));
+		 }
+    	 intlist.clear();
+    	 return list;
+    }
+    public List<Integer> getIntList(){
+    	for (int i = 0; i < intlist.size(); i++) {
+			Log.d("Main", "int="+intlist.get(i));
+		}
+    	return intlist;
+    }
 
 	@Override
-	public View getView(  int position, View convertView, ViewGroup parent) {
-		for (int i = 0; i < newFriends.size(); i++) {
-			Log.d("Main", "getViewPos="+position);
-			Log.d("Main","getViewstatus="+newFriends.get(position).getStatus());
-			
-		}
+	public View getView(  final int position, View convertView, ViewGroup parent) {
+
+		
 		
 		View view;
 		final int mPosition=position;
@@ -90,6 +105,25 @@ public class newFriendAdapter extends BaseAdapter {
 		TextView newFriendBeizhu=(TextView)view.findViewById(R.id.agreefriendbeizhu);
 		Button button=(Button)view.findViewById(R.id.btn_add);
 		Button button2=(Button)view.findViewById(R.id.btn_decline);
+	    CheckBox checkBox=(CheckBox)view.findViewById(R.id.agreefriendcheck);
+		if(state==8){
+			checkBox.setVisibility(View.GONE);
+		}else if(state==0){
+			checkBox.setVisibility(View.VISIBLE);
+		}
+	    checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				  if(isChecked&&!intlist.contains(position)){
+					    intlist.add(position);
+				  }else if(!isChecked&&intlist.contains(position)){
+					  intlist.remove(position);
+				  }
+				
+			}
+		});
+		
 		TextView textView=(TextView)view.findViewById(R.id.agreefriend_msg);
 		if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_IREFUSE){
 			 

@@ -105,11 +105,8 @@ public class newFriendActivity extends Activity {
 					int position, long id) {
 				if(buttonGuan.getText().equals("清空"))
 				    buttonGuan.setText("删除");
-				Log.d("Main","position="+position);
-	    		 View itemview=listView.getChildAt(position);
-                 itemview.setBackgroundColor(Color.parseColor("#00FFFF"));
-	    		 newFriends.add((NewFriend) bAdapter.getItem(position));
-	    		 
+			    bAdapter.state=0; //为0的时候显现出来
+				bAdapter.notifyDataSetChanged();	 
 				 return false;
 			}
 		});
@@ -143,10 +140,21 @@ public class newFriendActivity extends Activity {
 				});
 			      builder.show();
 			    }else if(buttonGuan.getText().equals("删除")){
-			        for (int i = 0; i < newFriends.size(); i++) {
-						  newFriendManager.deleteNewFriend(newFriends.get(i));
+			        List<Integer> intList=new ArrayList<Integer>();
+					intList=bAdapter.getIntList();
+					for (int i = 0; i < intList.size(); i++) {
+					
+						listView.removeViews(intList.get(i), 1);//既然刷新数据后出现有些View并没有正常删除，实际上数据库里相应的是删除了的，那么我们就直接调用listview的remove功能删除相应的视图
 					}
+				
+					List<NewFriend> newFriends=new ArrayList<NewFriend>();
+						newFriends=	bAdapter.getNewFriendToDelete();
+	              	for (int i = 0; i < newFriends.size(); i++) {
+							 newFriendManager.deleteNewFriend(newFriends.get(i));
+						}
+			
 					bAdapter.notifyDataSetChanged();
+				
 			    }
 			}
 		});
@@ -159,6 +167,8 @@ public class newFriendActivity extends Activity {
 				listView.getChildAt(i).setBackgroundColor(0);
 			}
 			newFriends.clear();
+			bAdapter.state=8;
+			bAdapter.notifyDataSetChanged();
 		}else {
 			super.onBackPressed();
 		}

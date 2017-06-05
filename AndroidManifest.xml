@@ -97,6 +97,9 @@
         <activity
             android:name="activity.newFriendActivity"
             ></activity>
+        <activity 
+            android:name="activity.talkActivity"
+            ></activity>
         <service
             android:name="service.autoUqdateService"/>
         <service 

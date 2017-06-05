@@ -47,4 +47,24 @@
        android:src="@drawable/blackline1"
        />
 </LinearLayout>
+<LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#999999"
+    >
+    <ImageView 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/sanjiao"   
+        android:layout_marginLeft="10dp"
+        />  
+     <TextView 
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="我的联系人"
+         android:textColor="#FFF" 
+         android:layout_marginLeft="10dp" 
+         />
+</LinearLayout>
 </LinearLayout>

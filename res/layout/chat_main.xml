@@ -40,35 +40,30 @@
  <LinearLayout 
      android:id="@+id/lin2"
      android:layout_width="match_parent"
-     android:layout_height="30dp"
+     android:layout_height="40dp"
      android:orientation="horizontal"
      android:layout_below="@id/lin1"
-     android:background="@drawable/danblue"
      >
      <Button
          android:id="@+id/chat_mes"
          android:layout_width="0dp"
-         android:layout_height="wrap_content"
+         android:layout_height="40dp"
           android:gravity="center_horizontal"
          android:text="消息"
          android:textSize="20sp"
+         android:textColor="#FF68B4FF"
+         android:background="@drawable/danblue"
          android:layout_weight="1"
-         android:background="@drawable/contact_stapre"
          />
 
-      <ImageView
-          android:layout_width="wrap_content"
-          android:layout_height="30dp"
-          android:src="@drawable/blackline" />
-  
      <Button
-         android:id="@+id/chat_con"    
+         android:id="@+id/chat_con"       
          android:layout_width="0dp"
-         android:layout_height="wrap_content"
+         android:layout_height="40dp"
          android:gravity="center_horizontal"
          android:layout_weight="1"
-        android:background="@drawable/contact_stapre"
          android:textSize="20sp"
+         android:background="@drawable/white"
           android:text="联系人"/>
     <ImageView
         android:id="@+id/newfriend_image"
@@ -80,7 +75,7 @@
         >     
   
     </ImageView>
-  
+      
 
      
  </LinearLayout>
