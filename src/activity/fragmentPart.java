@@ -189,6 +189,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	
 	private View  yonghuDataView;  //附近用户资料卡View
+	private static BaseAdapter baseAdapter2;//朋友列表
 	
 	public static  yonghuDB yongbDb;
 	private String username;
@@ -319,8 +320,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						startActivity(intent);
 					
 					}else if(position>0){
-						Intent intent=new Intent(context,talkActivity.class);
-						startActivity(intent);
+						BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+						bmobIMUserInfo.setUserId(((Friend)baseAdapter2.getItem(position)).getFriendUser().getObjectId());
+						bmobIMUserInfo.setName(((Friend)baseAdapter2.getItem(position)).getFriendUser().getNick());
+						bmobIMUserInfo.setAvatar(((Friend)baseAdapter2.getItem(position)).getFriendUser().getTouXiangUrl());
+				   	BmobIM.getInstance().startPrivateConversation(n , arg1)
 					}
 					
 				}
@@ -1296,11 +1300,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		UserModel.getInstance().queryFriends(new FindListener<Friend>() {
 
 			@Override
-			public void done(List<Friend> list, BmobException e) {
+			public void done(final List<Friend> list, BmobException e) {
 				
 				if(e==null||e.getErrorCode()==0){
 					friends=list;
-					BaseAdapter baseAdapter2=new BaseAdapter() {
+				   baseAdapter2=new BaseAdapter() {
 						
 						@Override
 						public View getView(final int position, View convertView, ViewGroup parent) {
@@ -1355,7 +1359,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						
 						@Override
 						public Object getItem(int position) {
-							return position;
+							return list.get(position-1);
 						}
 						
 						@Override
