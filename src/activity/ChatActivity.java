@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -99,6 +100,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     TextView tv_voice_tips;
 
     ImageView iv_record;
+    TextView tv_picture;
+    TextView tv_camera;
+    
     private Drawable[] drawable_Anims;// 话筒动画
     BmobRecordManager recordManager;
 
@@ -167,7 +171,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        
         ll_chat=(LinearLayout)findViewById(R.id.ll_chat);
         sw_refresh=(SwipeRefreshLayout)findViewById(R.id.sw_refresh);
         rc_view=(RecyclerView)findViewById(R.id.rc_view);
@@ -180,30 +183,126 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         btn_chat_send=(Button)findViewById(R.id.btn_chat_send);
         layout_more=(LinearLayout)findViewById(R.id.layout_more);
         layout_add=(LinearLayout)findViewById(R.id.layout_add);
+
         layout_emo=(LinearLayout)findViewById(R.id.layout_emo);
         layout_record=(RelativeLayout)findViewById(R.id.layout_record);
         tv_voice_tips=(TextView)findViewById(R.id.tv_voice_tips);
         iv_record=(ImageView)findViewById(R.id.iv_record);
-        
-        
+        tv_picture=(TextView)findViewById(R.id.tv_picture);
+        tv_camera=(TextView)findViewById(R.id.tv_camera);
+   
+        Log.d("Main","1");
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
       // initNaviView();
         initSwipeLayout();
         initVoiceView();   
+        Log.d("Main","2");
         initBottomView();
+        Log.d("Main","3");
+        edit_msg.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				 if (layout_more.getVisibility() == View.VISIBLE) {
+			            layout_add.setVisibility(View.GONE);
+			            layout_emo.setVisibility(View.GONE);
+			            layout_more.setVisibility(View.GONE);
+			        }
+				
+			}
+		});
+        
+        btn_chat_emo.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			    if (layout_more.getVisibility() == View.GONE) {
+		            showEditState(true);
+		        } else {
+		            if (layout_add.getVisibility() == View.VISIBLE) {
+		                layout_add.setVisibility(View.GONE);
+		                layout_emo.setVisibility(View.VISIBLE);
+		            } else {
+		                layout_more.setVisibility(View.GONE);
+		            }
+		        }
+			}
+		});
+        
+        btn_chat_add.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				  if (layout_more.getVisibility() == View.GONE) {
+			            layout_more.setVisibility(View.VISIBLE);
+			            layout_add.setVisibility(View.VISIBLE);
+			            layout_emo.setVisibility(View.GONE);
+			            hideSoftInputView();
+			        } else {
+			            if (layout_emo.getVisibility() == View.VISIBLE) {
+			                layout_emo.setVisibility(View.GONE);
+			                layout_add.setVisibility(View.VISIBLE);
+			            } else {
+			                layout_more.setVisibility(View.GONE);
+			            }
+			        }
+			}
+		});
+        btn_chat_voice.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				   edit_msg.setVisibility(View.GONE);
+			        layout_more.setVisibility(View.GONE);
+			        btn_chat_voice.setVisibility(View.GONE);
+			        btn_chat_keyboard.setVisibility(View.VISIBLE);
+			        btn_speak.setVisibility(View.VISIBLE);
+			        hideSoftInputView();
+			}
+		});
+        btn_chat_keyboard.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				 showEditState(false);
+				
+			}
+		});
+        
+        btn_chat_send.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				 sendMessage();
+				
+			}
+		});
+        tv_picture.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				sendVideoMessage();
+				
+			}
+		});
+        tv_camera.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				sendRemoteImageMessage();
+				
+			}
+		});
+       
+        
     }
 
     private void initSwipeLayout(){
         sw_refresh.setEnabled(true);
-        Log.d("Main", "6");
         layoutManager = new LinearLayoutManager(this);
-        Log.d("Main", "8");
         rc_view.setLayoutManager(layoutManager);
-        Log.d("Main", "9");
         adapter = new ChatAdapter(this,c);
-        Log.d("Main", "10");
         rc_view.setAdapter(adapter);
-        Log.d("Main", "1");
         ll_chat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -214,7 +313,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             }
         });
         //下拉加载
-        Log.d("Main", "2");
         sw_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -223,7 +321,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             }
         });
         //设置RecyclerView的点击事件
-        Log.d("Main", "3");
         adapter.setOnRecyclerViewListener(new OnRecyclerViewListener() {
             @Override
             public void onItemClick(int position) {
@@ -365,72 +462,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     }
 
 
-    public void onEditClick(View view){
-        if (layout_more.getVisibility() == View.VISIBLE) {
-            layout_add.setVisibility(View.GONE);
-            layout_emo.setVisibility(View.GONE);
-            layout_more.setVisibility(View.GONE);
-        }
-    }
-
-    public void onEmoClick(View view){
-        if (layout_more.getVisibility() == View.GONE) {
-            showEditState(true);
-        } else {
-            if (layout_add.getVisibility() == View.VISIBLE) {
-                layout_add.setVisibility(View.GONE);
-                layout_emo.setVisibility(View.VISIBLE);
-            } else {
-                layout_more.setVisibility(View.GONE);
-            }
-        }
-    }
-
-    public void onAddClick(View view){
-        if (layout_more.getVisibility() == View.GONE) {
-            layout_more.setVisibility(View.VISIBLE);
-            layout_add.setVisibility(View.VISIBLE);
-            layout_emo.setVisibility(View.GONE);
-            hideSoftInputView();
-        } else {
-            if (layout_emo.getVisibility() == View.VISIBLE) {
-                layout_emo.setVisibility(View.GONE);
-                layout_add.setVisibility(View.VISIBLE);
-            } else {
-                layout_more.setVisibility(View.GONE);
-            }
-        }
-    }
-    public void onVoiceClick(View view){
-        edit_msg.setVisibility(View.GONE);
-        layout_more.setVisibility(View.GONE);
-        btn_chat_voice.setVisibility(View.GONE);
-        btn_chat_keyboard.setVisibility(View.VISIBLE);
-        btn_speak.setVisibility(View.VISIBLE);
-        hideSoftInputView();
-    }
-
-    public void onKeyClick(View view){
-        showEditState(false);
-    }
-
-    public void onSendClick(View view){
-        sendMessage();
-    }
-
-    public void onPictureClick(View view){
-//        sendLocalImageMessage();
-//        sendOtherMessage();
-        sendVideoMessage();
-    }
-    public void onCameraClick(View view){
-        sendRemoteImageMessage();
-    }
-
-   // public void onLocationClick(View view){
-    //    sendLocationMessage();
-  //  }
-
     /**
      * 根据是否点击笑脸来显示文本输入框的状态
      * @param  isEmo 用于区分文字和表情
@@ -474,13 +505,18 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             Toast.makeText(ChatActivity.this, "请输入内容",Toast.LENGTH_SHORT).show();
             return;
         }
+        Log.d("Main", "3");
         BmobIMTextMessage msg =new BmobIMTextMessage();
         msg.setContent(text);
         //可设置额外信息
+        Log.d("Main", "2");
+        
         Map<String,Object> map =new HashMap<String, Object>();
         map.put("level", "1");//随意增加信息
         msg.setExtraMap(map);
+        Log.d("Main", "1");
         c.sendMessage(msg, listener);
+        
     }
 
     /**
@@ -569,6 +605,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             scrollToBottom();
             if (e != null) {
                 Toast.makeText(ChatActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+            }else {
+            	Log.d("Main", e.getMessage());
             }
         }
     };

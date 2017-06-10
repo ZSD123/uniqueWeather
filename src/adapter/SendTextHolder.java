@@ -2,12 +2,15 @@ package adapter;
 
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import butterknife.Bind;
 
 import java.text.SimpleDateFormat;
 
@@ -32,6 +35,7 @@ public class SendTextHolder extends BaseViewHolder implements View.OnClickListen
   protected TextView tv_time;
 
   protected TextView tv_message;
+
   protected TextView tv_send_status;
 
   protected ProgressBar progress_load;
@@ -40,7 +44,15 @@ public class SendTextHolder extends BaseViewHolder implements View.OnClickListen
 
   public SendTextHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener listener) {
     super(context, root, R.layout.item_chat_sent_message, listener);
-    this.c =c;  
+    this.c =c;
+    View view=((Activity)context).getLayoutInflater().inflate(R.layout.item_chat_sent_message, null);
+    iv_avatar=(ImageView)view.findViewById(R.id.iv_avatar);
+    iv_fail_resend=(ImageView)view.findViewById(R.id.iv_fail_resend);
+    tv_time=(TextView)view.findViewById(R.id.tv_time);
+    tv_message=(TextView)view.findViewById(R.id.tv_message);
+    tv_send_status=(TextView)view.findViewById(R.id.tv_send_status);
+    progress_load=(ProgressBar)view.findViewById(R.id.progress_load);
+    
   }
 
   @Override

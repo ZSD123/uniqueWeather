@@ -79,7 +79,7 @@
     android:layout_width="30dp" 
     android:gravity="center" 
     android:id="@+id/btn_chat_keyboard"
-     android:visibility="gone"
+   android:visibility="gone"
    android:textColor="@color/base_color_text_black"> </Button>
 
 <Button 
@@ -124,8 +124,8 @@
 
 <include 
     android:id="@+id/layout_add"
-     android:visibility="gone"
-      layout="@layout/include_chat_add"/>
+    android:visibility="gone"
+    layout="@layout/include_chat_add"/>
 
 </LinearLayout>
 
