@@ -18,14 +18,17 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
 public  class baseActivity extends Activity {
-	private String bmobObjectId=(String)MyUser.getObjectByKey("objectId");
+	private String bmobObjectId;
+	
 	private Dialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
+		
 		//自动登陆状态下检测是否在其他设备登陆
 		checkLogin();
+		
 	}
 	@Override
 	protected void onResume() {
@@ -36,6 +39,9 @@ public  class baseActivity extends Activity {
 	}
 	
 	public void checkLogin() {
+		Log.d("Main", "这里2");
+		bmobObjectId=(String)MyUser.getObjectByKey("objectId");
+		Log.d("Main", "这里1");
 		final BmobRealTimeData rtd=new BmobRealTimeData();
 	    rtd.start(new ValueEventListener() {
 			

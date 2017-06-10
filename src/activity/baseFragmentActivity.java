@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 public class baseFragmentActivity extends FragmentActivity {
 	private String bmobObjectId=(String)MyUser.getObjectByKey("objectId");
@@ -93,4 +95,17 @@ public class baseFragmentActivity extends FragmentActivity {
             dialog.dismiss();
         }
     }
+	   public Bundle getBundle() {
+	        if (getIntent() != null && getIntent().hasExtra(getPackageName()))
+	            return getIntent().getBundleExtra(getPackageName());
+	        else
+	            return null;
+	    }
+	    public void hideSoftInputView() {
+	        InputMethodManager manager = ((InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE));
+	        if (getWindow().getAttributes().softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN) {
+	            if (getCurrentFocus() != null)
+	                manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+	        }
+	    }
 }

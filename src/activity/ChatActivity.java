@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import butterknife.Bind;
 import butterknife.OnClick;
 
 
@@ -64,7 +65,7 @@ import cn.bmob.v3.exception.BmobException;
  * @project:ChatActivity
  * @date :2016-01-25-18:23
  */
-public class ChatActivity extends baseActivity implements ObseverListener,MessageListHandler{
+public class ChatActivity extends baseFragmentActivity implements ObseverListener,MessageListHandler{
 
     LinearLayout ll_chat;
 
@@ -76,19 +77,27 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
 
     Button btn_chat_add;
     Button btn_chat_emo;
+
     Button btn_speak;
+
     Button btn_chat_voice;
+
     Button btn_chat_keyboard;
 
     Button btn_chat_send;
 
+
     LinearLayout layout_more;
+
     LinearLayout layout_add;
     LinearLayout layout_emo;
 
     // 语音有关
+
     RelativeLayout layout_record;
+ 
     TextView tv_voice_tips;
+
     ImageView iv_record;
     private Drawable[] drawable_Anims;// 话筒动画
     BmobRecordManager recordManager;
@@ -96,28 +105,103 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     ChatAdapter adapter;
     protected LinearLayoutManager layoutManager;
     BmobIMConversation c;
+    
+    class VoiceTouchListener implements View.OnTouchListener {
+        @Override   
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (!CommonUtils.checkSdCard()) {
+                        Toast.makeText(ChatActivity.this, "发送语音需要sdcard支持！", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    try {
+                        v.setPressed(true);
+                        layout_record.setVisibility(View.VISIBLE);
+                        tv_voice_tips.setText(getString(R.string.voice_cancel_tips));
+                        // 开始录音
+                        recordManager.startRecording(c.getConversationId());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                case MotionEvent.ACTION_MOVE: {
+                    if (event.getY() < 0) {
+                        tv_voice_tips.setText(getString(R.string.voice_cancel_tips));
+                        tv_voice_tips.setTextColor(Color.RED);
+                    } else {
+                        tv_voice_tips.setText(getString(R.string.voice_up_tips));
+                        tv_voice_tips.setTextColor(Color.WHITE);
+                    }
+                    return true;
+                }
+                case MotionEvent.ACTION_UP:
+                    v.setPressed(false);
+                    layout_record.setVisibility(View.INVISIBLE);
+                    try {
+                        if (event.getY() < 0) {// 放弃录音
+                            recordManager.cancelRecording();
+                            Log.i("voice", "放弃发送语音");
+                        } else {
+                            int recordTime = recordManager.stopRecording();
+                            if (recordTime > 1) {
+                                // 发送语音文件
+                                sendVoiceMessage(recordManager.getRecordFilePath(c.getConversationId()),recordTime);
+                            } else {// 录音时间过短，则提示录音过短的提示
+                                layout_record.setVisibility(View.GONE);
+                                showShortToast().show();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        Log.d("Main", "6");
-        c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getBundle().getSerializable("c"));
-        Log.d("Main", "7");
-      //  initNaviView();
+        
+        ll_chat=(LinearLayout)findViewById(R.id.ll_chat);
+        sw_refresh=(SwipeRefreshLayout)findViewById(R.id.sw_refresh);
+        rc_view=(RecyclerView)findViewById(R.id.rc_view);
+        edit_msg=(EditText)findViewById(R.id.edit_msg);
+        btn_chat_add=(Button)findViewById(R.id.btn_chat_add);
+        btn_chat_emo=(Button)findViewById(R.id.btn_chat_emo);
+        btn_speak=(Button)findViewById(R.id.btn_speak);
+        btn_chat_voice=(Button)findViewById(R.id.btn_chat_voice);
+        btn_chat_keyboard=(Button)findViewById(R.id.btn_chat_keyboard);
+        btn_chat_send=(Button)findViewById(R.id.btn_chat_send);
+        layout_more=(LinearLayout)findViewById(R.id.layout_more);
+        layout_add=(LinearLayout)findViewById(R.id.layout_add);
+        layout_emo=(LinearLayout)findViewById(R.id.layout_emo);
+        layout_record=(RelativeLayout)findViewById(R.id.layout_record);
+        tv_voice_tips=(TextView)findViewById(R.id.tv_voice_tips);
+        iv_record=(ImageView)findViewById(R.id.iv_record);
+        
+        
+        c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
+      // initNaviView();
         initSwipeLayout();
-        Log.d("Main", "4");
-        initVoiceView();
-        Log.d("Main", "5");
+        initVoiceView();   
         initBottomView();
     }
 
     private void initSwipeLayout(){
         sw_refresh.setEnabled(true);
+        Log.d("Main", "6");
         layoutManager = new LinearLayoutManager(this);
+        Log.d("Main", "8");
         rc_view.setLayoutManager(layoutManager);
+        Log.d("Main", "9");
         adapter = new ChatAdapter(this,c);
+        Log.d("Main", "10");
         rc_view.setAdapter(adapter);
         Log.d("Main", "1");
         ll_chat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -260,62 +344,7 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
      * @author smile
      * @date 2014-7-1 下午6:10:16
      */
-    class VoiceTouchListener implements View.OnTouchListener {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    if (!CommonUtils.checkSdCard()) {
-                        Toast.makeText(ChatActivity.this, "发送语音需要sdcard支持！", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    try {
-                        v.setPressed(true);
-                        layout_record.setVisibility(View.VISIBLE);
-                        tv_voice_tips.setText(getString(R.string.voice_cancel_tips));
-                        // 开始录音
-                        recordManager.startRecording(c.getConversationId());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return true;
-                case MotionEvent.ACTION_MOVE: {
-                    if (event.getY() < 0) {
-                        tv_voice_tips.setText(getString(R.string.voice_cancel_tips));
-                        tv_voice_tips.setTextColor(Color.RED);
-                    } else {
-                        tv_voice_tips.setText(getString(R.string.voice_up_tips));
-                        tv_voice_tips.setTextColor(Color.WHITE);
-                    }
-                    return true;
-                }
-                case MotionEvent.ACTION_UP:
-                    v.setPressed(false);
-                    layout_record.setVisibility(View.INVISIBLE);
-                    try {
-                        if (event.getY() < 0) {// 放弃录音
-                            recordManager.cancelRecording();
-                            Log.i("voice", "放弃发送语音");
-                        } else {
-                            int recordTime = recordManager.stopRecording();
-                            if (recordTime > 1) {
-                                // 发送语音文件
-                                sendVoiceMessage(recordManager.getRecordFilePath(c.getConversationId()),recordTime);
-                            } else {// 录音时间过短，则提示录音过短的提示
-                                layout_record.setVisibility(View.GONE);
-                                showShortToast().show();
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return true;
-                default:
-                    return false;
-            }
-        }
-    }
-
+    
     Toast toast;
 
     /**

@@ -324,7 +324,24 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						bmobIMUserInfo.setUserId(((Friend)baseAdapter2.getItem(position)).getFriendUser().getObjectId());
 						bmobIMUserInfo.setName(((Friend)baseAdapter2.getItem(position)).getFriendUser().getNick());
 						bmobIMUserInfo.setAvatar(((Friend)baseAdapter2.getItem(position)).getFriendUser().getTouXiangUrl());
-				   	BmobIM.getInstance().startPrivateConversation(n , arg1)
+				     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
+							
+							@Override
+							public void done(BmobIMConversation c, BmobException e) {
+								if(e==null){
+									Bundle bundle=new Bundle();
+									bundle.putSerializable("c",c);
+									Log.d("Main","cµÄÖµÎª"+c.toString());
+									Intent intent=new Intent(context,ChatActivity.class);
+									intent.putExtra("bundle", bundle);
+									startActivity(intent);
+									
+								}else {
+									Log.d("Main", e.getMessage());
+								}
+								
+							}
+						});
 					}
 					
 				}
