@@ -24,8 +24,8 @@ public class AgreeHolder extends BaseViewHolder implements View.OnClickListener,
   @Bind(R.id.tv_message)
   protected TextView tv_message;
 
-  public AgreeHolder(Context context, ViewGroup root, OnRecyclerViewListener listener) {
-    super(context, root, R.layout.item_chat_agree, listener);
+  public AgreeHolder(Context context, ViewGroup root, OnRecyclerViewListener listener,View view) {
+    super(context, root, listener,view);
   }
 
   @Override

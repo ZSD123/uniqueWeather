@@ -36,8 +36,8 @@ public class ReceiveImageHolder extends BaseViewHolder {
   @Bind(R.id.progress_load)
   protected ProgressBar progress_load;
 
-  public ReceiveImageHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener) {
-    super(context, root, R.layout.item_chat_received_image,onRecyclerViewListener);
+  public ReceiveImageHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
+     super(context, root,onRecyclerViewListener,view);
   }
 
   @Override

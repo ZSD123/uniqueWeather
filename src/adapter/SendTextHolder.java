@@ -2,8 +2,14 @@ package adapter;
 
 
 
+import activity.MyUser;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +18,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import butterknife.Bind;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+
+import myCustomView.CircleImageView;
 
 import com.uniqueweather.app.R;
 
@@ -27,26 +38,28 @@ import cn.bmob.v3.exception.BmobException;
  * 发送的文本类型
  */
 public class SendTextHolder extends BaseViewHolder implements View.OnClickListener,View.OnLongClickListener {
+	 @Bind(R.id.iv_avatar)
+	  protected CircleImageView iv_avatar;
 
-  protected ImageView iv_avatar;
+	  @Bind(R.id.iv_fail_resend)
+	  protected ImageView iv_fail_resend;
 
-  protected ImageView iv_fail_resend;
+	  @Bind(R.id.tv_time)
+	  protected TextView tv_time;
 
-  protected TextView tv_time;
+	  @Bind(R.id.tv_message)
+	  protected TextView tv_message;
+	  @Bind(R.id.tv_send_status)
+	  protected TextView tv_send_status;
 
-  protected TextView tv_message;
+	  @Bind(R.id.progress_load)
+	  protected ProgressBar progress_load;
+      BmobIMConversation c;
 
-  protected TextView tv_send_status;
-
-  protected ProgressBar progress_load;
-
-  BmobIMConversation c;
-
-  public SendTextHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener listener) {
-    super(context, root, R.layout.item_chat_sent_message, listener);
+  public SendTextHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener listener,View view) {
+    super(context, root, listener,view);
     this.c =c;
-    View view=((Activity)context).getLayoutInflater().inflate(R.layout.item_chat_sent_message, null);
-    iv_avatar=(ImageView)view.findViewById(R.id.iv_avatar);
+    iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);
     iv_fail_resend=(ImageView)view.findViewById(R.id.iv_fail_resend);
     tv_time=(TextView)view.findViewById(R.id.tv_time);
     tv_message=(TextView)view.findViewById(R.id.tv_message);
@@ -57,10 +70,29 @@ public class SendTextHolder extends BaseViewHolder implements View.OnClickListen
 
   @Override
   public void bindData(Object o) {
+	     
     final BmobIMMessage message = (BmobIMMessage)o;
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     final BmobIMUserInfo info = message.getBmobIMUserInfo();
-    ImageLoaderFactory.getLoader().loadAvator(iv_avatar,info != null ? info.getAvatar() : null, R.drawable.head);
+    
+    //加载发送文本的自己的头像
+    
+    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+    File file=new File(path);
+    if(file.exists()){
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = 2;      
+      try {
+         Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+         iv_avatar.setImageBitmap(bmp);
+      } catch (OutOfMemoryError err) {
+    	  err.printStackTrace();
+     }
+    }else {
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    }
+    
+    
     String time = dateFormat.format(message.getCreateTime());
     String content = message.getContent();
     tv_message.setText(content);
@@ -138,4 +170,5 @@ public class SendTextHolder extends BaseViewHolder implements View.OnClickListen
   public void showTime(boolean isShow) {
     tv_time.setVisibility(isShow ? View.VISIBLE : View.GONE);
   }
+
 }

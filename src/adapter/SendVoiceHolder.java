@@ -45,8 +45,8 @@ public class SendVoiceHolder extends BaseViewHolder {
   protected ProgressBar progress_load;
 
   BmobIMConversation c;
-  public SendVoiceHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener onRecyclerViewListener) {
-    super(context, root, R.layout.item_chat_sent_voice,onRecyclerViewListener);
+  public SendVoiceHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener onRecyclerViewListener,View view) {
+    super(context, root,onRecyclerViewListener,view);
     this.c =c;
   }
 

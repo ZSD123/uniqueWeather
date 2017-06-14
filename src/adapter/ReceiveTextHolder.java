@@ -1,13 +1,21 @@
 package adapter;
 
 
+import activity.MyUser;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
+
+import myCustomView.CircleImageView;
 
 import com.uniqueweather.app.R;
 
@@ -21,34 +29,54 @@ import cn.bmob.newim.bean.BmobIMUserInfo;
  */
 public class ReceiveTextHolder extends BaseViewHolder {
 
-  @Bind(R.id.iv_avatar)
-  protected ImageView iv_avatar;
 
-  @Bind(R.id.tv_time)
+  protected CircleImageView iv_avatar;
+
+ 
   protected TextView tv_time;
 
-  @Bind(R.id.tv_message)
+
   protected TextView tv_message;
 
-  public ReceiveTextHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener) {
-    super(context, root, R.layout.item_chat_received_message,onRecyclerViewListener);
+  public ReceiveTextHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
+    super(context, root,onRecyclerViewListener,view);
+    iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);
+    tv_time=(TextView)view.findViewById(R.id.tv_time);
+    tv_message=(TextView)view.findViewById(R.id.tv_message);
   }
 
-  @OnClick({R.id.iv_avatar})
-  public void onAvatarClick(View view) {
-
-  }
 
   @Override
   public void bindData(Object o) {
     final BmobIMMessage message = (BmobIMMessage)o;
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyƒÍMM‘¬dd»’ HH:mm");
     String time = dateFormat.format(message.getCreateTime());
+    
+    
+    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+message.getFromId()+".jpg_";
+    File file=new File(path);
+    if(file.exists()){
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = 2;      
+      try {
+         Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+         iv_avatar.setImageBitmap(bmp);
+      } catch (OutOfMemoryError err) {
+    	  err.printStackTrace();
+     }
+    }else {
+    	
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    }
+    
+    
+    
     tv_time.setText(time);
     final BmobIMUserInfo info = message.getBmobIMUserInfo();
-    ImageLoaderFactory.getLoader().loadAvator(iv_avatar,info != null ? info.getAvatar() : null, R.drawable.head);
     String content =  message.getContent();
     tv_message.setText(content);
+    
+    
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {

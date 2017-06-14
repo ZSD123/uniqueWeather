@@ -44,8 +44,8 @@ public class SendVideoHolder extends BaseViewHolder implements View.OnClickListe
 
   BmobIMConversation c;
 
-  public SendVideoHolder(Context context, ViewGroup root, BmobIMConversation c, OnRecyclerViewListener listener) {
-    super(context, root, R.layout.item_chat_sent_message, listener);
+  public SendVideoHolder(Context context, ViewGroup root, BmobIMConversation c, OnRecyclerViewListener listener,View view) {
+    super(context, root, listener,view);
     this.c =c;
   }
 

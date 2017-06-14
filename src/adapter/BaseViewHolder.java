@@ -18,8 +18,8 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
   OnRecyclerViewListener onRecyclerViewListener;
   protected Context context;
 
-  public BaseViewHolder(Context context, ViewGroup root, int layoutRes,OnRecyclerViewListener listener) {
-    super(LayoutInflater.from(context).inflate(layoutRes, root, false));
+  public BaseViewHolder(Context context, ViewGroup root,OnRecyclerViewListener listener,View view) {
+	super(view);
     this.context=context;
     ButterKnife.bind(this, itemView);
     this.onRecyclerViewListener =listener;

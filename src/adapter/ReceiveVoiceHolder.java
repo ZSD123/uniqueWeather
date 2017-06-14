@@ -42,8 +42,8 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
 
   private String currentUid="";
 
-  public ReceiveVoiceHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener) {
-    super(context, root, R.layout.item_chat_received_voice,onRecyclerViewListener);
+  public ReceiveVoiceHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
+    super(context, root,onRecyclerViewListener,view);
     try {
       currentUid = BmobUser.getCurrentUser().getObjectId();
     } catch (Exception e) {

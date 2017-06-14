@@ -45,8 +45,8 @@ public class SendImageHolder extends BaseViewHolder {
   protected ProgressBar progress_load;
   BmobIMConversation c;
 
-  public SendImageHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener onRecyclerViewListener) {
-    super(context, root, R.layout.item_chat_sent_image,onRecyclerViewListener);
+  public SendImageHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener onRecyclerViewListener,View view) {
+    super(context, root,onRecyclerViewListener,view);
     this.c =c;
   }
 

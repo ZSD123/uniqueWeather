@@ -55,6 +55,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import butterknife.Bind;
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
@@ -110,6 +111,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     
     private RelativeLayout fuzhiMap;
 	private static TextView weather;
+
 	private static TextView temper;
 	public static CircleImageView userPicture;
 	public static MapCircleImageView userPicture1;  //地图上userPicture
@@ -331,7 +333,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 								if(e==null){
 									Bundle bundle=new Bundle();
 									bundle.putSerializable("c",c);
-									Log.d("Main","c的值为"+c.toString());
 									Intent intent=new Intent(context,ChatActivity.class);
 									intent.putExtra("bundle", bundle);
 									startActivity(intent);
@@ -415,6 +416,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			    	});
 				
 			}
+			
+			//左侧大头像加载板块
 		    touxiangUrl=(String)MyUser.getObjectByKey("touxiangUrl");
 		
             File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");

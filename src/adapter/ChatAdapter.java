@@ -3,11 +3,14 @@ package adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.uniqueweather.app.R;
 
 import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
@@ -22,7 +25,7 @@ import cn.bmob.v3.BmobUser;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     //文本
-    private final int TYPE_RECEIVER_TXT = 0;
+    private  final int TYPE_RECEIVER_TXT = 0;
     private final int TYPE_SEND_TXT = 1;
     //图片
     private final int TYPE_SEND_IMAGE = 2;
@@ -38,8 +41,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private final int TYPE_RECEIVER_VIDEO = 9;
 
     //同意添加好友成功后的样式
-    private final int TYPE_AGREE = 10;
-
+    private int TYPE_AGREE = 10;
+    private Context mContext;
     /**
      * 显示时间间隔:10分钟
      */
@@ -53,6 +56,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public ChatAdapter(Context context,BmobIMConversation c) {
         try {
             currentUid = BmobUser.getCurrentUser().getObjectId();
+            mContext=context;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,24 +127,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_SEND_TXT) {
-            return new SendTextHolder(parent.getContext(), parent,c,onRecyclerViewListener);
+            return new SendTextHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_message,parent,false));//这里是发送文本适配器
         } else if (viewType == TYPE_SEND_IMAGE) {
-            return new SendImageHolder(parent.getContext(), parent,c,onRecyclerViewListener);
+            return new SendImageHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_image,parent,false));
         }else if (viewType == TYPE_SEND_VOICE) {
-            return new SendVoiceHolder(parent.getContext(), parent,c,onRecyclerViewListener);
+            return new SendVoiceHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_voice,parent,false));
         } else if (viewType == TYPE_RECEIVER_TXT) {
-            return new ReceiveTextHolder(parent.getContext(), parent,onRecyclerViewListener);
+            return new ReceiveTextHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_message,parent,false));
         } else if (viewType == TYPE_RECEIVER_IMAGE) {
-            return new ReceiveImageHolder(parent.getContext(), parent,onRecyclerViewListener);
+            return new ReceiveImageHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_image,parent,false));
         }
          else if (viewType == TYPE_RECEIVER_VOICE) {
-            return new ReceiveVoiceHolder(parent.getContext(), parent,onRecyclerViewListener);
+            return new ReceiveVoiceHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_voice,parent,false));
         } else if (viewType == TYPE_SEND_VIDEO) {
-            return new SendVideoHolder(parent.getContext(), parent,c,onRecyclerViewListener);
+            return new SendVideoHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_message,parent,false));
         } else if (viewType == TYPE_RECEIVER_VIDEO) {
-            return new ReceiveVideoHolder(parent.getContext(), parent,onRecyclerViewListener);
+            return new ReceiveVideoHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_message,parent,false));
         }else if(viewType ==TYPE_AGREE) {
-            return new AgreeHolder(parent.getContext(),parent,onRecyclerViewListener);
+            return new AgreeHolder(parent.getContext(),parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_agree,parent,false));
         }else{//开发者自定义的其他类型，可自行处理
             return null;
         }

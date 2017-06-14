@@ -30,8 +30,8 @@ public class ReceiveVideoHolder extends BaseViewHolder {
   @Bind(R.id.tv_message)
   protected TextView tv_message;
 
-  public ReceiveVideoHolder(Context context, ViewGroup root, OnRecyclerViewListener onRecyclerViewListener) {
-    super(context, root, R.layout.item_chat_received_message,onRecyclerViewListener);
+  public ReceiveVideoHolder(Context context, ViewGroup root, OnRecyclerViewListener onRecyclerViewListener,View view) {
+    super(context, root,onRecyclerViewListener,view);
   }
 
   @OnClick({R.id.iv_avatar})

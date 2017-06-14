@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -170,6 +171,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_chat);
         ll_chat=(LinearLayout)findViewById(R.id.ll_chat);
         sw_refresh=(SwipeRefreshLayout)findViewById(R.id.sw_refresh);
@@ -191,14 +193,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         tv_picture=(TextView)findViewById(R.id.tv_picture);
         tv_camera=(TextView)findViewById(R.id.tv_camera);
    
-        Log.d("Main","1");
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
       // initNaviView();
         initSwipeLayout();
         initVoiceView();   
-        Log.d("Main","2");
         initBottomView();
-        Log.d("Main","3");
         edit_msg.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -505,16 +504,13 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             Toast.makeText(ChatActivity.this, "请输入内容",Toast.LENGTH_SHORT).show();
             return;
         }
-        Log.d("Main", "3");
         BmobIMTextMessage msg =new BmobIMTextMessage();
         msg.setContent(text);
         //可设置额外信息
-        Log.d("Main", "2");
         
         Map<String,Object> map =new HashMap<String, Object>();
         map.put("level", "1");//随意增加信息
         msg.setExtraMap(map);
-        Log.d("Main", "1");
         c.sendMessage(msg, listener);
         
     }
@@ -606,7 +602,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             if (e != null) {
                 Toast.makeText(ChatActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
             }else {
-            	Log.d("Main", e.getMessage());
+            	Log.d("Main", "发送成功");
             }
         }
     };
@@ -637,9 +633,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 
     @Override
     public void onMessageReceive(List<MessageEvent> list) {
+    	  Log.d("Main","7");
         Log.i("Main","聊天页面接收到消息：" + list.size());
         //当注册页面消息监听时候，有消息（包含离线消息）到来时会回调该方法
         for (int i=0;i<list.size();i++){
+        	  Log.d("Main","6");
             addMessage2Chat(list.get(i));
         }
     }
@@ -671,14 +669,19 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
      */
     private void addMessage2Chat(MessageEvent event){
         BmobIMMessage msg =event.getMessage();
+        Log.d("Main","1");
         if(c!=null && event!=null && c.getConversationId().equals(event.getConversation().getConversationId()) //如果是当前会话的消息
                 && !msg.isTransient()){//并且不为暂态消息
+        	  Log.d("Main","2");
             if(adapter.findPosition(msg)<0){//如果未添加到界面中
                 adapter.addMessage(msg);
+                Log.d("Main","3");
                 //更新该会话下面的已读状态
                 c.updateReceiveStatus(msg);
+                Log.d("Main","4");
             }
             scrollToBottom();
+            Log.d("Main","5");
         }else{
             Log.i("Main","不是与当前聊天对象的消息");
         }
