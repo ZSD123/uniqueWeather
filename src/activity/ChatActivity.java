@@ -5,6 +5,7 @@ import adapter.ChatAdapter;
 import adapter.OnRecyclerViewListener;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.ContactsContract.Contacts.Data;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +45,8 @@ import butterknife.OnClick;
 
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +106,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 
 
     LinearLayout layout_more;
-
+     
+    String path;
+    
     LinearLayout layout_add;
     LinearLayout layout_emo;
 
@@ -327,7 +333,14 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     	 String state = Environment.getExternalStorageState(); //拿到sdcard是否可用的状态码
     	 if (state.equals(Environment.MEDIA_MOUNTED)){   //如果可用
     	  Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-    	  Uri uri=Uri.fromFile(new File(Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/temp.jpg"));
+    	  
+    	  SimpleDateFormat format=new SimpleDateFormat("yyyyMMddHHmmss");
+    	  Date curDate=new Date(System.currentTimeMillis());
+    	  String str=format.format(curDate);
+    	  Log.d("Main",str);
+    	  
+    	  path=Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/"+str+".jpg";
+    	  Uri uri=Uri.fromFile(new File(path));
     	  intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
     	  startActivityForResult(intent,3);
     	 }else {
@@ -588,12 +601,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			break;
 		case 3:
 			if(resultCode==RESULT_OK){
-				 String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/EndRain/temp.jpg";
-				 File file=new File(path);
-				 if(file.exists()){
-				  BmobIMImageMessage image =new BmobIMImageMessage(path);
-				  c.sendMessage(image, listener);
-				 }
+				File file=new File(path);
+				if(file.exists()){
+					 BmobIMImageMessage image =new BmobIMImageMessage(path);
+				     c.sendMessage(image, listener);
+				}
 			}
 		default:
 			break;

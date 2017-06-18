@@ -18,7 +18,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
 public class baseFragmentActivity extends FragmentActivity {
-	private String bmobObjectId=(String)MyUser.getObjectByKey("objectId");
+	private String bmobObjectId;
 	private Dialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +26,7 @@ public class baseFragmentActivity extends FragmentActivity {
 		
 		super.onCreate(savedInstanceState);
 		//自动登陆状态下检测是否在其他设备登陆
+		bmobObjectId=(String)MyUser.getObjectByKey("objectId");
 		checkLogin();
 	}
 	@Override
