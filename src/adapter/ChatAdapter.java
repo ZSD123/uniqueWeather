@@ -61,6 +61,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             e.printStackTrace();
         }
         this.c =c;
+       
     }
     public int findPosition(BmobIMMessage message) {
         int index = this.getCount();

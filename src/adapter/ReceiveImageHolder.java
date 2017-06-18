@@ -1,19 +1,26 @@
 package adapter;
 
 
+import activity.MyUser;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.uniqueweather.app.R;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
+
+import myCustomView.CircleImageView;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMImageMessage;
@@ -25,19 +32,23 @@ import cn.bmob.newim.bean.BmobIMUserInfo;
  */
 public class ReceiveImageHolder extends BaseViewHolder {
 
-  @Bind(R.id.iv_avatar)
-  protected ImageView iv_avatar;
 
-  @Bind(R.id.tv_time)
+  protected CircleImageView iv_avatar;
+
+
   protected TextView tv_time;
 
-  @Bind(R.id.iv_picture)
+
   protected ImageView iv_picture;
-  @Bind(R.id.progress_load)
+
   protected ProgressBar progress_load;
 
   public ReceiveImageHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
      super(context, root,onRecyclerViewListener,view);
+     iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);
+     tv_time=(TextView)view.findViewById(R.id.tv_time);
+     iv_picture=(ImageView)view.findViewById(R.id.iv_picture);
+     progress_load=(ProgressBar)view.findViewById(R.id.progress_load);
   }
 
   @Override
@@ -45,14 +56,35 @@ public class ReceiveImageHolder extends BaseViewHolder {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
     final BmobIMUserInfo info = msg.getBmobIMUserInfo();
-    ImageLoaderFactory.getLoader().loadAvator(iv_avatar,info != null ? info.getAvatar() : null, R.drawable.head);
+
+    
+    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
+    File file=new File(path);
+    if(file.exists()){
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = 2;      
+      try {
+         Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+         iv_avatar.setImageBitmap(bmp);
+      } catch (OutOfMemoryError err) {
+    	  err.printStackTrace();
+     }
+    }else {
+    	
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    }
+    
+    
+    
+    
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
     String time = dateFormat.format(msg.getCreateTime());
     tv_time.setText(time);
     //可使用buildFromDB方法转化为指定类型的消息
     final BmobIMImageMessage message = BmobIMImageMessage.buildFromDB(false,msg);
     //显示图片
-    ImageLoaderFactory.getLoader().load(iv_picture,message.getRemoteUrl(),  R.drawable.ic_launcher,new ImageLoadingListener(){;
+  
+    ImageLoaderFactory.getLoader().load(iv_picture,message.getRemoteUrl(),  R.drawable.ic_launcher,new ImageLoadingListener(){
 
     @Override
       public void onLoadingStarted(String s, View view) {

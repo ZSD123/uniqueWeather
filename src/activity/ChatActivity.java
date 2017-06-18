@@ -3,10 +3,17 @@ package activity;
 import Util.CommonUtils;
 import adapter.ChatAdapter;
 import adapter.OnRecyclerViewListener;
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +42,7 @@ import butterknife.Bind;
 import butterknife.OnClick;
 
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +54,7 @@ import com.uniqueweather.app.R;
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMAudioMessage;
 import cn.bmob.newim.bean.BmobIMConversation;
+import cn.bmob.newim.bean.BmobIMFileMessage;
 import cn.bmob.newim.bean.BmobIMImageMessage;
 import cn.bmob.newim.bean.BmobIMLocationMessage;
 import cn.bmob.newim.bean.BmobIMMessage;
@@ -60,6 +69,7 @@ import cn.bmob.newim.listener.MessagesQueryListener;
 import cn.bmob.newim.listener.ObseverListener;
 import cn.bmob.newim.listener.OnRecordChangeListener;
 import cn.bmob.newim.notification.BmobNotificationManager;
+import cn.bmob.push.config.Constant;
 import cn.bmob.v3.exception.BmobException;
 
 /**聊天界面
@@ -85,6 +95,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     Button btn_chat_voice;
 
     Button btn_chat_keyboard;
+    
+    Button btn_chat_keyboard1;
 
     Button btn_chat_send;
 
@@ -182,6 +194,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         btn_speak=(Button)findViewById(R.id.btn_speak);
         btn_chat_voice=(Button)findViewById(R.id.btn_chat_voice);
         btn_chat_keyboard=(Button)findViewById(R.id.btn_chat_keyboard);
+        btn_chat_keyboard1=(Button)findViewById(R.id.btn_chat_keyboard1);
         btn_chat_send=(Button)findViewById(R.id.btn_chat_send);
         layout_more=(LinearLayout)findViewById(R.id.layout_more);
         layout_add=(LinearLayout)findViewById(R.id.layout_add);
@@ -215,16 +228,17 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-			    if (layout_more.getVisibility() == View.GONE) {
-		            showEditState(true);
-		        } else {
-		            if (layout_add.getVisibility() == View.VISIBLE) {
-		                layout_add.setVisibility(View.GONE);
-		                layout_emo.setVisibility(View.VISIBLE);
-		            } else {
-		                layout_more.setVisibility(View.GONE);
-		            }
-		        }
+				btn_chat_keyboard1.setVisibility(View.GONE);
+				 if (layout_more.getVisibility() == View.GONE) {
+			            showEditState(true);
+			        } else {
+			            if (layout_add.getVisibility() == View.VISIBLE) {
+			                layout_add.setVisibility(View.GONE);
+			                layout_emo.setVisibility(View.VISIBLE);
+			            } else {
+			                layout_more.setVisibility(View.GONE);
+			            }
+			        }
 			}
 		});
         
@@ -232,6 +246,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
+				edit_msg.setVisibility(View.VISIBLE);
+				btn_speak.setVisibility(View.GONE);
 				  if (layout_more.getVisibility() == View.GONE) {
 			            layout_more.setVisibility(View.VISIBLE);
 			            layout_add.setVisibility(View.VISIBLE);
@@ -254,7 +270,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				   edit_msg.setVisibility(View.GONE);
 			        layout_more.setVisibility(View.GONE);
 			        btn_chat_voice.setVisibility(View.GONE);
-			        btn_chat_keyboard.setVisibility(View.VISIBLE);
+			        btn_chat_keyboard1.setVisibility(View.VISIBLE);
 			        btn_speak.setVisibility(View.VISIBLE);
 			        hideSoftInputView();
 			}
@@ -264,7 +280,16 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			@Override
 			public void onClick(View v) {
 				 showEditState(false);
-				
+				 btn_chat_emo.setVisibility(View.VISIBLE);
+			}
+		});
+        btn_chat_keyboard1.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				 showEditState(false);
+				 btn_chat_keyboard1.setVisibility(View.GONE);
+				 
 			}
 		});
         
@@ -280,7 +305,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-				sendVideoMessage();
+				sendLocalImageMessage();
 				
 			}
 		});
@@ -288,14 +313,27 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-				sendRemoteImageMessage();
+				openTakePhoto();
 				
 			}
 		});
        
         
     }
-
+    private void openTakePhoto(){    
+    	 /**
+    	 * 在启动拍照之前最好先判断一下sdcard是否可用
+    	 */
+    	 String state = Environment.getExternalStorageState(); //拿到sdcard是否可用的状态码
+    	 if (state.equals(Environment.MEDIA_MOUNTED)){   //如果可用
+    	  Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+    	  Uri uri=Uri.fromFile(new File(Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/temp.jpg"));
+    	  intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+    	  startActivityForResult(intent,3);
+    	 }else {
+    	  Toast.makeText(ChatActivity.this,"sdcard不可用",Toast.LENGTH_SHORT).show();
+    	 }
+    	}
     private void initSwipeLayout(){
         sw_refresh.setEnabled(true);
         layoutManager = new LinearLayoutManager(this);
@@ -358,13 +396,14 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
                 if (!TextUtils.isEmpty(s)) {
                     btn_chat_send.setVisibility(View.VISIBLE);
                     btn_chat_keyboard.setVisibility(View.GONE);
-                    btn_chat_voice.setVisibility(View.GONE);
+                    btn_chat_add.setVisibility(View.GONE);
                 } else {
-                    if (btn_chat_voice.getVisibility() != View.VISIBLE) {
+                  
                         btn_chat_voice.setVisibility(View.VISIBLE);
                         btn_chat_send.setVisibility(View.GONE);
                         btn_chat_keyboard.setVisibility(View.GONE);
-                    }
+                        btn_chat_add.setVisibility(View.VISIBLE);
+                    
                 }
             }
 
@@ -508,9 +547,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         msg.setContent(text);
         //可设置额外信息
         
-        Map<String,Object> map =new HashMap<String, Object>();
-        map.put("level", "1");//随意增加信息
-        msg.setExtraMap(map);
+     //   Map<String,Object> map =new HashMap<String, Object>();
+       // map.put("level", "1");//随意增加信息
+       // msg.setExtraMap(map);
         c.sendMessage(msg, listener);
         
     }
@@ -529,14 +568,39 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
      */
     public void sendLocalImageMessage(){
         //正常情况下，需要调用系统的图库或拍照功能获取到图片的本地地址，开发者只需要将本地的文件地址传过去就可以发送文件类型的消息
-        BmobIMImageMessage image =new BmobIMImageMessage("/storage/emulated/0/bimagechooser/IMG_20160302_172003.jpg");
-        c.sendMessage(image, listener);
-//        //因此也可以使用BmobIMFileMessage来发送文件消息
-//        BmobIMFileMessage file =new BmobIMFileMessage("文件地址");
-//        c.sendMessage(file,listener);
+    	Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/jpeg");
+        startActivityForResult(intent, 2);
+        
     }
 
-    /**
+    @Override
+	protected void onActivityResult(int requestCode,int resultCode,Intent data) {
+	     switch (requestCode) {
+		case 2:
+			if(resultCode==RESULT_OK){
+				Uri uri=data.getData();
+				String path=weather_info.getPath(ChatActivity.this, uri);
+				 BmobIMImageMessage image =new BmobIMImageMessage(path);
+			     c.sendMessage(image, listener);
+			}
+			break;
+		case 3:
+			if(resultCode==RESULT_OK){
+				 String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/EndRain/temp.jpg";
+				 File file=new File(path);
+				 if(file.exists()){
+				  BmobIMImageMessage image =new BmobIMImageMessage(path);
+				  c.sendMessage(image, listener);
+				 }
+			}
+		default:
+			break;
+		}
+	}
+
+	/**
      * 发送语音消息
      * @Title: sendVoiceMessage
      * @param  local
@@ -669,19 +733,15 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
      */
     private void addMessage2Chat(MessageEvent event){
         BmobIMMessage msg =event.getMessage();
-        Log.d("Main","1");
         if(c!=null && event!=null && c.getConversationId().equals(event.getConversation().getConversationId()) //如果是当前会话的消息
                 && !msg.isTransient()){//并且不为暂态消息
-        	  Log.d("Main","2");
             if(adapter.findPosition(msg)<0){//如果未添加到界面中
                 adapter.addMessage(msg);
-                Log.d("Main","3");
                 //更新该会话下面的已读状态
                 c.updateReceiveStatus(msg);
-                Log.d("Main","4");
+
             }
             scrollToBottom();
-            Log.d("Main","5");
         }else{
             Log.i("Main","不是与当前聊天对象的消息");
         }

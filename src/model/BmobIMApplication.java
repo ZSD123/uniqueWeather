@@ -49,6 +49,7 @@ public class BmobIMApplication extends Application{
         }
         //uil≥ı ºªØ
         UniversalImageLoader.initImageLoader(this);
+        
     }
 
     /**

@@ -1,7 +1,11 @@
 package adapter;
 
 
+import activity.MyUser;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +13,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
+
+import myCustomView.CircleImageView;
 
 import com.uniqueweather.app.R;
 
@@ -27,27 +34,28 @@ import cn.bmob.v3.exception.BmobException;
  */
 public class SendImageHolder extends BaseViewHolder {
 
-  @Bind(R.id.iv_avatar)
-  protected ImageView iv_avatar;
+  protected CircleImageView iv_avatar;
 
-  @Bind(R.id.iv_fail_resend)
   protected ImageView iv_fail_resend;
 
-  @Bind(R.id.tv_time)
   protected TextView tv_time;
 
   protected ImageView iv_picture;
 
-  @Bind(R.id.tv_send_status)
   protected TextView tv_send_status;
 
-  @Bind(R.id.progress_load)
   protected ProgressBar progress_load;
   BmobIMConversation c;
 
   public SendImageHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener onRecyclerViewListener,View view) {
     super(context, root,onRecyclerViewListener,view);
     this.c =c;
+    iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);
+    iv_fail_resend=(ImageView)view.findViewById(R.id.iv_fail_resend);
+    tv_time=(TextView)view.findViewById(R.id.tv_time);
+    iv_picture=(ImageView)view.findViewById(R.id.iv_picture);
+    tv_send_status=(TextView)view.findViewById(R.id.tv_send_status);
+    progress_load=(ProgressBar)view.findViewById(R.id.progress_load);
   }
 
   @Override
@@ -55,7 +63,24 @@ public class SendImageHolder extends BaseViewHolder {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
     final BmobIMUserInfo info = msg.getBmobIMUserInfo();
-    ImageLoaderFactory.getLoader().loadAvator(iv_avatar,info != null ? info.getAvatar() : null,R.drawable.head);
+
+    
+    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+    File file=new File(path);
+    if(file.exists()){
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = 2;      
+      try {
+         Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+         iv_avatar.setImageBitmap(bmp);
+      } catch (OutOfMemoryError err) {
+    	  err.printStackTrace();
+     }
+    }else {
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    }
+    
+   
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
     String time = dateFormat.format(msg.getCreateTime());
     tv_time.setText(time);
@@ -79,6 +104,7 @@ public class SendImageHolder extends BaseViewHolder {
 
     //发送的不是远程图片地址，则取本地地址
     ImageLoaderFactory.getLoader().load(iv_picture,TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteUrl(),R.drawable.ic_launcher,null);
+//  ViewUtil.setPicture(TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteU,R.drawable.ic_launcher,null);
 //    ViewUtil.setPicture(TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteUrl(), R.mipmap.ic_launcher, iv_picture,null);
 
     iv_avatar.setOnClickListener(new View.OnClickListener() {
