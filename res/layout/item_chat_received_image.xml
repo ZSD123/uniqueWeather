@@ -39,7 +39,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/add_avator"
             android:background="@drawable/chat_left_qp"
-            android:scaleType="fitXY" />
+              android:scaleType="centerInside"  />
         
         <ProgressBar
             android:id="@+id/progress_load"

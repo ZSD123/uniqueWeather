@@ -23,6 +23,9 @@ import butterknife.Bind;
 import butterknife.OnClick;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.QueryListener;
 
 /**
  * 接收到的文本类型
@@ -72,15 +75,36 @@ public class ReceiveTextHolder extends BaseViewHolder {
     
     
     tv_time.setText(time);
-    final BmobIMUserInfo info = message.getBmobIMUserInfo();
     String content =  message.getContent();
     tv_message.setText(content);
+    
+    final String info = message.getFromId();
+    final MyUser myUser=new MyUser();
+    
+    BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+    query.getObject(info, new QueryListener<MyUser>() {
+		
+		@Override
+		public void done(MyUser user, BmobException e ) {
+		      if(e==null){
+		    	  myUser.setNick(user.getNick());
+		      }else{
+		    	  toast(e.getMessage());
+		      }
+			
+		}
+	});
     
     
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        toast("点击" + info.getName() + "的头像");
+    	  try {
+    		  toast("点击" +myUser.getNick() + "的头像");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
       }
     });
     tv_message.setOnClickListener(new View.OnClickListener() {

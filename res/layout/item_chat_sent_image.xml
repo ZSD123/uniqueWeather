@@ -35,7 +35,7 @@
             android:layout_toLeftOf="@id/iv_avatar"
             android:background="@drawable/chat_right_qp"
             android:contentDescription="@string/add_avator"
-            android:scaleType="fitXY"
+              android:scaleType="centerInside" 
             android:maxWidth="200.0dip"
             android:minHeight="150dp"
             android:minWidth="150dp"

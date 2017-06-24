@@ -4,6 +4,7 @@ package adapter;
 
 import butterknife.ButterKnife;
 import activity.baseActivity;
+import activity.baseFragmentActivity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,7 +37,7 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
   private Toast toast;
   public void toast(final Object obj) {
     try {
-      ((baseActivity)context).runOnUiThread(new Runnable() {
+      ((baseFragmentActivity)context).runOnUiThread(new Runnable() {
 
         @Override
         public void run() {

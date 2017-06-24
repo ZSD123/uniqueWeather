@@ -337,7 +337,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     	  SimpleDateFormat format=new SimpleDateFormat("yyyyMMddHHmmss");
     	  Date curDate=new Date(System.currentTimeMillis());
     	  String str=format.format(curDate);
-    	  Log.d("Main",str);
     	  
     	  path=Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/"+str+".jpg";
     	  Uri uri=Uri.fromFile(new File(path));
