@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -154,6 +155,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     public AMapLocationClientOption mLocationClientOption;
     public static CameraUpdate cameraUpdate;
     private ImageButton locButton;
+    private ImageButton zujiBtn;
+    
     private LatLonPoint latlng;
     private LatLng latLng1;
     public float zoom;
@@ -195,6 +198,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	public static  yonghuDB yongbDb;
 	private String username;
+	
+	private boolean zuji=true;
 	
 	
 	public static ImageView newFriendImage;
@@ -338,7 +343,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 									startActivity(intent);
 									
 								}else {
-									Log.d("Main", e.getMessage());
+	                                   Toast.makeText(context, e.getMessage(),Toast.LENGTH_SHORT).show();
 								}
 								
 							}
@@ -540,6 +545,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			view=inflater.inflate(R.layout.map,container,false);
 			fuzhiMap=(RelativeLayout)view;
 			
+			
+			zujiBtn=(ImageButton)view.findViewById(R.id.zujibtn);
+			
 			lat=pre.getFloat("lat", 39);
 			lon=pre.getFloat("lon",116);
 			zoom=pre.getFloat("zoom", 18);
@@ -549,6 +557,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			locButton=(ImageButton)view.findViewById(R.id.locationButton);
 			yonghuString=(TextView)view.findViewById(R.id.yonghuString);
 			refreshBtn=(ImageButton)view.findViewById(R.id.refreshbtn);
+			
+			
 			
 			if(context==null)
 				context=(Context)getActivity();
@@ -618,23 +628,66 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             //调用异步查询接口
             mNearbySearch.searchNearbyInfoAsyn(query);
             
-        	timer=new Timer();
+            timer=new Timer();     //这里是搜查10s，每10s搜查一次
 			task=new TimerTask(){
-			 		@Override
+		 		@Override
 			 		public void run() 
 			 		{   daojishi--;
 			 		    if(daojishi==0)
 			 			{   
+			 		    	if(mNearbySearch!=null){
 							query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
 						    mNearbySearch.searchNearbyInfoAsyn(query);
-			 			    daojishi=10;
-	                        chucuoonce=0;
+		 			        daojishi=10;
+	                          chucuoonce=0;
+			    	}
 	                
-			 			}
-			 		}
-			 	};
-			timer.schedule(task, 1000,1000);
+		 			}
+		 		}
+		 	};
+		timer.schedule(task, 1000,1000);
             
+		    zujiBtn.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					if(zuji==true){
+	
+						zuji=false;
+						zujiBtn.setBackgroundResource(R.drawable.shoenoprint);
+						String objectId=(String)MyUser.getObjectByKey("objectId");
+						if(objectId!=null){
+							mNearbySearch.stopUploadNearbyInfoAuto();
+							NearbySearch.getInstance(context).setUserID(objectId);
+							NearbySearch.getInstance(context).clearUserInfoAsyn();
+							Toast.makeText(context, "当前状态:去掉地理位置信息，停止上传地理位置信息", Toast.LENGTH_LONG).show();
+                          }
+					}else if(zuji==false){
+						zuji=true;
+						zujiBtn.setBackgroundResource(R.drawable.shoeprints);
+						mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
+				            	//设置自动上传数据和上传的间隔时间
+				            	@Override
+				            	public UploadInfo OnUploadInfoCallback() {
+				            	       UploadInfo loadInfo = new UploadInfo();
+				            	       loadInfo.setCoordType(NearbySearch.AMAP);
+				            	       //位置信息
+				            	       loadInfo.setPoint(latlng);
+				            	       //用户id信息
+				                       loadInfo.setUserID((String)MyUser.getObjectByKey("objectId")); 
+				                       Log.d("Main", "连续上传");
+				            	       return loadInfo;
+				            	}
+				            	},10000);
+						
+						Toast.makeText(context, "当前状态:上传地理位置信息", Toast.LENGTH_SHORT).show();
+						
+						
+					}
+					
+				}
+			});
+			
 		    locButton.setOnClickListener(new OnClickListener() {
 				
 				@Override
