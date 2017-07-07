@@ -358,31 +358,77 @@ public class loginAct extends Activity {
 					   if(passwordString.isEmpty()&&flag2)
 						   Toast.makeText(loginAct.this, "ÑéÖ¤Âë²»ÄÜÎª¿Õ", Toast.LENGTH_SHORT).show();
 					   else if(flag2&&!passwordString.isEmpty())
-					    {
-						    BmobUser.signOrLoginByMobilePhone(input, passwordString, new LogInListener<BmobUser>()
-						   {		
-                                  
-						           @Override
-					        	    public void done(BmobUser user, BmobException e) 
-						           {
-							             if(user!=null&&e==null)
-							             {   Toast.makeText(loginAct.this,"µÇÂ¼³É¹¦",Toast.LENGTH_SHORT).show();
-							                 Intent intent=new Intent(loginAct.this,weather_info.class);
-										     startActivity(intent);
-										     finish();
-							             }
-							             else {
-											  Toast.makeText(loginAct.this,"µÇÂ¼Ê§°Ü£¬"+e.getMessage(),Toast.LENGTH_SHORT).show();
-											  if(relativeRoot.getAlpha()==0.3f){
-													progressBar.setVisibility(View.GONE);
-													relativeRoot.setAlpha(1);
-													relativeLayout.setVisibility(View.GONE);
-													textView.setVisibility(View.GONE);
-												}
-										}
-						            }
-						   }
-						    		);
+					    {   
+						   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+						   query.addWhereEqualTo("username",input);
+						   query.findObjects(new FindListener<MyUser>() {
+
+							@Override
+							public void done(List<MyUser> object,
+									BmobException e) {
+								if(e==null){
+									if(object.size()>0){
+										  BmobUser.signOrLoginByMobilePhone(input, passwordString, new LogInListener<BmobUser>()
+												   {		
+						                                  
+												           @Override
+											        	    public void done(BmobUser user, BmobException e) 
+												           {
+													             if(user!=null&&e==null)
+													             {   Toast.makeText(loginAct.this,"µÇÂ¼³É¹¦",Toast.LENGTH_SHORT).show();
+													                 Intent intent=new Intent(loginAct.this,weather_info.class);
+																     startActivity(intent);
+																     finish();
+													             }
+													             else {
+																	  Toast.makeText(loginAct.this,"µÇÂ¼Ê§°Ü£¬"+e.getMessage(),Toast.LENGTH_SHORT).show();
+																	  if(relativeRoot.getAlpha()==0.3f){
+																			progressBar.setVisibility(View.GONE);
+																			relativeRoot.setAlpha(1);
+																			relativeLayout.setVisibility(View.GONE);
+																			textView.setVisibility(View.GONE);
+																		}
+																}
+												            }
+												   });
+									}else {
+										MyUser user=new MyUser();
+										user.setMobilePhoneNumber(input);
+										user.setUsername(input);
+										user.setNick(input);
+										user.setPassword(MD5Util.getMD5String(input));
+										user.setMobilePhoneNumber(input);
+										user.setMobilePhoneNumberVerified(false);
+										user.signOrLogin(passwordString,new SaveListener<MyUser>() {
+
+											@Override
+											public void done(MyUser user,
+													BmobException e) {
+											if(e==null){
+												Toast.makeText(loginAct.this,"×¢²á³É¹¦£¬³õÊ¼ÃÜÂëÎªÄúµÄÊÖ»úºÅ£¬ÇëÀÎ¼Ç",Toast.LENGTH_LONG).show();
+												 Intent intent=new Intent(loginAct.this,weather_info.class);
+												  startActivity(intent);
+												  finish();
+											}else{
+												Toast.makeText(loginAct.this,"×¢²áÊ§°Ü£¬"+e.getMessage(),Toast.LENGTH_LONG).show();
+												 if(relativeRoot.getAlpha()==0.3f){
+														progressBar.setVisibility(View.GONE);
+														relativeRoot.setAlpha(1);
+														relativeLayout.setVisibility(View.GONE);
+														textView.setVisibility(View.GONE);
+													}
+											}
+												
+											}
+										} );
+									}
+								
+								
+								}else{
+									Toast.makeText(loginAct.this,"ÍøÂç³ö´í",Toast.LENGTH_SHORT).show();
+								}
+							}
+						   });
 						    progressBar.setVisibility(View.VISIBLE);
 							relativeLayout.setVisibility(View.VISIBLE);
 							relativeLayout.setOnClickListener(null);
@@ -397,8 +443,7 @@ public class loginAct extends Activity {
 					button2.setBackgroundColor(Color.parseColor("#00FF00"));
 				}
 				return false;
-			}
-		});
+			}});
 	    button3.setOnClickListener(new OnClickListener() {
 			
 			@Override

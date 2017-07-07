@@ -1,8 +1,12 @@
 package activity;
 
 import Util.CommonUtils;
+import Util.FaceTextUtils;
 import adapter.ChatAdapter;
+import adapter.EmoViewPagerAdapter;
+import adapter.EmoteAdapter;
 import adapter.OnRecyclerViewListener;
+import android.R.integer;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -16,10 +20,14 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.ContactsContract.Contacts.Data;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.Selection;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -28,28 +36,37 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 import butterknife.Bind;
 import butterknife.OnClick;
 
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import myCustomView.EmoticonsEditText;
+
 
 import com.koushikdutta.async.Util;
 import com.uniqueweather.app.R;
@@ -63,6 +80,7 @@ import cn.bmob.newim.bean.BmobIMImageMessage;
 import cn.bmob.newim.bean.BmobIMLocationMessage;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMTextMessage;
+import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.bean.BmobIMVideoMessage;
 import cn.bmob.newim.core.BmobIMClient;
 import cn.bmob.newim.core.BmobRecordManager;
@@ -75,6 +93,7 @@ import cn.bmob.newim.listener.OnRecordChangeListener;
 import cn.bmob.newim.notification.BmobNotificationManager;
 import cn.bmob.push.config.Constant;
 import cn.bmob.v3.exception.BmobException;
+import db.FaceText;
 
 /**聊天界面
  * @author :smile
@@ -83,13 +102,14 @@ import cn.bmob.v3.exception.BmobException;
  */
 public class ChatActivity extends baseFragmentActivity implements ObseverListener,MessageListHandler{
 
-    LinearLayout ll_chat;
+    private static final List<View> listViews = null;
+
+	LinearLayout ll_chat;
 
     SwipeRefreshLayout sw_refresh;
 
     RecyclerView rc_view;
-
-    EditText edit_msg;
+    EmoticonsEditText edit_msg;
 
     Button btn_chat_add;
     Button btn_chat_emo;
@@ -122,12 +142,18 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     TextView tv_picture;
     TextView tv_camera;
     
+    ViewPager emoPager;
+    TextView talkpartername;
+
+   
     private Drawable[] drawable_Anims;// 话筒动画
     BmobRecordManager recordManager;
-
+    
     ChatAdapter adapter;
     protected LinearLayoutManager layoutManager;
     BmobIMConversation c;
+    
+    
     
     class VoiceTouchListener implements View.OnTouchListener {
         @Override   
@@ -186,15 +212,16 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     }
 
 
-    @Override
+ 
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_chat);
+        edit_msg=(EmoticonsEditText)findViewById(R.id.edit_user_comment);
         ll_chat=(LinearLayout)findViewById(R.id.ll_chat);
         sw_refresh=(SwipeRefreshLayout)findViewById(R.id.sw_refresh);
         rc_view=(RecyclerView)findViewById(R.id.rc_view);
-        edit_msg=(EditText)findViewById(R.id.edit_msg);
         btn_chat_add=(Button)findViewById(R.id.btn_chat_add);
         btn_chat_emo=(Button)findViewById(R.id.btn_chat_emo);
         btn_speak=(Button)findViewById(R.id.btn_speak);
@@ -204,16 +231,22 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         btn_chat_send=(Button)findViewById(R.id.btn_chat_send);
         layout_more=(LinearLayout)findViewById(R.id.layout_more);
         layout_add=(LinearLayout)findViewById(R.id.layout_add);
-
+        
         layout_emo=(LinearLayout)findViewById(R.id.layout_emo);
         layout_record=(RelativeLayout)findViewById(R.id.layout_record);
         tv_voice_tips=(TextView)findViewById(R.id.tv_voice_tips);
         iv_record=(ImageView)findViewById(R.id.iv_record);
         tv_picture=(TextView)findViewById(R.id.tv_picture);
         tv_camera=(TextView)findViewById(R.id.tv_camera);
-   
+        emoPager=(ViewPager)findViewById(R.id.pager_emo);
+        talkpartername=(TextView)findViewById(R.id.talkpartername);
+        
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
+        BmobIMUserInfo userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
+        talkpartername.setText(userInfo.getName());
+        
       // initNaviView();
+        initEmoView();
         initSwipeLayout();
         initVoiceView();   
         initBottomView();
@@ -326,6 +359,61 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
        
         
     }
+    List<FaceText> emos;
+    private void initEmoView() {
+		emoPager = (ViewPager) findViewById(R.id.pager_emo);  //emoPager实例化
+		emos = FaceTextUtils.faceTexts;   //包含有所有表情相应的字符定义
+
+		List<View> views = new ArrayList<View>();
+		for (int i = 0; i < 2; ++i) {
+			views.add(getGridView(i));
+		}
+		emoPager.setAdapter(new EmoViewPagerAdapter(views));
+	}
+    
+    private View getGridView(final int i) {
+		View view = View.inflate(this, R.layout.include_emo_gridview, null);
+		GridView gridview = (GridView) view.findViewById(R.id.gridview);
+		List<FaceText> list = new ArrayList<FaceText>();
+		if (i == 0) {
+			list.addAll(emos.subList(0, 21));
+		} else if (i == 1) {
+			list.addAll(emos.subList(21, emos.size()));
+		}
+		final EmoteAdapter gridAdapter = new EmoteAdapter(ChatActivity.this,
+				list);
+		gridview.setAdapter(gridAdapter);  
+		gridview.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1,
+					int position, long arg3) {
+				FaceText name = (FaceText) gridAdapter.getItem(position);
+				String key = name.text.toString();
+				try {
+					if (edit_msg != null && !TextUtils.isEmpty(key)) {
+						int start = edit_msg.getSelectionStart();
+						CharSequence content = edit_msg.getText()
+								.insert(start, key);
+						edit_msg.setText(content);
+						// 定位光标位置
+						CharSequence info = edit_msg.getText();
+						if (info instanceof Spannable) {
+							Spannable spanText = (Spannable) info;
+							Selection.setSelection(spanText,
+									start + key.length());
+						}
+					}
+				} catch (Exception e) {
+
+				}
+
+			}
+		});
+		return view;
+	}
+    
+    
     private void openTakePhoto(){    
     	 /**
     	 * 在启动拍照之前最好先判断一下sdcard是否可用
@@ -708,11 +796,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 
     @Override
     public void onMessageReceive(List<MessageEvent> list) {
-    	  Log.d("Main","7");
+    	
         Log.i("Main","聊天页面接收到消息：" + list.size());
         //当注册页面消息监听时候，有消息（包含离线消息）到来时会回调该方法
         for (int i=0;i<list.size();i++){
-        	  Log.d("Main","6");
+        
             addMessage2Chat(list.get(i));
         }
     }

@@ -87,7 +87,7 @@ public class weather_info extends baseFragmentActivity {
 		setContentView(R.layout.main);
 	    init();	
 	    mViewPager.setAdapter(mAdapter);
-	      UniversalImageLoader.initImageLoader(this);
+	    UniversalImageLoader.initImageLoader(this);
 	    
 	 }		
 	private void init() 

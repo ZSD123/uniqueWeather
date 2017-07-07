@@ -26,6 +26,8 @@ public class AgreeHolder extends BaseViewHolder implements View.OnClickListener,
 
   public AgreeHolder(Context context, ViewGroup root, OnRecyclerViewListener listener,View view) {
     super(context, root, listener,view);
+    tv_time=(TextView)view.findViewById(R.id.tv_time);
+    tv_message=(TextView)view.findViewById(R.id.tv_message);
   }
 
   @Override
@@ -34,7 +36,8 @@ public class AgreeHolder extends BaseViewHolder implements View.OnClickListener,
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     String time = dateFormat.format(message.getCreateTime());
     String content = message.getContent();
-    tv_message.setText(content);
+    	tv_message.setText(content);
+	
     tv_time.setText(time);
   }
 

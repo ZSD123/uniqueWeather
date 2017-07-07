@@ -125,6 +125,7 @@ public class newFriendAdapter extends BaseAdapter {
 		});
 		
 		TextView textView=(TextView)view.findViewById(R.id.agreefriend_msg);
+		Log.d("Main","newFriends.getStatus="+newFriends.get(position).getStatus().toString());
 		if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_IREFUSE){
 			 
 			 button.setVisibility(View.GONE);
@@ -141,7 +142,13 @@ public class newFriendAdapter extends BaseAdapter {
 			 newFriendBeizhu.setVisibility(View.VISIBLE);
 			 newFriendBeizhu.setText("\n"+newFriends.get(position).getName());
 			 
-		}else {
+		}else if(newFriends.get(position).getStatus()==Config.STATUS_VERIFIED){
+			 button.setVisibility(View.GONE);
+			 button2.setVisibility(View.GONE);
+			 textView.setVisibility(View.VISIBLE);
+			 textView.setText("您已添加对方");
+			 newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
+		}else{
 			newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
 		}
 	   
@@ -181,6 +188,7 @@ public class newFriendAdapter extends BaseAdapter {
 						  if (e == null) {
 	                            Log.e("Main","success");
 	                            fragmentPart.refreshNewFriend();
+	                            
 	                        } else {
 	                            Log.e("Main",e.getMessage());
 	                        }

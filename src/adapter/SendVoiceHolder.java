@@ -1,14 +1,21 @@
 package adapter;
 
 
+import activity.MyUser;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
+
+import myCustomView.CircleImageView;
 
 import com.uniqueweather.app.R;
 
@@ -27,7 +34,7 @@ import cn.bmob.v3.exception.BmobException;
 public class SendVoiceHolder extends BaseViewHolder {
 
   @Bind(R.id.iv_avatar)
-  protected ImageView iv_avatar;
+  protected CircleImageView iv_avatar;
 
   @Bind(R.id.iv_fail_resend)
   protected ImageView iv_fail_resend;
@@ -48,6 +55,13 @@ public class SendVoiceHolder extends BaseViewHolder {
   public SendVoiceHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener onRecyclerViewListener,View view) {
     super(context, root,onRecyclerViewListener,view);
     this.c =c;
+    iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);
+    iv_fail_resend=(ImageView)view.findViewById(R.id.iv_fail_resend);
+    tv_time=(TextView)view.findViewById(R.id.tv_time);
+    tv_voice_length=(TextView)view.findViewById(R.id.tv_voice_length);
+    iv_voice=(ImageView)view.findViewById(R.id.iv_voice);
+    tv_send_status=(TextView)view.findViewById(R.id.tv_send_status);
+    progress_load=(ProgressBar)view.findViewById(R.id.progress_load);
   }
 
   @Override
@@ -55,7 +69,24 @@ public class SendVoiceHolder extends BaseViewHolder {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
     final BmobIMUserInfo info = msg.getBmobIMUserInfo();
-    ImageLoaderFactory.getLoader().loadAvator(iv_avatar,info != null ? info.getAvatar() : null, R.drawable.head);
+   
+    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+    File file=new File(path);
+    if(file.exists()){
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = 2;      
+      try {
+         Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+         iv_avatar.setImageBitmap(bmp);
+      } catch (OutOfMemoryError err) {
+    	  err.printStackTrace();
+     }
+    }else {
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.userpicture));
+    }
+    
+    
+    
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
     String time = dateFormat.format(msg.getCreateTime());
     tv_time.setText(time);

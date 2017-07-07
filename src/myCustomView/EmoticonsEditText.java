@@ -36,11 +36,11 @@ public class EmoticonsEditText extends EditText {
 		}
 	}
 	
-	private Pattern buildPattern() {
+	private  Pattern buildPattern() {
 		return Pattern.compile("\\\\ue[a-z0-9]{3}", Pattern.CASE_INSENSITIVE);
 	}
 
-	private CharSequence replace(String text) {
+	private  CharSequence replace(String text) {
 		try {
 			SpannableString spannableString = new SpannableString(text);
 			int start = 0;

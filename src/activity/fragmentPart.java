@@ -327,7 +327,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 						startActivity(intent);
 					
 					}else if(position>0){
-						BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+						final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
 						bmobIMUserInfo.setUserId(((Friend)baseAdapter2.getItem(position)).getFriendUser().getObjectId());
 						bmobIMUserInfo.setName(((Friend)baseAdapter2.getItem(position)).getFriendUser().getNick());
 						bmobIMUserInfo.setAvatar(((Friend)baseAdapter2.getItem(position)).getFriendUser().getTouXiangUrl());
@@ -338,6 +338,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 								if(e==null){
 									Bundle bundle=new Bundle();
 									bundle.putSerializable("c",c);
+									bundle.putSerializable("userInfo",bmobIMUserInfo);
 									Intent intent=new Intent(context,ChatActivity.class);
 									intent.putExtra("bundle", bundle);
 									startActivity(intent);
@@ -598,7 +599,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
             aMap.moveCamera(cameraUpdate);       //初始化到相应的位置
             aMap.invalidate();
-		    
+		    Log.d("Main","object="+(String)MyUser.getObjectByKey("objectId"));
             mNearbySearch=NearbySearch.getInstance(context);
             mNearbySearch.startUploadNearbyInfoAuto(new UploadInfoCallback() {
             	//设置自动上传数据和上传的间隔时间
@@ -610,6 +611,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             	       loadInfo.setPoint(latlng);
             	       //用户id信息
                        loadInfo.setUserID((String)MyUser.getObjectByKey("objectId")); 
+      
             	       return loadInfo;
             	}
             	},10000);
@@ -675,7 +677,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				            	       loadInfo.setPoint(latlng);
 				            	       //用户id信息
 				                       loadInfo.setUserID((String)MyUser.getObjectByKey("objectId")); 
-				                       Log.d("Main", "连续上传");
 				            	       return loadInfo;
 				            	}
 				            	},10000);
@@ -1020,28 +1021,25 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 		private  void addSanMarker1() 
 		{    
-		   
+			
 			List<String>  objectIdList=yongbDb.loadobjectIdWhereUrlemp();//加载没有Url的objectId
 		    if(objectIdList.size()>0){
 		    	for (int i = 0; i < objectIdList.size(); i++) {
-		    		
 		    		BmobQuery<MyUser> query=new BmobQuery<MyUser>();
 		    		query.getObject(objectIdList.get(i), new QueryListener<MyUser>() {
 						
 						@Override
 						public void done(MyUser object, BmobException e) {
 							if(e==null){
-
 								yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
 								yongbDb.saveData(object.getObjectId(),object.getNick(),object.getSex(), object.getAge(), object.getZhiye());
-								
-								if(!object.getTouXiangUrl().equals("")){      //当存在有相应的Url值
+								if(object.getTouXiangUrl()!=null){      //当存在有相应的Url值
 								     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
 								}
 								 else {
-									 if(!markXianShi(object.getObjectId()))  //这里修改为了判断mark是否加载
+									 if(!markXianShi(object.getObjectId()))  {//这里修改为了判断mark是否加载
 								 	    addSanMarkerDir(object.getObjectId(),null);     //如果touxiangUrl为空的话，直接加载
-									 else{                                         //如果等于1，就是加载完毕，这个设置它最新的地理位置坐标                    
+									 }else{                                         //如果等于1，就是加载完毕，这个设置它最新的地理位置坐标                    
 										for (int j = 0; j < zmarkNum; j++) {
 											if(mFujinMarker.get(j).getObject().equals(object.getObjectId())){
 												double la=yongbDb.loadLatbyId(object.getObjectId())[0];
@@ -1053,7 +1051,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 								 }
 							}else if(e.getErrorCode()!=9015){
 								Toast.makeText(context,"失败，"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
-				                Log.d("Main", "失败，"+e.getErrorCode()+e.getMessage());
 							}
 							
 						}
@@ -1141,7 +1138,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	   private void JiaZai(final String obString,final String touxiangUrl){ 
 	        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
 	        if(file.exists()){
-	            Log.d("Main", "文件存在");
             bitmap11=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
             addSanMarkerDir(obString,bitmap11);     
             new Thread(new Runnable() {
@@ -1195,7 +1191,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	   }
 	   private void addSanMarkerDir(String objectId,Bitmap bitmap1){
 		   Bitmap bitmap2;
-		   Log.d("Main", "直接加载marker");
 		   if(bitmap1==null){
 		        bitmap2=BitmapFactory.decodeResource(getResources(),R.drawable.userpicture);
 		    }else {
@@ -1247,7 +1242,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	public boolean onMarkerClick(Marker marker) {
 		if(yonghuDataView==null){
 	    addYonghuDataView(marker);
-	    Log.d("Main", "点击事件");
 		}else {
 		    fuzhiMap.removeView(yonghuDataView);
 		    addYonghuDataView(marker);
@@ -1292,8 +1286,13 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				public void onClick(View v) {
 				  BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();   //这里出现的问题把我折磨死了，我查了好久，折腾好久，原来就是String的nizhen没办法加在setName中
 				  bmobIMUserInfo.setUserId((String) marker.getObject());
+				  Log.d("Main","mark.getObject="+(String) marker.getObject());
 				  bmobIMUserInfo.setAvatar(yongbDb.loadUserTouxiangUrl((String)marker.getObject()));
-				  bmobIMUserInfo.setName(nizhen);
+				  if(nizhen==null||nizhen.equals("")){
+					  bmobIMUserInfo.setName((String) marker.getObject());
+				  }else{
+				     bmobIMUserInfo.setName(nizhen);
+				  }
 				  sendAddFriendMessage(bmobIMUserInfo);
 				}
 			});
@@ -1308,11 +1307,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 				}else {
 					Toast.makeText(context, "失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
+
 				}
 				
 			}
 		});
-    	 BmobIMConversation conversation=BmobIMConversation.obtain(BmobIMClient.getInstance(),c);
+    
+    		 BmobIMConversation conversation=BmobIMConversation.obtain(BmobIMClient.getInstance(),c);
+	
     	 AddFriendMessage msg=new AddFriendMessage();
          MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
          msg.setContent("很高兴认识你，可以加个好友吗？");
@@ -1336,29 +1338,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		});
      }
   
-     private void queryFriends(final FindListener<Friend> listener){
-    	 BmobQuery<Friend> query=new BmobQuery<Friend>();
-    	 MyUser myUser=MyUser.getCurrentUser(MyUser.class);
-    	 query.addWhereEqualTo("myUser",myUser ); // 查询当前用户的所有好友
-    	 query.order("-updatedAt");
-    	 query.include("friendUser");//希望在查询的同时也把该用户的
-    	 query.findObjects(new FindListener<Friend>() {
-
-			@Override
-			public void done(List<Friend> list, BmobException e) {
-				if(e==null){
-					if(list!=null&&list.size()>0){
-						Log.d("Main", list.get(0).getFriendUser().getNick());
-					}else {
-						Log.d("Main", "没有好友");
-					}
-				}else {
-					Log.d("Main","出错，"+e.getMessage());
-				}
-				
-			}
-		});
-     }
+   
      private int benyonghucunzai(List<NearbyInfo> list){   //返回1的时候表示有本用户
     	 for (int i = 0; i < list.size(); i++) {
 			   if(list.get(i).getUserID().equals((String)MyUser.getCurrentUser().getObjectId())){

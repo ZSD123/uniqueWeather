@@ -35,22 +35,17 @@
 
 
 
-<EditText
-     android:background="@drawable/drawable_edit_normal" 
-     android:layout_height="wrap_content" 
-     android:layout_width="0dp"
-      android:gravity="left|center" 
-      android:minHeight="@dimen/height_40" 
-      android:id="@+id/edit_msg" 
-      android:layout_marginLeft="6dp" 
-      android:padding="@dimen/margin_5" 
-      android:imeOptions="flagNoExtractUi" 
-      android:lineSpacingExtra="@dimen/margin_3"
-       android:layout_weight="1.0" 
-       android:textColorHint="@color/color_b4" 
-       android:hint="请输入新消息" 
-       android:textColor="@color/color_1e1e1e"
-        android:textSize="@dimen/text_size_medium"/>
+<myCustomView.EmoticonsEditText
+            android:id="@+id/edit_user_comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_weight="1.0"
+            android:background="@drawable/base_edit_input"
+            android:imeOptions="flagNoExtractUi"
+            android:minHeight="@dimen/tab_padding_left_right"
+            android:padding="5dp" />
 
 <Button 
     android:background="@drawable/btn_chat_record_selector" 
@@ -116,7 +111,8 @@
      android:layout_height="wrap_content"
       android:layout_width="match_parent"
        android:id="@+id/layout_more"
-        android:visibility="gone">
+       android:visibility="gone"
+       >
 
 
 <LinearLayout 
@@ -124,13 +120,22 @@
     android:layout_height="120dp" 
     android:layout_width="match_parent"
      android:id="@+id/layout_emo"
-      android:visibility="gone">
+   android:visibility="gone"
+     >
 
 <android.support.v4.view.ViewPager 
     android:layout_height="wrap_content" 
     android:layout_width="match_parent" 
     android:id="@+id/pager_emo"/>
-
+    <LinearLayout
+            android:id="@+id/points"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:orientation="horizontal" />
+   
 </LinearLayout>
 
 <include 

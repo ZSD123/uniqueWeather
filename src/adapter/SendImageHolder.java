@@ -97,7 +97,7 @@ public class SendImageHolder extends BaseViewHolder {
     	  err.printStackTrace();
      }
     }else {
-    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.userpicture));
     }
     
    

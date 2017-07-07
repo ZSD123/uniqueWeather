@@ -39,9 +39,9 @@ public  class baseActivity extends Activity {
 	}
 	
 	public void checkLogin() {
-		Log.d("Main", "这里2");
+	
 		bmobObjectId=(String)MyUser.getObjectByKey("objectId");
-		Log.d("Main", "这里1");
+	
 		final BmobRealTimeData rtd=new BmobRealTimeData();
 	    rtd.start(new ValueEventListener() {
 			

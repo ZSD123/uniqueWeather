@@ -75,9 +75,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
     		  fragmentPart.newFriendImage1.setVisibility(View.VISIBLE);
     		  
     		  
-          } else {
-              Toast.makeText(mContext, "接收到的自定义消息：" + bmobIMMessage.getMsgType() + "," + bmobIMMessage.getContent() + "," + bmobIMMessage.getExtra(), Toast.LENGTH_SHORT).show();
-          }
+          } 
     		  
      }
      private void addFriend(String uid) {

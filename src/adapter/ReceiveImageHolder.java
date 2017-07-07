@@ -107,7 +107,7 @@ public class ReceiveImageHolder extends BaseViewHolder {
      }
     }else {
     	
-    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.userpicture));
     }
     
     

@@ -233,6 +233,7 @@ public class register extends Activity {
 						if(isMobileNO(input)){
 							MyUser bu=new MyUser();
 							bu.setUsername(input);
+							bu.setNick(input);
 							bu.setPassword(MD5Util.getMD5String(passwordString));
 							bu.setMobilePhoneNumber(input);
 							bu.setMobilePhoneNumberVerified(false);

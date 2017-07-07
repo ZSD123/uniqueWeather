@@ -6,6 +6,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,8 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import myCustomView.CircleImageView;
 
@@ -69,14 +74,14 @@ public class ReceiveTextHolder extends BaseViewHolder {
      }
     }else {
     	
-    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.head));
+    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.userpicture));
     }
     
     
     
     tv_time.setText(time);
     String content =  message.getContent();
-    tv_message.setText(content);
+    tv_message.setText(replace(content));
     
     final String info = message.getFromId();
     final MyUser myUser=new MyUser();
@@ -131,4 +136,32 @@ public class ReceiveTextHolder extends BaseViewHolder {
   public void showTime(boolean isShow) {
     tv_time.setVisibility(isShow ? View.VISIBLE : View.GONE);
   }
+  private  Pattern buildPattern() {
+		return Pattern.compile("\\\\ue[a-z0-9]{3}", Pattern.CASE_INSENSITIVE);
+	}
+
+	private  CharSequence replace(String text) {
+		try {
+			SpannableString spannableString = new SpannableString(text);
+			int start = 0;
+			Pattern pattern = buildPattern();
+			Matcher matcher = pattern.matcher(text);
+			while (matcher.find()) {
+				String faceText = matcher.group();
+				String key = faceText.substring(1);
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(),
+						getContext().getResources().getIdentifier(key, "drawable", getContext().getPackageName()), options);
+				ImageSpan imageSpan = new ImageSpan(getContext(), bitmap);
+				int startIndex = text.indexOf(faceText, start);
+				int endIndex = startIndex + faceText.length();
+				if (startIndex >= 0)
+					spannableString.setSpan(imageSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				start = (endIndex - 1);
+			}
+			return spannableString;
+		} catch (Exception e) {
+			return text;
+		}
+	}
 }
