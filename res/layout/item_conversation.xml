@@ -71,7 +71,6 @@
             android:layout_marginRight="10.0dip"
             android:layout_marginTop="5.0dip"
             android:gravity="center"
-            android:textColor="#ffffffff"
             android:textSize="10.0dip" />
     </RelativeLayout>
 

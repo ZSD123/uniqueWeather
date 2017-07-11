@@ -170,7 +170,7 @@ public class newFriendAdapter extends BaseAdapter {
 				if(bitmap!=null)
 					image.setImageBitmap(bitmap);
 			}
-		});
+		}).start();
 		
 		
 	

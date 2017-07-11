@@ -69,6 +69,7 @@ public class Utility {
              {  InputStream in=connection.getInputStream();
                  bitmap=BitmapFactory.decodeStream(in);
              }
+             connection.disconnect();
         }catch(Exception e)
         {
         	e.printStackTrace();

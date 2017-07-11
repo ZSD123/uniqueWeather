@@ -133,7 +133,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     private View view;
     private static Bitmap bitmap;
     private static Bitmap bitmap1;
-    public Context context;
+    public static Context context;
     public Button button1;
     public MyHorizontalView horizontalView;
     public Button button2;     //退出登录Button
@@ -188,12 +188,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private TimerTask task;
 	private int daojishi=10;     //倒计时刷新
 	
-	private View view3;    //消息界面View
+	private static View view3;    //消息界面View
 	private static View view4;     //联系人界面view
 	private List<View> views;    //装载消息界面view和联系人界面view的views
 	
 	
 	private View  yonghuDataView;  //附近用户资料卡View
+	
+	private static BaseAdapter baseAdapter1;
 	private static BaseAdapter baseAdapter2;//朋友列表
 	
 	public static  yonghuDB yongbDb;
@@ -207,6 +209,11 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	private static List<Friend> friends=new ArrayList<Friend>(); 
 	public static LayoutInflater layoutInflater;
+	
+	public static BmobIM bmobIM=BmobIM.getInstance();
+    public static  List<BmobIMConversation>  conversations;
+	private static List<MyUser> converUsers=new ArrayList<MyUser>();
+    
 	public fragmentPart(){
 		
 	}
@@ -269,52 +276,138 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			view3=layoutInflater.inflate(R.layout.chatlist,null);
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
 			
-            final BmobIM bmobIM=BmobIM.getInstance();
-		
-            
-			BaseAdapter baseAdapter=new BaseAdapter() {
-				
-				@Override
-				public View getView(int position, View convertView, ViewGroup parent) {
-					View view5;
-					if(convertView==null){
-						view5=layoutInflater.inflate(R.layout.item_conversation, null);
-						}else {
-							view5=convertView;
-						}
-					CircleImageView circle=(CircleImageView)view5.findViewById(R.id.iv_recent_avatar);
-					TextView nameText=(TextView)view5.findViewById(R.id.tv_recent_name);
-					TextView messageText=(TextView)view5.findViewById(R.id.tv_recent_msg);
-					TextView unReadText=(TextView)view5.findViewById(R.id.tv_recent_unread);
-					circle.setImageBitmap(Utility.getPicture(bmobIM.loadAllConversation().get(position).getConversationIcon()));
-					nameText.setText(bmobIM.loadAllConversation().get(position).getConversationTitle());
-					if(bmobIM.loadAllConversation().get(position).getMessages().size()>0)
-				     	messageText.setText(bmobIM.loadAllConversation().get(position).getMessages().get(bmobIM.loadAllConversation().get(position).getMessages().size()-1).toString());
-					unReadText.setText(""+bmobIM.loadAllConversation().get(position).getUnreadCount());
-					return view5;
-				}
-				
-				@Override
-				public long getItemId(int position) {
-					return position;
-				}
-				
-				@Override
-				public Object getItem(int position) {
-					return position;
-				}
-				
-				@Override
-				public int getCount() {
-
-					return 0;
-
-				}
-			};
-			((ListView)view3).setAdapter(baseAdapter);
+			//会话列表点击事件
 			
-		
-		
+            ListView conversationList=(ListView)view3;
+            conversationList.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view,
+						int position, long id) {
+					
+					final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+					bmobIMUserInfo.setUserId(((MyUser)baseAdapter1.getItem(position)).getObjectId());
+					bmobIMUserInfo.setName(((MyUser)baseAdapter1.getItem(position)).getNick());
+					bmobIMUserInfo.setAvatar(((MyUser)baseAdapter1.getItem(position)).getTouXiangUrl());
+			     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
+						
+						@Override
+						public void done(BmobIMConversation c, BmobException e) {
+							if(e==null){
+								Bundle bundle=new Bundle();
+								bundle.putSerializable("c",c);
+								bundle.putSerializable("userInfo",bmobIMUserInfo);
+								Intent intent=new Intent(context,ChatActivity.class);
+								intent.putExtra("bundle", bundle);
+								startActivity(intent);
+								
+							}else {
+                                   Toast.makeText(context, e.getMessage(),Toast.LENGTH_SHORT).show();
+							}
+							
+						}
+					});
+				}
+			});
+			
+            
+            conversations=bmobIM.loadAllConversation();
+            //会话列表适配器
+  			 baseAdapter1=new BaseAdapter() {
+  				
+  				@Override
+  				public View getView(final int position, View convertView, ViewGroup parent) {
+  					
+  					
+  					final MyUser myUser1=new MyUser();
+  					myUser1.setObjectId(conversations.get(position).getConversationTitle());
+  					View view5;
+  					if(convertView==null){
+  						view5=layoutInflater.inflate(R.layout.item_conversation, null);
+  						}else {
+  							view5=convertView;
+  						}
+  					final CircleImageView circle=(CircleImageView)view5.findViewById(R.id.iv_recent_avatar);
+  					final TextView nameText=(TextView)view5.findViewById(R.id.tv_recent_name);
+  					TextView messageText=(TextView)view5.findViewById(R.id.tv_recent_msg);
+  					TextView unReadText=(TextView)view5.findViewById(R.id.tv_recent_unread);
+  					nameText.setText(conversations.get(position).getMessages().get(0).getExtra());
+  					
+  					File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_");
+  						if(file.exists()){
+  							circle.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_"));
+  						}
+  				    
+  						
+  					BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+  				    query.getObject(conversations.get(position).getConversationTitle(),new QueryListener<MyUser>() {
+
+  						@Override
+  						public void done(final MyUser myUser, BmobException e) {
+  							if(e==null){
+ 
+  								nameText.setText(myUser.getNick());
+  								myUser1.setNick(myUser.getNick());
+  								myUser1.setTouXiangUrl(myUser.getTouXiangUrl());
+  								converUsers.add(position, myUser1);
+  								  new Thread(new Runnable() {
+  										
+  										@Override
+  										public void run() {
+  										    final Bitmap bitmap=Utility.getPicture(myUser.getTouXiangUrl());
+  											((Activity)context).runOnUiThread(new Runnable() {
+  												
+  												@Override
+  												public void run() {
+  													if(bitmap!=null)
+  												     	circle.setImageBitmap(bitmap);
+  													
+  												}
+  											});
+  										}
+  									}).start();
+  								  
+  				    
+  								}else {
+  								converUsers.add(position, myUser1);
+  								Toast.makeText(context, "失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+  							}
+  						 }
+  				    	});
+  					
+  					if(bmobIM.loadAllConversation().get(position).getMessages().size()>0){
+  				     	messageText.setText(conversations.get(position).getMessages().get(0).getContent());
+  					}
+  					unReadText.setText(""+bmobIM.loadAllConversation().get(position).getUnreadCount());
+  					
+  					
+  					return view5;
+  				}
+  				
+  				@Override
+  				public long getItemId(int position) {
+  					return position;
+  				}
+  				
+  				@Override
+  				public Object getItem(int position) {
+  					 return converUsers.get(position);
+  				}
+  				
+  				@Override
+  				public int getCount() {
+                    if(bmobIM.loadAllConversation()!=null)
+  					return bmobIM.loadAllConversation().size();
+                    else {
+  						return 0;
+  					}
+
+  				}
+  			};
+  			((ListView)view3).setAdapter(baseAdapter1);
+            //会话列表更新事件
+            refreshConversations();
+		   //联系人列表点击事件
 			ListView contactsList=(ListView)view4;
 		    contactsList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -353,7 +446,97 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 				}
 			});
-		    
+		    //联系人列表加载适配器
+			UserModel.getInstance().queryFriends(new FindListener<Friend>() {
+
+				@Override
+				public void done(final List<Friend> list, BmobException e) {
+					
+					if(e==null||e.getErrorCode()==0){
+						friends=list;
+					   baseAdapter2=new BaseAdapter() {
+							
+							@Override
+							public View getView(final int position, View convertView, ViewGroup parent) {
+							  
+							    if(position==0){
+								if(convertView==null){
+									view6=layoutInflater.inflate(R.layout.new_friend, null);
+									}else {
+										view6=convertView;
+								       
+									}
+							    
+								newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
+								return view6;
+							    }
+							   else if(position>0) {
+								   
+							    	if(convertView==null||position==1){
+							    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
+							    	}else if(convertView!=null&&position!=1){
+							    		view6=convertView;
+							    	}
+							    		final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
+								    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
+								        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_");
+										if(file.exists()){
+											circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
+										}
+										textView.setText(friends.get(position-1).getFriendUser().getNick());
+									    new Thread(new Runnable() {
+											
+											@Override
+											public void run() {
+												final Bitmap bitmap=Utility.getPicture(friends.get(position-1).getFriendUser().getTouXiangUrl());
+	                                             ((Activity)context).runOnUiThread(new Runnable() {
+											 		
+													@Override
+													public void run() {
+														if(bitmap!=null)
+													     	circleImageView.setImageBitmap(bitmap);
+														
+													}
+												});
+											
+											}
+										}).start();
+										
+										
+								    	return view6;
+							    	}
+							    
+							 return view6;
+							}
+							
+							@Override
+							public long getItemId(int position) {
+								return position;
+							}
+							
+							@Override
+							public Object getItem(int position) {
+								return list.get(position-1);
+							}
+							
+							@Override
+							public int getCount() {
+								if(friends==null){
+									return 1;
+								}else {
+									return (friends.size()+1);
+								}
+							
+							}
+						};
+						((ListView)view4).setAdapter(baseAdapter2);
+					}else{
+						Log.d("Main","查询朋友有误,"+e.getMessage()+e.getErrorCode());
+					}
+					
+				}
+			});
+			((ListView)view4).setAdapter(baseAdapter2);
 			
 		    refreshNewFriend();
 		    
@@ -1350,88 +1533,22 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
     	 
      }
 	  public static void refreshNewFriend(){    //当通过或者对方通过好友的时候刷新联系人列表
-		UserModel.getInstance().queryFriends(new FindListener<Friend>() {
+		  UserModel.getInstance().queryFriends(new FindListener<Friend>() {
 
 			@Override
-			public void done(final List<Friend> list, BmobException e) {
-				
-				if(e==null||e.getErrorCode()==0){
-					friends=list;
-				   baseAdapter2=new BaseAdapter() {
-						
-						@Override
-						public View getView(final int position, View convertView, ViewGroup parent) {
-						  
-						    if(position==0){
-							if(convertView==null){
-								view6=layoutInflater.inflate(R.layout.new_friend, null);
-								}else {
-									view6=convertView;
-							       
-								}
-						    
-							newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
-							return view6;
-						    }
-						   else if(position>0) {
-							   
-						    	if(convertView==null||position==1){
-						    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
-						    	}else if(convertView!=null&&position!=1){
-						    		view6=convertView;
-						    	}
-						    		final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
-							    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
-							        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_");
-									if(file.exists()){
-										circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
-									}
-									textView.setText(friends.get(position-1).getFriendUser().getNick());
-								    new Thread(new Runnable() {
-										
-										@Override
-										public void run() {
-											Bitmap bitmap=Utility.getPicture(friends.get(position-1).getFriendUser().getTouXiangUrl());
-											
-											if(bitmap!=null)
-												circleImageView.setImageBitmap(bitmap);
-										}
-									});
-									
-									
-							    	return view6;
-						    	}
-						    
-						 return view6;
-						}
-						
-						@Override
-						public long getItemId(int position) {
-							return position;
-						}
-						
-						@Override
-						public Object getItem(int position) {
-							return list.get(position-1);
-						}
-						
-						@Override
-						public int getCount() {
-							if(friends==null){
-								return 1;
-							}else {
-								return (friends.size()+1);
-							}
-						
-						}
-					};
-					((ListView)view4).setAdapter(baseAdapter2);
-				}else{
-					Log.d("Main","查询朋友有误,"+e.getMessage()+e.getErrorCode());
+			public void done(List<Friend> list, BmobException e) {
+				if(e==null){
+				friends=list;
+				baseAdapter2.notifyDataSetChanged();
+				}else {
+					Toast.makeText(context,"更新朋友有误，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 				}
-				
 			}
 		});
 		
 	}
+	  public static void refreshConversations(){
+		    conversations=bmobIM.loadAllConversation();
+		    baseAdapter1.notifyDataSetChanged();
+	  }
 }

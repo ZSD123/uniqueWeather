@@ -30,14 +30,12 @@ public class myMessageHandler extends BmobIMMessageHandler {
 	@Override
 	public void onMessageReceive(MessageEvent event) {
 		super.onMessageReceive(event);
-		Log.d("Main", event.getMessage().toString());
 		processMessage(event);
 	}
 
 	@Override
 	public void onOfflineReceive(OfflineMessageEvent event) {
 		super.onOfflineReceive(event);
-		Log.d("Main", event.toString());
 		Map<String, List<MessageEvent>> map = event.getEventMap();
 	    Log.i("Main","离线消息属于" + map.size() + "个用户");
 	        //挨个检测下离线消息所属的用户的信息是否需要更新
@@ -64,6 +62,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
               AgreeAddFriendMessage agree = AgreeAddFriendMessage.convert(bmobIMMessage);
               addFriend(agree.getFromId());//添加消息的发送方为好友
               fragmentPart.refreshNewFriend();
+              fragmentPart.refreshConversations();
               //这里应该也需要做下校验--来检测下是否已经同意过该好友请求，我这里省略了
           }else if(bmobIMMessage.getMsgType().equals("decline")){  //接收到拒绝的消息
         	  NewFriend newFriend=declineFriendMessage.convert(bmobIMMessage);
@@ -73,9 +72,9 @@ public class myMessageHandler extends BmobIMMessageHandler {
         	  newFriendActivity.bAdapter.notifyDataSetChanged();
         	  fragmentPart.newFriendImage.setVisibility(View.VISIBLE);
     		  fragmentPart.newFriendImage1.setVisibility(View.VISIBLE);
-    		  
-    		  
-          } 
+    		} else {
+				fragmentPart.refreshConversations();
+			}
     		  
      }
      private void addFriend(String uid) {
