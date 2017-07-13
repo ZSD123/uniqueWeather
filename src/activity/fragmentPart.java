@@ -353,8 +353,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   					converdb.saveTitle(conversations.get(position).getConversationTitle());
   					
   					String nickName=converdb.loadNickByTitle(conversations.get(position).getConversationTitle());
-  					Log.d("Main","conversationId="+conversations.get(position).getConversationTitle());
-  					Log.d("Main","nickName="+nickName);
   					if(nickName!=null){
   						viewHolder1.nameText.setText(nickName);
   					}
@@ -375,7 +373,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   							if(e==null){
  
   								viewHolder1.nameText.setText(myUser.getNick());
-  								
+  								Log.d("Main", "传过来的"+myUser.getNick());
   								converdb.saveNickByTitle(conversations.get(position).getConversationTitle(),myUser.getNick());
   								
   								myUser1.setNick(myUser.getNick());

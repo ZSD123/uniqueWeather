@@ -31,15 +31,18 @@ public class conversationDB {
      public void saveTitle(String title){
     	 ContentValues values=new ContentValues();
     	 values.put("conversationTitle", title);
-    	 db.insert("conversation",null, values);
+    	 int i= db.update("conversation",values, "conversationTitle=?",new String[]{title});
+    	 if(i==0){
+    	 	db.insert("conversation", null, values);
+     	}
      }
      
    
      public void saveNickByTitle(String title,String nick){
     	 ContentValues values=new ContentValues();
     	 values.put("nickName",nick);
-    	 db.update("conversation", values,"conversationTitle=?",new String[]{title});
-    	 
+    	int row= db.update("conversation", values,"conversationTitle=?",new String[]{title});
+
      }
      public String loadNickByTitle(String title){
     	 String nickName="";
@@ -47,8 +50,6 @@ public class conversationDB {
     	 if(cursor.moveToFirst()){
     		 do {
 				nickName=cursor.getString(cursor.getColumnIndex("nickName"));
-				Log.d("Main", "这里cursor.getColumnIndex="+cursor.getString(0));
-				Log.d("Main", "这里nickName="+nickName);
 			} while (cursor.moveToNext());
     	 }
     	 return nickName;
