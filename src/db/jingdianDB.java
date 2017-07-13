@@ -17,7 +17,7 @@ public class jingdianDB {
 	private jingdiandbHelper dbhHelper;
 	private SQLiteDatabase db;
 	private static jingdianDB jingdiandb;
-	public jingdianDB(Context context)
+	private jingdianDB(Context context)
 	{
 		dbhHelper=new jingdiandbHelper(context, dB_name, null, VERSION);
 		db=dbhHelper.getWritableDatabase();

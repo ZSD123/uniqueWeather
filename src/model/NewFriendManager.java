@@ -15,7 +15,6 @@ import java.util.List;
 
 
 import cn.bmob.v3.BmobUser;
-import db.messageDB;
 
 
 /**

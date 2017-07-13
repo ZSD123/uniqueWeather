@@ -18,7 +18,7 @@ public class yonghuDB {
       private SQLiteDatabase db;
       private yonghudbHelper dbHelper;
       private static yonghuDB yongDb;
-      public yonghuDB(Context context){
+      private yonghuDB(Context context){
     	  dbHelper=new yonghudbHelper(context,db_name,null,VERSION);
     	  db=dbHelper.getWritableDatabase();
       }

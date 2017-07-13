@@ -282,6 +282,7 @@ public class register extends Activity {
 									 @Override
 									    public void done(MyUser user, BmobException e) {
 									        if(user!=null){
+									        	loginAct.installationId=MyBmobInstallation.getInstallationId(register.this);
 									        	Toast.makeText(register.this,"注册成功，正在转入", Toast.LENGTH_SHORT).show();
 												Intent intent=new Intent(register.this,weather_info.class);
 												startActivity(intent);

@@ -165,10 +165,17 @@ public class newFriendAdapter extends BaseAdapter {
 			
 			@Override
 			public void run() {
-				Bitmap bitmap=Utility.getPicture(newFriends.get(mPosition).getAvatar());
+				final Bitmap bitmap=Utility.getPicture(newFriends.get(mPosition).getAvatar());
 				
-				if(bitmap!=null)
-					image.setImageBitmap(bitmap);
+				((Activity)mContext).runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {
+							if(bitmap!=null)
+								image.setImageBitmap(bitmap);
+						}
+					});
+				
 			}
 		}).start();
 		
@@ -232,7 +239,6 @@ public class newFriendAdapter extends BaseAdapter {
 	
 	@Override
 	public int getCount() {
-		Log.d("Main","count="+newFriends.size());
 		return newFriends.size();
 	}
 	private void sendAgreeAddFriendMessage(final NewFriend add,final SaveListener listener){
@@ -297,7 +303,7 @@ public class newFriendAdapter extends BaseAdapter {
 						newFriendActivity.bAdapter.notifyDataSetChanged();
 					}else {
 						Toast.makeText(mContext, "∑¢ÀÕ ß∞‹£¨"+e.getMessage(),Toast.LENGTH_SHORT).show();
-                        Log.d("Main","2≤Ω ß∞‹");
+       
 					}
 					
 				}

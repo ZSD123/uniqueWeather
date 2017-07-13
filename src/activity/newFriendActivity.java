@@ -83,8 +83,9 @@ public class newFriendActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.new_friend_list);
-		
-		
+	
+			
+	
 		newFriendManager=NewFriendManager.getInstance(newFriendActivity.this);
 		fragmentPart.newFriendImage.setVisibility(View.GONE);//这是为了进入这个页面之后相应的红点会消失
 		fragmentPart.newFriendImage1.setVisibility(View.GONE);
@@ -154,6 +155,7 @@ public class newFriendActivity extends Activity {
 			    }
 			}
 		});
+	
 	}
 	@Override
 	public void onBackPressed() {

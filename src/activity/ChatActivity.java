@@ -647,9 +647,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         msg.setContent(text);
         //可设置额外信息
         
-        Map<String,Object> map =new HashMap<String, Object>();
-        map.put("level",talkpartername);//随意增加信息
-        msg.setExtraMap(map);
+  //      Map<String,Object> map =new HashMap<String, Object>();
+    //    map.put("level",talkpartername);//随意增加信息
+      //  msg.setExtraMap(map);
         c.sendMessage(msg, listener);
         
     }

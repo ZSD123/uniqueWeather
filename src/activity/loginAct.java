@@ -251,6 +251,7 @@ public class loginAct extends Activity {
 												
                                         	   if(e==null){
 													  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+													  installationId=MyBmobInstallation.getInstallationId(loginAct.this);
 													  Intent intent=new Intent(loginAct.this,weather_info.class);
 													  startActivity(intent);
 													  finish();
@@ -295,6 +296,7 @@ public class loginAct extends Activity {
                                 @Override
 								public void done(MyUser myUser, BmobException e) {
 									if(e==null){
+										  installationId=MyBmobInstallation.getInstallationId(loginAct.this);
                                           Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
 										  Intent intent=new Intent(loginAct.this,weather_info.class);
 										  startActivity(intent);
@@ -375,7 +377,8 @@ public class loginAct extends Activity {
 											        	    public void done(BmobUser user, BmobException e) 
 												           {
 													             if(user!=null&&e==null)
-													             {   Toast.makeText(loginAct.this,"登录成功",Toast.LENGTH_SHORT).show();
+													             {   installationId=MyBmobInstallation.getInstallationId(loginAct.this);
+													            	 Toast.makeText(loginAct.this,"登录成功",Toast.LENGTH_SHORT).show();
 													                 Intent intent=new Intent(loginAct.this,weather_info.class);
 																     startActivity(intent);
 																     finish();
@@ -405,6 +408,7 @@ public class loginAct extends Activity {
 											public void done(MyUser user,
 													BmobException e) {
 											if(e==null){
+												installationId=MyBmobInstallation.getInstallationId(loginAct.this);
 												Toast.makeText(loginAct.this,"注册成功，初始密码为您的手机号，请牢记",Toast.LENGTH_LONG).show();
 												 Intent intent=new Intent(loginAct.this,weather_info.class);
 												  startActivity(intent);

@@ -22,6 +22,7 @@ import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
 import Util.download;
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -104,7 +105,7 @@ import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
 import com.uniqueweather.app.R;
 
-import db.messageDB;
+import db.conversationDB;
 import db.yonghuDB;
 public  class fragmentPart extends Fragment implements  AMapLocationListener, LocationSource, NearbyListener,OnCameraChangeListener,OnMarkerClickListener
 {   public static String keyToGet="begin";
@@ -119,7 +120,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	private RelativeLayout fujinData;    //附近用户的资料名片
 	
-	public static messageDB meDb;
 	
 	private ListView chatList;      //聊天列表
 	private TextView yonghuString;
@@ -198,11 +198,15 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private static BaseAdapter baseAdapter1;
 	private static BaseAdapter baseAdapter2;//朋友列表
 	
-	public static  yonghuDB yongbDb;
+	public static  yonghuDB yongbDb;  //周围用户数据表
+	public static conversationDB converdb;  //对话数据表
+	
+	
 	private String username;
 	
 	private boolean zuji=true;
 	
+	private int onceImage=0;  //这里防止多次刷新图片内存溢出，当它为0的时候表示要刷新，当它为1的时候停止刷新
 	
 	public static ImageView newFriendImage;
 	public static ImageView newFriendImage1;
@@ -212,7 +216,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	public static BmobIM bmobIM=BmobIM.getInstance();
     public static  List<BmobIMConversation>  conversations;
-	private static List<MyUser> converUsers=new ArrayList<MyUser>();
+	private List<MyUser> converUsers=new ArrayList<MyUser>();//这里是为了回应点击事件进行加载MyUser的信息资料
     
 	public fragmentPart(){
 		
@@ -240,8 +244,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             
 	        username=(String)MyUser.getObjectByKey("username");
 	        
+	        converdb=conversationDB.getInstance(context);
 	        
-            meDb=messageDB.getInstance(context);
 			
              MyUser user=MyUser.getCurrentUser(MyUser.class);
             if(user.getObjectId()!=null)
@@ -285,71 +289,99 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
 					
-					final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
-					bmobIMUserInfo.setUserId(((MyUser)baseAdapter1.getItem(position)).getObjectId());
-					bmobIMUserInfo.setName(((MyUser)baseAdapter1.getItem(position)).getNick());
-					bmobIMUserInfo.setAvatar(((MyUser)baseAdapter1.getItem(position)).getTouXiangUrl());
-			     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
-						
-						@Override
-						public void done(BmobIMConversation c, BmobException e) {
-							if(e==null){
-								Bundle bundle=new Bundle();
-								bundle.putSerializable("c",c);
-								bundle.putSerializable("userInfo",bmobIMUserInfo);
-								Intent intent=new Intent(context,ChatActivity.class);
-								intent.putExtra("bundle", bundle);
-								startActivity(intent);
-								
-							}else {
-                                   Toast.makeText(context, e.getMessage(),Toast.LENGTH_SHORT).show();
-							}
+					try {
+						final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+						bmobIMUserInfo.setUserId(((MyUser)baseAdapter1.getItem(position)).getObjectId());
+						bmobIMUserInfo.setName(((MyUser)baseAdapter1.getItem(position)).getNick());
+						bmobIMUserInfo.setAvatar(((MyUser)baseAdapter1.getItem(position)).getTouXiangUrl());
+				     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
 							
-						}
-					});
+							@Override
+							public void done(BmobIMConversation c, BmobException e) {
+								if(e==null){
+									Bundle bundle=new Bundle();
+									bundle.putSerializable("c",c);
+									bundle.putSerializable("userInfo",bmobIMUserInfo);
+									Intent intent=new Intent(context,ChatActivity.class);
+									intent.putExtra("bundle", bundle);
+									startActivity(intent);
+									
+								}else {
+	                                   Toast.makeText(context, e.getMessage(),Toast.LENGTH_SHORT).show();
+								}
+								
+							}
+						});
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				
 				}
 			});
 			
             
             conversations=bmobIM.loadAllConversation();
             //会话列表适配器
+            class ViewHolder1{
+            	CircleImageView imageView;
+            	TextView nameText;
+            	TextView contentText;
+            	TextView unReadText;
+            }
   			 baseAdapter1=new BaseAdapter() {
   				
   				@Override
   				public View getView(final int position, View convertView, ViewGroup parent) {
   					
+  					final ViewHolder1 viewHolder1;
   					
   					final MyUser myUser1=new MyUser();
   					myUser1.setObjectId(conversations.get(position).getConversationTitle());
-  					View view5;
   					if(convertView==null){
-  						view5=layoutInflater.inflate(R.layout.item_conversation, null);
+  						convertView=layoutInflater.inflate(R.layout.item_conversation, null);
+  						viewHolder1=new ViewHolder1();
+  						viewHolder1.imageView=(CircleImageView)convertView.findViewById(R.id.iv_recent_avatar);
+  						viewHolder1.nameText=(TextView)convertView.findViewById(R.id.tv_recent_name);
+  						viewHolder1.contentText=(TextView)convertView.findViewById(R.id.tv_recent_msg);
+  						viewHolder1.unReadText=(TextView)convertView.findViewById(R.id.tv_recent_unread);
+  						convertView.setTag(viewHolder1);
   						}else {
-  							view5=convertView;
+  							viewHolder1=(ViewHolder1)convertView.getTag();
   						}
-  					final CircleImageView circle=(CircleImageView)view5.findViewById(R.id.iv_recent_avatar);
-  					final TextView nameText=(TextView)view5.findViewById(R.id.tv_recent_name);
-  					TextView messageText=(TextView)view5.findViewById(R.id.tv_recent_msg);
-  					TextView unReadText=(TextView)view5.findViewById(R.id.tv_recent_unread);
-  					nameText.setText(conversations.get(position).getMessages().get(0).getExtra());
+  		
+
+  					converdb.saveTitle(conversations.get(position).getConversationTitle());
+  					
+  					String nickName=converdb.loadNickByTitle(conversations.get(position).getConversationTitle());
+  					Log.d("Main","conversationId="+conversations.get(position).getConversationTitle());
+  					Log.d("Main","nickName="+nickName);
+  					if(nickName!=null){
+  						viewHolder1.nameText.setText(nickName);
+  					}
   					
   					File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_");
   						if(file.exists()){
-  							circle.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_"));
+  							viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_"));
   						}
   				    
   						
   					BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+  					if(onceImage==0)
   				    query.getObject(conversations.get(position).getConversationTitle(),new QueryListener<MyUser>() {
+  				    	
 
   						@Override
   						public void done(final MyUser myUser, BmobException e) {
   							if(e==null){
  
-  								nameText.setText(myUser.getNick());
+  								viewHolder1.nameText.setText(myUser.getNick());
+  								
+  								converdb.saveNickByTitle(conversations.get(position).getConversationTitle(),myUser.getNick());
+  								
   								myUser1.setNick(myUser.getNick());
   								myUser1.setTouXiangUrl(myUser.getTouXiangUrl());
-  								converUsers.add(position, myUser1);
+  								 
+  								
   								  new Thread(new Runnable() {
   										
   										@Override
@@ -360,28 +392,34 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   												@Override
   												public void run() {
   													if(bitmap!=null)
-  												     	circle.setImageBitmap(bitmap);
-  													
+  												     	viewHolder1.imageView.setImageBitmap(bitmap);
+  													onceImage=1;
   												}
   											});
   										}
   									}).start();
-  								  
+  								
+  							    	
+  						    		converUsers.add(position, myUser1);
   				    
-  								}else {
-  								converUsers.add(position, myUser1);
-  								Toast.makeText(context, "失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
-  							}
+  								}else if(e.getErrorCode()==101) {
+  							     viewHolder1.nameText.setText(conversations.get(position).getConversationTitle());
+  								 
+  								 myUser1.setNick(conversations.get(position).getConversationTitle());
+  							   	 converUsers.add(position, myUser1);
+  							}else {
+  								Toast.makeText(context, "查询会话失败，"+e.getErrorCode()+e.getMessage(), Toast.LENGTH_SHORT).show();
+							}
   						 }
   				    	});
   					
   					if(bmobIM.loadAllConversation().get(position).getMessages().size()>0){
-  				     	messageText.setText(conversations.get(position).getMessages().get(0).getContent());
+  				     	viewHolder1.contentText.setText(conversations.get(position).getMessages().get(0).getContent());
   					}
-  					unReadText.setText(""+bmobIM.loadAllConversation().get(position).getUnreadCount());
+  					viewHolder1.unReadText.setText(""+bmobIM.loadAllConversation().get(position).getUnreadCount());
   					
   					
-  					return view5;
+  					return convertView;
   				}
   				
   				@Override
@@ -1233,6 +1271,8 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 									   }
 								 }
 							}else if(e.getErrorCode()!=9015){
+								Toast.makeText(context,"失败，"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
+							}else {
 								Toast.makeText(context,"失败，"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
 							}
 							

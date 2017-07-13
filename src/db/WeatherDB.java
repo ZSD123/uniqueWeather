@@ -16,8 +16,8 @@ public class WeatherDB {
 	public static final int VERSION=3;
 	public static WeatherDB weatherDB;
 	public SQLiteDatabase db;
-	public WeatherDB(Context context)
-	{
+	private WeatherDB(Context context)
+	{ 
 		weatherdbHelper dbhelper=new weatherdbHelper(context,DB_name,null,VERSION);
 		db=dbhelper.getWritableDatabase();
 	}

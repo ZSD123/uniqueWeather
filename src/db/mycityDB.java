@@ -17,7 +17,7 @@ public class mycityDB {
 	public SQLiteDatabase db;
 	public mycitydbHelper dbhelper;
 	public static mycityDB mycitydb;
-	public mycityDB(Context context)
+	private mycityDB(Context context)
 	{
 		dbhelper=new mycitydbHelper(context, db_name,null, VERSION);
 		db=dbhelper.getWritableDatabase();

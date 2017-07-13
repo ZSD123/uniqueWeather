@@ -21,7 +21,7 @@ public class myUserDB {
 	private myUserdbHelper dbhHelper;
 	private SQLiteDatabase db;
 	private static myUserDB myUserdb;
-	public myUserDB(Context context)
+	private myUserDB(Context context)
 	{
 		dbhHelper=new myUserdbHelper(context, dB_name, null, VERSION);
 		db=dbhHelper.getWritableDatabase();
