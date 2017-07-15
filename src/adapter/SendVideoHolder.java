@@ -25,7 +25,6 @@ import cn.bmob.v3.exception.BmobException;
  */
 public class SendVideoHolder extends BaseViewHolder implements View.OnClickListener,View.OnLongClickListener {
 
-  @Bind(R.id.iv_avatar)
   protected ImageView iv_avatar;
 
   @Bind(R.id.iv_fail_resend)
@@ -47,6 +46,7 @@ public class SendVideoHolder extends BaseViewHolder implements View.OnClickListe
   public SendVideoHolder(Context context, ViewGroup root, BmobIMConversation c, OnRecyclerViewListener listener,View view) {
     super(context, root, listener,view);
     this.c =c;
+
   }
 
   @Override

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class conversationdbHelper extends SQLiteOpenHelper {
     public static final String CREATE_CONVERSATION="create table conversation("
-    		+ "conversationTitle Text UNIQUE,"
+    		+ "id Text UNIQUE,"
     		+ "nickName Text,"
     		+ "unReadNum Integer)";
 	public conversationdbHelper(Context context, String name,

@@ -241,6 +241,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         talkpartername=(TextView)findViewById(R.id.talkpartername);
         
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
+        Log.d("Main","title="+c.getConversationTitle());
+        Log.d("Main","Id="+c.getConversationId());
+        Log.d("Main","Icon="+c.getConversationIcon());
+        Log.d("Main","type="+c.getConversationType());
+        Log.d("Main","draft="+c.getDraft());
         BmobIMUserInfo userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
         talkpartername.setText(userInfo.getName());
         

@@ -30,10 +30,10 @@ public class conversationDB {
     	 }
     	 return condb;
      }
-     public void saveTitle(String title){
+     public void saveId(String id){
     	 ContentValues values=new ContentValues();
-    	 values.put("conversationTitle", title);
-    	 int i= db.update("conversation",values, "conversationTitle=?",new String[]{title});//这里就是为了判断是否有之前的，这里用update的原因在于用insert会提示错误的，当影响的行数等于0的时候表示之前没有就直接插入
+    	 values.put("id", id);
+    	 int i= db.update("conversation",values, "id=?",new String[]{id});//这里就是为了判断是否有之前的，这里用update的原因在于用insert会提示错误的，当影响的行数等于0的时候表示之前没有就直接插入
     	 if(i==0){
         	values.put("unReadNum", 0);
     	 	db.insert("conversation", null, values);
@@ -41,15 +41,15 @@ public class conversationDB {
      }
      
    
-     public void saveNickByTitle(String title,String nick){
+     public void saveNickById(String id,String nick){
     	 ContentValues values=new ContentValues();
     	 values.put("nickName",nick);
-    	 db.update("conversation", values,"conversationTitle=?",new String[]{title});
+    	 db.update("conversation", values,"id=?",new String[]{id});
               
      }
-     public String getNickByTitle(String title){
+     public String getNickById(String id){
     	 String nickName="";
-    	 Cursor cursor= db.query("conversation",new String[]{"nickName"},"conversationTitle=?",new String[]{title}, null, null, null);
+    	 Cursor cursor= db.query("conversation",new String[]{"nickName"},"id=?",new String[]{id}, null, null, null);
     	 if(cursor.moveToFirst()){
     		 do {
 				nickName=cursor.getString(cursor.getColumnIndex("nickName"));
@@ -57,15 +57,15 @@ public class conversationDB {
     	 }
     	 return nickName;
      }
-     public void addUnReadNumByTitle(String title){
-    	  int i=getUnReadNumByTitle(title);
+     public void addUnReadNumById(String id){
+    	  int i=getUnReadNumById(id);
     	  ContentValues values=new ContentValues();
     	  values.put("unReadNum",i+1);
-    	  db.update("conversation", values,"conversationTitle=?", new String[]{title});
+    	  db.update("conversation", values,"id=?", new String[]{id});
      }
-     public int getUnReadNumByTitle(String title){
+     public int getUnReadNumById(String id){
     	 int i=0;
-    	 Cursor cursor=db.query("conversation", new String []{"unReadNum"},"conversationTitle=?",new String[]{title}, null, null, null);
+    	 Cursor cursor=db.query("conversation", new String []{"unReadNum"},"id=?",new String[]{id}, null, null, null);
     	 if(cursor.moveToFirst()){
     		 do {
 				i=cursor.getInt(cursor.getColumnIndex("unReadNum"));
@@ -73,10 +73,10 @@ public class conversationDB {
     	 }
     	 return i;
      }
-     public void clearUnReadNumByTitle(String title){
+     public void clearUnReadNumById(String Id){
     	 ContentValues values=new ContentValues();
     	 values.put("unReadNum", 0);
-   	     db.update("conversation", values,"conversationTitle=?", new String[]{title});
+   	     db.update("conversation", values,"id=?", new String[]{Id});
      }
      
 }
