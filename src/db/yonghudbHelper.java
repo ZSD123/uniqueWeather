@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class yonghudbHelper extends SQLiteOpenHelper {
     public static final String CREATE_YONGHU="create table yonghu("
-    		+ "id integer primary key autoincrement, "
     		+ "objectId Text,"
     		+ "userName Text,"
     		+ "touxiangUrl Text,"

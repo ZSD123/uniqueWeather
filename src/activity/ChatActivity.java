@@ -154,7 +154,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     BmobIMConversation c;
     
     
-    
     class VoiceTouchListener implements View.OnTouchListener {
         @Override   
         public boolean onTouch(View v, MotionEvent event) {
@@ -904,7 +903,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             c.updateLocalCache();
         }
         hideSoftInputView();
-        fragmentPart.refreshConversations();
+        fragmentPart.refreshConversations(1,c.getConversationTitle());
         super.onDestroy();
     }
 

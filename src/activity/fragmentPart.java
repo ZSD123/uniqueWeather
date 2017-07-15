@@ -20,6 +20,7 @@ import service.autoUqdateService;
 import Util.Http;
 import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
+import Util.TimeUtil;
 import Util.Utility;
 import Util.download;
 import android.R.integer;
@@ -61,6 +62,7 @@ import butterknife.Bind;
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
+import cn.bmob.newim.bean.BmobIMMessageType;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.core.BmobIMClient;
 import cn.bmob.newim.listener.ConnectListener;
@@ -321,12 +323,17 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
             
             conversations=bmobIM.loadAllConversation();
+            conversations.get(0).getMessages().get(0).getMsgType();
+            BmobIMMessageType.IMAGE.getType();
             //会话列表适配器
+            //会话列表的ViewHolder
             class ViewHolder1{
             	CircleImageView imageView;
             	TextView nameText;
             	TextView contentText;
+            	TextView timeText;
             	TextView unReadText;
+            	
             }
   			 baseAdapter1=new BaseAdapter() {
   				
@@ -344,6 +351,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   						viewHolder1.nameText=(TextView)convertView.findViewById(R.id.tv_recent_name);
   						viewHolder1.contentText=(TextView)convertView.findViewById(R.id.tv_recent_msg);
   						viewHolder1.unReadText=(TextView)convertView.findViewById(R.id.tv_recent_unread);
+  						viewHolder1.timeText=(TextView)convertView.findViewById(R.id.tv_recent_time);
   						convertView.setTag(viewHolder1);
   						}else {
   							viewHolder1=(ViewHolder1)convertView.getTag();
@@ -352,7 +360,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 
   					converdb.saveTitle(conversations.get(position).getConversationTitle());
   					
-  					String nickName=converdb.loadNickByTitle(conversations.get(position).getConversationTitle());
+  					String nickName=converdb.getNickByTitle(conversations.get(position).getConversationTitle());
   					if(nickName!=null){
   						viewHolder1.nameText.setText(nickName);
   					}
@@ -373,7 +381,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   							if(e==null){
  
   								viewHolder1.nameText.setText(myUser.getNick());
-  								Log.d("Main", "传过来的"+myUser.getNick());
   								converdb.saveNickByTitle(conversations.get(position).getConversationTitle(),myUser.getNick());
   								
   								myUser1.setNick(myUser.getNick());
@@ -403,7 +410,12 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   								}else if(e.getErrorCode()==101) {
   							     viewHolder1.nameText.setText(conversations.get(position).getConversationTitle());
   								 
-  								 myUser1.setNick(conversations.get(position).getConversationTitle());
+  								 String nick=converdb.getNickByTitle(conversations.get(position).getConversationTitle());
+  								 if(nick.equals("")){
+  									 myUser1.setNick(nick);
+  								 }else {
+									myUser1.setNick("0");
+								}
   							   	 converUsers.add(position, myUser1);
   							}else {
   								Toast.makeText(context, "查询会话失败，"+e.getErrorCode()+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -411,11 +423,26 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   						 }
   				    	});
   					
-  					if(bmobIM.loadAllConversation().get(position).getMessages().size()>0){
-  				     	viewHolder1.contentText.setText(conversations.get(position).getMessages().get(0).getContent());
+  					if(conversations.get(position).getMessages().size()>0){
+  						if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
+							viewHolder1.contentText.setText(conversations.get(position).getMessages().get(0).getContent());
+  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
+  		                        viewHolder1.contentText.setText("[图片]");
+  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
+  							viewHolder1.contentText.setText("[视频]");
+  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
+  							viewHolder1.contentText.setText("[语音]");
   					}
-  					viewHolder1.unReadText.setText(""+bmobIM.loadAllConversation().get(position).getUnreadCount());
   					
+  					viewHolder1.timeText.setText(""+TimeUtil.getChatTime(false,conversations.get(position).getUpdateTime()));
+  					
+  					if(converdb.getUnReadNumByTitle(conversations.get(position).getConversationTitle())!=0){
+  					viewHolder1.unReadText.setVisibility(View.VISIBLE);
+  					viewHolder1.unReadText.setText(""+converdb.getUnReadNumByTitle(conversations.get(position).getConversationTitle()));
+  					}
+  					else {
+						viewHolder1.unReadText.setVisibility(View.INVISIBLE);
+					}
   					
   					return convertView;
   				}
@@ -441,8 +468,6 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   				}
   			};
   			((ListView)view3).setAdapter(baseAdapter1);
-            //会话列表更新事件
-            refreshConversations();
 		   //联系人列表点击事件
 			ListView contactsList=(ListView)view4;
 		    contactsList.setOnItemClickListener(new OnItemClickListener() {
@@ -1585,8 +1610,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		});
 		
 	}
-	  public static void refreshConversations(){
+	  public static void refreshConversations(int i,String title){
+		    if(i==0){     //接收消息后调用
+		    	 converdb.addUnReadNumByTitle(title);
+		    }else if(i==1)   { //打开某一个聊天窗口后调用
+		    	 converdb.clearUnReadNumByTitle(title);
+		    }
 		    conversations=bmobIM.loadAllConversation();
 		    baseAdapter1.notifyDataSetChanged();
+		    
 	  }
 }

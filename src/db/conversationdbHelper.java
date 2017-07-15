@@ -7,8 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class conversationdbHelper extends SQLiteOpenHelper {
     public static final String CREATE_CONVERSATION="create table conversation("
-    		+ "conversationTitle Text UNIQUE ,"
-    		+ "nickName Text)";
+    		+ "conversationTitle Text UNIQUE,"
+    		+ "nickName Text,"
+    		+ "unReadNum Integer)";
 	public conversationdbHelper(Context context, String name,
 			CursorFactory factory, int version) {
 		super(context, name, factory, version);
@@ -23,7 +24,8 @@ public class conversationdbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
+		db.execSQL("drop table if exists conversation");
+		onCreate(db);
 
 	}
 
