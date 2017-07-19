@@ -1,6 +1,7 @@
 package Util;
 
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -77,6 +78,7 @@ public class Utility {
 
         return bitmap;
 	}
+
 	public static Bitmap getTouxiangBitmap(String urlstring,Context context,yonghuDB yonghudB)
 	{
 		Bitmap bitmap=null;

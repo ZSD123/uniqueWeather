@@ -9,7 +9,10 @@ public class conversationdbHelper extends SQLiteOpenHelper {
     public static final String CREATE_CONVERSATION="create table conversation("
     		+ "id Text UNIQUE,"
     		+ "nickName Text,"
-    		+ "unReadNum Integer)";
+    		+ "touXiang Text,"
+    		+ "unReadNum Integer,"
+    		+ "newTime Integer,"
+    		+ "newContent Text)";
 	public conversationdbHelper(Context context, String name,
 			CursorFactory factory, int version) {
 		super(context, name, factory, version);

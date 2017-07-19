@@ -1,7 +1,14 @@
 package db;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.bmob.newim.bean.BmobIMConversation;
+
 import com.amap.api.services.a.v;
 
+import activity.MyUser;
+import activity.newFriendActivity;
 import android.R.integer;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -16,7 +23,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class conversationDB {
-     private int VERSION=2;   //这里到时候记得修改回来
+     private int VERSION=1;
      private static SQLiteDatabase db;
      private static conversationDB condb;
      private static conversationdbHelper dbHelper;
@@ -78,5 +85,54 @@ public class conversationDB {
     	 values.put("unReadNum", 0);
    	     db.update("conversation", values,"id=?", new String[]{Id});
      }
-     
+     public void saveTimeById(String id,long time){
+    	 ContentValues values=new ContentValues();
+    	 values.put("newTime", time);
+    	 db.update("conversation", values, "id=?", new String[]{id});
+     }
+     public List<BmobIMConversation> getConverByTime(){
+    	 List<BmobIMConversation> list=new ArrayList<BmobIMConversation>();
+    	 Cursor cursor=db.rawQuery("select * from conversation order by newTime DESC", null);
+    	 if(cursor.moveToFirst()){
+    		 do {
+				BmobIMConversation conversation=new BmobIMConversation();
+				conversation.setConversationId(cursor.getString(cursor.getColumnIndex("id")));
+				conversation.setConversationTitle(cursor.getString(cursor.getColumnIndex("nickName")));
+				conversation.setUpdateTime(cursor.getLong(cursor.getColumnIndex("newTime")));
+				conversation.setConversationIcon(cursor.getString(cursor.getColumnIndex("touXiang")));
+				list.add(conversation);
+			} while (cursor.moveToNext());
+    	 }
+    	 return list;
+     }
+     public void saveTouXiangById(String id,String touXiang){
+    	 ContentValues values=new ContentValues();
+    	 values.put("touXiang", touXiang);
+    	 db.update("conversation", values, "id=?", new String[]{id});
+     }
+     public String getTouXiangById(String id){
+    	 String touXiang="0";
+    	 Cursor cursor=db.query("conversation", new String []{"touXiang"},"id=?",new String[]{id}, null, null, null);
+    	 if(cursor.moveToFirst()){
+    		 do {
+				touXiang=cursor.getString(cursor.getColumnIndex("touXiang"));
+			} while (cursor.moveToNext());
+    	 }
+    	 return touXiang;
+     }
+     public void saveNewContentById(String id,String content){
+    	 ContentValues values=new ContentValues();
+    	 values.put("newContent", content);
+    	 db.update("conversation", values, "id=?", new String[]{id});
+     }
+     public String getNewContentById(String id){
+    	 String newContent="";
+    	 Cursor cursor=db.query("conversation", new String []{"newContent"},"id=?",new String[]{id}, null, null, null);
+    	 if(cursor.moveToFirst()){
+    		 do {
+				newContent=cursor.getString(cursor.getColumnIndex("newContent"));
+			} while (cursor.moveToNext());
+    	 }
+    	 return newContent;
+     }
 }

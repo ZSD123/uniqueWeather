@@ -63,7 +63,6 @@ public class myMessageHandler extends BmobIMMessageHandler {
               AgreeAddFriendMessage agree = AgreeAddFriendMessage.convert(bmobIMMessage);
               addFriend(agree.getFromId());//添加消息的发送方为好友
               fragmentPart.refreshNewFriend();
-              fragmentPart.refreshConversations(0,event.getConversation().getConversationTitle());
               //这里应该也需要做下校验--来检测下是否已经同意过该好友请求，我这里省略了
           }else if(bmobIMMessage.getMsgType().equals("decline")){  //接收到拒绝的消息
         	  NewFriend newFriend=declineFriendMessage.convert(bmobIMMessage);
@@ -76,7 +75,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
     		  fragmentPart.newFriendImage1.setVisibility(View.VISIBLE);
     		} else {
     			
-				fragmentPart.refreshConversations(0,event.getConversation().getConversationTitle());
+				//fragmentPart.refreshConversations(0,event.getConversation().getConversationId());
 			}
     		  
      }

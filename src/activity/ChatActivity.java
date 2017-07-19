@@ -654,6 +654,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
   //      Map<String,Object> map =new HashMap<String, Object>();
     //    map.put("level",talkpartername);//随意增加信息
       //  msg.setExtraMap(map);
+        
         c.sendMessage(msg, listener);
         
     }
@@ -908,7 +909,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             c.updateLocalCache();
         }
         hideSoftInputView();
-        fragmentPart.refreshConversations(1,c.getConversationTitle());
+        
+        fragmentPart.refreshConversations(1,c.getConversationId());
+        
         super.onDestroy();
     }
 

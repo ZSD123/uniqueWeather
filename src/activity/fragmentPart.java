@@ -2,6 +2,7 @@ package activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatCodePointException;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.security.auth.PrivateCredentialPermission;
 
 import message.AddFriendMessage;
 import model.Friend;
@@ -65,8 +68,10 @@ import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMMessageType;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.core.BmobIMClient;
+import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.listener.ConnectListener;
 import cn.bmob.newim.listener.ConversationListener;
+import cn.bmob.newim.listener.MessageListHandler;
 import cn.bmob.newim.listener.MessageSendListener;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
@@ -123,7 +128,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	private RelativeLayout fujinData;    //附近用户的资料名片
 	
 	
-	private ListView chatList;      //聊天列表
+	//private ListView chatList;      //聊天列表
 	private TextView yonghuString;
 	private Bitmap bitmap11;
 	private TextView myCity;
@@ -208,7 +213,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	private boolean zuji=true;
 	
-	private int onceImage=0;  //这里防止多次刷新图片内存溢出，当它为0的时候表示要刷新，当它为1的时候停止刷新
+	private int onceConversation=0;  //这里防止多次刷新图片内存溢出，当它为0的时候表示要刷新，当它为1的时候停止刷新
+	
+	private int onceContact=0;    //联系人列表
 	
 	public static ImageView newFriendImage;
 	public static ImageView newFriendImage1;
@@ -218,7 +225,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 	
 	public static BmobIM bmobIM=BmobIM.getInstance();
     public static  List<BmobIMConversation>  conversations;
-	private List<MyUser> converUsers=new ArrayList<MyUser>();//这里是为了回应点击事件进行加载MyUser的信息资料
+	private List<BmobIMConversation> converList=new ArrayList<BmobIMConversation>();//这里是为了回应点击事件进行加载MyUser的信息资料
     
 	public fragmentPart(){
 		
@@ -293,9 +300,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 					
 					try {
 						final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
-						bmobIMUserInfo.setUserId(((MyUser)baseAdapter1.getItem(position)).getObjectId());
-						bmobIMUserInfo.setName(((MyUser)baseAdapter1.getItem(position)).getNick());
-						bmobIMUserInfo.setAvatar(((MyUser)baseAdapter1.getItem(position)).getTouXiangUrl());
+						bmobIMUserInfo.setUserId(((BmobIMConversation)baseAdapter1.getItem(position)).getConversationId());
+						bmobIMUserInfo.setName(((BmobIMConversation)baseAdapter1.getItem(position)).getConversationTitle());
+						bmobIMUserInfo.setAvatar(((BmobIMConversation)baseAdapter1.getItem(position)).getConversationIcon());
 				     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
 							
 							@Override
@@ -323,6 +330,33 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 			
             
             conversations=bmobIM.loadAllConversation();
+            bmobIM.addMessageListHandler(new MessageListHandler() {
+				
+				@Override
+				public void onMessageReceive(List<MessageEvent> list) {
+					 for (int i = 0; i <list.size(); i++) {
+						 String content="";
+		  		         String id=list.get(i).getConversation().getConversationId();
+							if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.TEXT.getType()))
+								content=list.get(i).getMessage().getContent();
+								else if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
+				                        content="[图片]";
+								else if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
+									content="[视频]";
+								else if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.VOICE.getType()))
+									content="[语音]";
+							
+							converdb.saveNewContentById(id, content);
+							converdb.saveTimeById(id, list.get(i).getMessage().getCreateTime());
+							
+							refreshConversations(0,list.get(i).getConversation().getConversationId());
+							
+						}
+					 
+					}
+					
+				}
+			);
             //会话列表适配器
             //会话列表的ViewHolder
             class ViewHolder1{
@@ -333,15 +367,48 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
             	TextView unReadText;
             	
             }
+      
   			 baseAdapter1=new BaseAdapter() {
   				
   				@Override
   				public View getView(final int position, View convertView, ViewGroup parent) {
   					
+  					
+  				  	if(converList.size()==0){
+  				     	int count=getCount();
+  						for (int i = 0; i < count; i++) {
+  							String id=conversations.get(i).getConversationId();
+							converdb.saveId(id);
+							
+							String content="";
+							if(conversations.get(i).getMessages().size()>0){
+							if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
+								content=conversations.get(position).getMessages().get(0).getContent();
+	  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
+	  		                        content="[图片]";
+	  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
+	  							content="[视频]";
+	  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
+	  							content="[语音]";
+							}
+							
+							converdb.saveNewContentById(id, content);
+							converdb.saveNickById(id, conversations.get(i).getConversationTitle());
+							converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
+							converdb.saveTouXiangById(id, conversations.get(i).getConversationIcon());
+						}
+  						converList=converdb.getConverByTime();
+  					}else {
+  						converList.clear();
+  						converList=converdb.getConverByTime();
+					}
+  					
+  				  	
+  			
+						
+  				  	
   					final ViewHolder1 viewHolder1;
   					
-  					final MyUser myUser1=new MyUser();
-  					myUser1.setObjectId(conversations.get(position).getConversationTitle());
   					if(convertView==null){
   						convertView=layoutInflater.inflate(R.layout.item_conversation, null);
   						viewHolder1=new ViewHolder1();
@@ -354,62 +421,46 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   						}else {
   							viewHolder1=(ViewHolder1)convertView.getTag();
   						}
-  		
-
-  					converdb.saveId(conversations.get(position).getConversationId());
+  	
   					
-  					String nickName=conversations.get(position).getConversationTitle();
+  					String nickName=converList.get(position).getConversationTitle();
   					if(nickName!=null){
   						viewHolder1.nameText.setText(nickName);
-  						myUser1.setNick(nickName);
   					}
   					
   					File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_");
   						if(file.exists()){
-  							viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_"));
+  							viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_"));
+  						}else {
+                              if(converList.get(position).getConversationIcon()!=null){
+                            	  if(onceConversation==0)
+      								  new Thread(new Runnable() {
+      										
+      										@Override
+      										public void run() {
+      										    Bitmap bitmap=Utility.getPicture(converList.get(position).getConversationIcon());
+      											if(bitmap!=null){
+      												onceConversation=1;
+      												savePicture(bitmap, Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_");
+      											}
+      										}
+      									}).start();
+  			                 }else {
+								viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.userpicture));
+							   }
   						}
-  			
-  						myUser1.setTouXiangUrl(conversations.get(position).getConversationIcon());
-  								 
+  			                     
   								
-  								  new Thread(new Runnable() {
-  										
-  										@Override
-  										public void run() {
-  										    final Bitmap bitmap=Utility.getPicture(conversations.get(position).getConversationIcon());
-  											((Activity)context).runOnUiThread(new Runnable() {
-  												
-  												@Override
-  												public void run() {
-  													if(bitmap!=null)
-  												     	viewHolder1.imageView.setImageBitmap(bitmap);
-  												
-  												}
-  											});
-  										}
-  									}).start();
-  								
-  							    	
-  						    		converUsers.add(position, myUser1);
-  				    
-  							
+  		
+				    viewHolder1.contentText.setText(converdb.getNewContentById(converList.get(position).getConversationId()));
   					
-  					if(conversations.get(position).getMessages().size()>0){
-  						if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
-							viewHolder1.contentText.setText(conversations.get(position).getMessages().get(0).getContent());
-  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
-  		                        viewHolder1.contentText.setText("[图片]");
-  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
-  							viewHolder1.contentText.setText("[视频]");
-  						else if(conversations.get(position).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
-  							viewHolder1.contentText.setText("[语音]");
-  					}
+  					long time=converList.get(position).getUpdateTime();
   					
-  					viewHolder1.timeText.setText(""+TimeUtil.getChatTime(false,conversations.get(position).getUpdateTime()));
+  					viewHolder1.timeText.setText(""+TimeUtil.getChatTime(false,time));
   					
-  					if(converdb.getUnReadNumById(conversations.get(position).getConversationId())!=0){
+  					if(converdb.getUnReadNumById(converList.get(position).getConversationId())!=0){
   					viewHolder1.unReadText.setVisibility(View.VISIBLE);
-  					viewHolder1.unReadText.setText(""+converdb.getUnReadNumById(conversations.get(position).getConversationId()));
+  					viewHolder1.unReadText.setText(""+converdb.getUnReadNumById(converList.get(position).getConversationId()));
   					}
   					else {
 						viewHolder1.unReadText.setVisibility(View.INVISIBLE);
@@ -425,7 +476,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   				
   				@Override
   				public Object getItem(int position) {
-  					 return converUsers.get(position);
+  					 return converList.get(position);
   				}
   				
   				@Override
@@ -523,6 +574,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 											circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
 										}
 										textView.setText(friends.get(position-1).getFriendUser().getNick());
+										if(onceContact==0)
 									    new Thread(new Runnable() {
 											
 											@Override
@@ -532,8 +584,10 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 											 		
 													@Override
 													public void run() {
-														if(bitmap!=null)
+														if(bitmap!=null){
 													     	circleImageView.setImageBitmap(bitmap);
+													     	onceContact=1;
+														}
 														
 													}
 												});
@@ -969,9 +1023,7 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		}
 
 	public static void savePicture(Bitmap bitmap,String path)
-		{   File file1=new File(Environment.getExternalStorageDirectory()+"/download");
-		    if(!file1.exists())
-		    	file1.mkdirs();
+		{ 
 			File file=new File(path);
 			try{
 			FileOutputStream out=new FileOutputStream(file);
@@ -1005,6 +1057,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		  return bitmap;
 	  }
 	
+      
+
+	  
 	  public static void showWeather(Context context)
 		{
 		    
@@ -1588,13 +1643,14 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 		});
 		
 	}
-	  public static void refreshConversations(int i,String title){
+	  public static void refreshConversations(int i,String id){
 		    if(i==0){     //接收消息后调用
-		    	 converdb.addUnReadNumById(title);
+		    	 converdb.addUnReadNumById(id);
 		    }else if(i==1)   { //打开某一个聊天窗口后调用
-		    	 converdb.clearUnReadNumById(title);
+		    	 converdb.clearUnReadNumById(id);
 		    }
 		    conversations=bmobIM.loadAllConversation();
+		    
 		    baseAdapter1.notifyDataSetChanged();
 		    
 	  }
