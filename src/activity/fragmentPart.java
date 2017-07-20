@@ -393,20 +393,18 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 							}
 							
 							converdb.saveNewContentById(id, content);
-							converdb.saveNickById(id, conversations.get(i).getConversationTitle());
-							converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
+							if(conversations.get(i).getMessages().size()>0)
+						    	converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
 							converdb.saveTouXiangById(id, conversations.get(i).getConversationIcon());
 						}
   						converList=converdb.getConverByTime();
   					}else {
   						converList.clear();
-  						converList=converdb.getConverByTime();
+  						converList=converdb.getConverByTime();  //如果不为0就按照时间排序获取会话
 					}
   					
   				  	
-  			
-						
-  				  	
+  				
   					final ViewHolder1 viewHolder1;
   					
   					if(convertView==null){
@@ -428,8 +426,9 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
   						viewHolder1.nameText.setText(nickName);
   					}
   					
-  					File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationTitle()+".jpg_");
+  					File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationId()+".jpg_");
   						if(file.exists()){
+ 
   							viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_"));
   						}else {
                               if(converList.get(position).getConversationIcon()!=null){
@@ -438,14 +437,24 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
       										
       										@Override
       										public void run() {
-      										    Bitmap bitmap=Utility.getPicture(converList.get(position).getConversationIcon());
+      										    final Bitmap bitmap=Utility.getPicture(converList.get(position).getConversationIcon());
       											if(bitmap!=null){
       												onceConversation=1;
       												savePicture(bitmap, Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_");
+      												((Activity)context).runOnUiThread(new Runnable() {
+														
+														@Override
+														public void run() {
+		      												viewHolder1.imageView.setImageBitmap(bitmap);
+															
+														}
+													});
+
       											}
       										}
       									}).start();
   			                 }else {
+
 								viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.userpicture));
 							   }
   						}
@@ -561,18 +570,27 @@ public  class fragmentPart extends Fragment implements  AMapLocationListener, Lo
 								return view6;
 							    }
 							   else if(position>0) {
-								   
+								    
 							    	if(convertView==null||position==1){
 							    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
 							    	}else if(convertView!=null&&position!=1){
 							    		view6=convertView;
 							    	}
-							    		final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
+
+							    	  converdb.saveId(friends.get(position-1).getFriendUser().getObjectId());  //这里存储联系人的id和昵称，然后获取会话的时候就不存储联系人的昵称了，有时候昵称错误
+							    	  converdb.saveNickById(friends.get(position-1).getFriendUser().getObjectId(), friends.get(position-1).getFriendUser().getNick());
+							    	  converdb.saveTouXiangById(friends.get(position-1).getFriendUser().getObjectId(), friends.get(position-1).getFriendUser().getTouXiangUrl());
+							    	  
+							    	   final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
 								    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
-								        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_");
+								    	
+								    	String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_";
+								       
+								    	File file=new File(path);
 										if(file.exists()){
-											circleImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_"));
+											circleImageView.setImageBitmap(BitmapFactory.decodeFile(path));
 										}
+										
 										textView.setText(friends.get(position-1).getFriendUser().getNick());
 										if(onceContact==0)
 									    new Thread(new Runnable() {

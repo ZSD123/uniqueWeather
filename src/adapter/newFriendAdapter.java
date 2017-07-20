@@ -125,7 +125,6 @@ public class newFriendAdapter extends BaseAdapter {
 		});
 		
 		TextView textView=(TextView)view.findViewById(R.id.agreefriend_msg);
-		Log.d("Main","newFriends.getStatus="+newFriends.get(position).getStatus().toString());
 		if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_IREFUSE){
 			 
 			 button.setVisibility(View.GONE);
@@ -159,25 +158,27 @@ public class newFriendAdapter extends BaseAdapter {
 	    File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_");
 		if(file.exists()){
 			image.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_"));
+		}else {
+		    new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					final Bitmap bitmap=Utility.getPicture(newFriends.get(mPosition).getAvatar());
+					
+					((Activity)mContext).runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+								if(bitmap!=null)
+									image.setImageBitmap(bitmap);
+							}
+						});
+					
+				}
+			}).start();
 		}
 		
-	    new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				final Bitmap bitmap=Utility.getPicture(newFriends.get(mPosition).getAvatar());
-				
-				((Activity)mContext).runOnUiThread(new Runnable() {
-						
-						@Override
-						public void run() {
-							if(bitmap!=null)
-								image.setImageBitmap(bitmap);
-						}
-					});
-				
-			}
-		}).start();
+	
 		
 		
 	
@@ -193,11 +194,10 @@ public class newFriendAdapter extends BaseAdapter {
 					@Override
 					public void done(String arg0, BmobException e) {
 						  if (e == null) {
-	                            Log.e("Main","success");
 	                            fragmentPart.refreshNewFriend();
-	                            
+	                            notifyDataSetChanged();
 	                        } else {
-	                            Log.e("Main",e.getMessage());
+	                        	
 	                        }
 						
 					}
@@ -276,7 +276,6 @@ public class newFriendAdapter extends BaseAdapter {
 						
 					}else {
 						Toast.makeText(mContext, "Ê§°Ü£¬"+e.getMessage(),Toast.LENGTH_SHORT).show();
-						Log.d("Main","1²½Ê§°Ü");
 					}
 					
 				}

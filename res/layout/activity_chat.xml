@@ -6,11 +6,10 @@
     android:orientation="vertical"
      android:id="@+id/ll_chat" 
      xmlns:android="http://schemas.android.com/apk/res/android">
-  <LinearLayout 
+  <RelativeLayout 
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="#000"
-      android:gravity="center"
       >
       <TextView 
           android:id="@+id/talkpartername"
@@ -19,9 +18,18 @@
           android:layout_marginTop="5dp"
           android:textSize="20sp"
           android:textColor="#FFF"
-          android:layout_gravity="center_horizontal"
+          android:layout_centerInParent="true"
           />
-  </LinearLayout>
+      <ImageView 
+          android:id="@+id/threeCircle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentRight="true"
+          android:layout_marginRight="10dp"
+          android:layout_centerVertical="true"
+          android:src="@drawable/threecircle"
+          />
+</RelativeLayout>
 
 
 <FrameLayout 

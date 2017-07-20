@@ -4,21 +4,35 @@ package model;
 
 import java.util.List;
 
+import com.amap.api.services.a.r;
+
 import activity.MyUser;
+import activity.fragmentPart;
+import activity.weather_info;
+import adapter.ChatAdapter;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.Toast;
 
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.event.MessageEvent;
+import cn.bmob.newim.listener.MessageListener;
+import cn.bmob.v3.BmobBatch;
+import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.datatype.BatchResult;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.LogInListener;
+import cn.bmob.v3.listener.QueryListListener;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
@@ -283,5 +297,48 @@ public class UserModel extends BaseModel {
     public void deleteFriend(Friend f, UpdateListener listener) {
         Friend friend = new Friend();
         friend.delete(f.getObjectId(), listener);
+    }
+    public void deleteFriends(final Context context,List<BmobObject> friends,final BmobIMConversation c,final ChatAdapter adapter){
+    	
+    	
+    	new BmobBatch().deleteBatch(friends).doBatch(new QueryListListener<BatchResult>() {
+
+			@Override
+			public void done(List<BatchResult> list, BmobException e) {
+				if(e==null){
+					int count=0;
+					for (int i = 0; i < list.size(); i++) {
+						BatchResult result=list.get(i);
+						BmobException exception=result.getError();
+						if(exception!=null&&exception.getErrorCode()!=101){
+							count++;
+							Toast.makeText(context,"Ê§°Ü,"+exception.getMessage(),Toast.LENGTH_SHORT).show();
+							Log.d("Main","Ê§°Ü+"+exception.getMessage());
+						}
+					}
+					if(count==0){
+						Toast.makeText(context,"É¾³ý³É¹¦",Toast.LENGTH_SHORT).show();
+						c.deleteBatchMessage(adapter.getMessages());
+						adapter.notifyDataSetChanged();
+						fragmentPart.refreshNewFriend();
+						fragmentPart.converdb.deleteCoversationById(c.getConversationId());
+						fragmentPart.refreshConversations(2,c.getConversationId());
+						
+						Intent intent=new Intent(context,weather_info.class);
+						context.startActivity(intent);
+						((Activity)context).finish();
+						
+						
+					}
+					
+				}else {
+					Toast.makeText(context,"Ê§°Ü,"+e.getMessage(),Toast.LENGTH_SHORT).show();
+				 }
+				
+			}
+
+		
+			
+		});
     }
 }

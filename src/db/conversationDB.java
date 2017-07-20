@@ -52,7 +52,7 @@ public class conversationDB {
     	 ContentValues values=new ContentValues();
     	 values.put("nickName",nick);
     	 db.update("conversation", values,"id=?",new String[]{id});
-              
+
      }
      public String getNickById(String id){
     	 String nickName="";
@@ -134,5 +134,9 @@ public class conversationDB {
 			} while (cursor.moveToNext());
     	 }
     	 return newContent;
+     }
+     public void deleteCoversationById(String id){
+    	 db.delete("conversation", "id=?", new String[]{id});
+    	 
      }
 }

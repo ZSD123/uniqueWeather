@@ -8,6 +8,8 @@ import adapter.EmoteAdapter;
 import adapter.OnRecyclerViewListener;
 import android.R.integer;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -48,6 +50,8 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -65,9 +69,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import model.Friend;
+import model.UserModel;
 import myCustomView.EmoticonsEditText;
 
 
+import com.amap.api.mapcore2d.di;
 import com.koushikdutta.async.Util;
 import com.uniqueweather.app.R;
 
@@ -92,7 +99,11 @@ import cn.bmob.newim.listener.ObseverListener;
 import cn.bmob.newim.listener.OnRecordChangeListener;
 import cn.bmob.newim.notification.BmobNotificationManager;
 import cn.bmob.push.config.Constant;
+import cn.bmob.v3.BmobObject;
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.UpdateListener;
 import db.FaceText;
 
 /**聊天界面
@@ -153,6 +164,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     protected LinearLayoutManager layoutManager;
     BmobIMConversation c;
     
+    ImageView threeCircle;
+    PopupWindow popupWindow;
+    BmobIMUserInfo userInfo;
     
     class VoiceTouchListener implements View.OnTouchListener {
         @Override   
@@ -189,7 +203,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
                     try {
                         if (event.getY() < 0) {// 放弃录音
                             recordManager.cancelRecording();
-                            Log.i("voice", "放弃发送语音");
                         } else {
                             int recordTime = recordManager.stopRecording();
                             if (recordTime > 1) {
@@ -240,13 +253,10 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         emoPager=(ViewPager)findViewById(R.id.pager_emo);
         talkpartername=(TextView)findViewById(R.id.talkpartername);
         
+        threeCircle=(ImageView)findViewById(R.id.threeCircle);
+        
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
-        Log.d("Main","title="+c.getConversationTitle());
-        Log.d("Main","Id="+c.getConversationId());
-        Log.d("Main","Icon="+c.getConversationIcon());
-        Log.d("Main","type="+c.getConversationType());
-        Log.d("Main","draft="+c.getDraft());
-        BmobIMUserInfo userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
+        userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
         talkpartername.setText(userInfo.getName());
         
       // initNaviView();
@@ -360,10 +370,119 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				
 			}
 		});
-       
+       threeCircle.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			if(popupWindow!=null&&popupWindow.isShowing()){
+				popupWindow.dismiss();
+				
+			}else {
+				initmPopupWindowView();
+				popupWindow.showAsDropDown(v,0,5);
+			}
+			
+		}
+	});
         
     }
     List<FaceText> emos;
+
+    private void initmPopupWindowView(){
+    	View customView=getLayoutInflater().inflate(R.layout.popview_item, null,false);
+    	popupWindow=new PopupWindow(customView,300, 400);
+    	popupWindow.setAnimationStyle(R.style.AnimationFade);
+    	
+    	Button buttonXiangXi=(Button)customView.findViewById(R.id.buttonXiangXi);
+    	Button buttonGuanLiao=(Button)customView.findViewById(R.id.buttonGuanLiao);
+    	Button buttonDelete=(Button)customView.findViewById(R.id.buttonDelete);
+    	buttonXiangXi.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+			}
+		});
+    	buttonDelete.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+				final AlertDialog alertdialog=builder.create();
+				builder.setTitle("删除提醒");
+				builder.setMessage("确定要删除该联系人吗?");
+				builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if(alertdialog.isShowing()){
+							alertdialog.dismiss();
+						}
+						
+					}
+				});
+				builder.setPositiveButton("确定",new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						BmobQuery<Friend> query1=new BmobQuery<Friend>();
+						query1.addWhereEqualTo("friendUser",userInfo.getUserId());
+						BmobQuery<Friend> query2=new BmobQuery<Friend>();
+						query2.addWhereEqualTo("myUser",(String)MyUser.getCurrentUser().getObjectId());
+						List<BmobQuery<Friend>> andQuery1=new ArrayList<BmobQuery<Friend>>();
+						andQuery1.add(query1);
+						andQuery1.add(query2);
+						BmobQuery<Friend> andQuery=new BmobQuery<Friend>();
+						andQuery.and(andQuery1);     //第一个列表要满足相互与条件
+					
+						
+						BmobQuery<Friend> query3=new BmobQuery<Friend>();
+						query3.addWhereEqualTo("friendUser",(String)MyUser.getCurrentUser().getObjectId());
+						BmobQuery<Friend> query4=new BmobQuery<Friend>();
+						query4.addWhereEqualTo("myUser",userInfo.getUserId());
+						List<BmobQuery<Friend>> andQuerys2=new ArrayList<BmobQuery<Friend>>();
+						andQuerys2.add(query3);
+						andQuerys2.add(query4);
+						BmobQuery<Friend> andBmobQuery=new BmobQuery<Friend>();
+						andBmobQuery.and(andQuerys2);
+					
+						List<BmobQuery<Friend>> mainList=new ArrayList<BmobQuery<Friend>>();
+						mainList.add(andQuery);
+						mainList.add(andBmobQuery);
+						BmobQuery<Friend> mainQuery=new BmobQuery<Friend>();
+						mainQuery.or(mainList);
+						mainQuery.findObjects(new FindListener<Friend>() {
+							
+							@Override
+						public void done(List<Friend> object, BmobException e) {
+							if(e==null){
+								List<BmobObject> friends=new ArrayList<BmobObject>();
+								for (int i = 0; i <object.size(); i++) {
+									   Friend friend=new Friend();
+									   friend.setObjectId(object.get(i).getObjectId());
+									   Friend friend2=new Friend();
+									   friend2.setObjectId(object.get(i).getObjectId());
+									   friends.add(friend);
+									   friends.add(friend2);
+									}
+								UserModel.getInstance().deleteFriends(ChatActivity.this, friends,c,adapter);
+								}else {
+									Toast.makeText(ChatActivity.this,"删除失败,"+e.getMessage(), Toast.LENGTH_SHORT).show();
+								}
+								
+							}
+						});
+					}
+					});
+				builder.show();
+				
+				
+				
+			}
+		});
+    }
+    
+    
     private void initEmoView() {
 		emoPager = (ViewPager) findViewById(R.id.pager_emo);  //emoPager实例化
 		emos = FaceTextUtils.faceTexts;   //包含有所有表情相应的字符定义
@@ -472,6 +591,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             public boolean onItemLongClick(int position) {
                 //这里省了个懒，直接长按就删除了该消息
                 c.deleteMessage(adapter.getItem(position));
+                
                 adapter.remove(position);
                 return true;
             }
@@ -656,7 +776,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
       //  msg.setExtraMap(map);
         
         c.sendMessage(msg, listener);
-        
+        fragmentPart.converdb.saveNewContentById(c.getConversationId(),text);
+        fragmentPart.converdb.saveTimeById(c.getConversationId(),msg.getCreateTime());
     }
 
     /**
@@ -687,8 +808,10 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			if(resultCode==RESULT_OK){
 				Uri uri=data.getData();
 				String path=weather_info.getPath(ChatActivity.this, uri);
-				 BmobIMImageMessage image =new BmobIMImageMessage(path);
-			     c.sendMessage(image, listener);
+				BmobIMImageMessage image =new BmobIMImageMessage(path);
+			    c.sendMessage(image, listener);
+			    fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[图片]");
+			    fragmentPart.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
 			}
 			break;
 		case 3:
@@ -697,6 +820,9 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				if(file.exists()){
 					 BmobIMImageMessage image =new BmobIMImageMessage(path);
 				     c.sendMessage(image, listener);
+				     
+					 fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[图片]");
+					 fragmentPart.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
 				}
 			}
 		default:
@@ -714,12 +840,14 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     private void sendVoiceMessage(String local, int length) {
         BmobIMAudioMessage audio =new BmobIMAudioMessage(local);
         //可设置额外信息-开发者设置的额外信息，需要开发者自己从extra中取出来
-        Map<String,Object> map =new HashMap<String, Object>();
-        map.put("from", "优酷");
-        audio.setExtraMap(map);
+     //   Map<String,Object> map =new HashMap<String, Object>();
+       // map.put("from", "优酷");
+      //  audio.setExtraMap(map);
         //设置语音文件时长：可选
 //        audio.setDuration(length);
         c.sendMessage(audio, listener);
+	    fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[语音]");
+	    fragmentPart.converdb.saveTimeById(c.getConversationId(),audio.getCreateTime());
     }
 
     /**
@@ -728,6 +856,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     private void sendVideoMessage(){
         BmobIMVideoMessage video =new BmobIMVideoMessage("/storage/sdcard0/bimagechooser/11.png");
         c.sendMessage(video, listener);
+	    fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[视频]");
+	    fragmentPart.converdb.saveTimeById(c.getConversationId(),video.getCreateTime());
     }
 
     /**

@@ -118,4 +118,8 @@
 <item name="android:textColor">@color/base_color_text_black</item>
 
 </style>
+<style  name="AnimationFade">
+    <item name="android:windowEnterAnimation">@anim/inputodown</item>
+    <item name="android:windowExitAnimation">@anim/outdowntoup</item>
+</style>
 </resources>

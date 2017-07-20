@@ -124,6 +124,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             return null;
         }
     }
+    public List<BmobIMMessage> getMessages(){
+    	  if (null != msgs && msgs.size() > 0) {
+              return msgs;
+          } else {
+              return null;
+          }
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
