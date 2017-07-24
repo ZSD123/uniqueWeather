@@ -4,8 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 <fragment
-     android:id="@+id/id_fragment0"
-     android:name="activity.fragmentChat"
+     android:id="@+id/id_fragment1"
+     android:name="activity.fragmentMap"
      android:layout_width="match_parent"
      android:layout_height="0dp"
      android:layout_weight="1"/>

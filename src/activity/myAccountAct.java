@@ -252,7 +252,7 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	            	button1.setVisibility(View.GONE);
 	            	
 	            	weather_info.myUserdb.checkandSaveUpdateN((String)MyUser.getObjectByKey("username"), editText1.getText().toString());
-	            	fragmentPart.userName.setText(editText1.getText().toString());
+	            	fragmentChat.userName.setText(editText1.getText().toString());
 	            	
 	            	MyUser newUser=new MyUser();
 	            	newUser.setNick(editText1.getText().toString());

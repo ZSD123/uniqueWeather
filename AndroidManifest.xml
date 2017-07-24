@@ -88,6 +88,10 @@
             android:name="activity.myAccountAct"
             ></activity>
         <activity 
+            android:name="activity.mapActivity"
+            android:launchMode="singleTask"
+            ></activity>
+        <activity 
             android:name="activity.chooseAreaActivity"
             ></activity>
         <activity 

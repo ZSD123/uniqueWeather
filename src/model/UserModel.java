@@ -7,7 +7,7 @@ import java.util.List;
 import com.amap.api.services.a.r;
 
 import activity.MyUser;
-import activity.fragmentPart;
+import activity.fragmentChat;
 import activity.weather_info;
 import adapter.ChatAdapter;
 import android.app.Activity;
@@ -320,9 +320,9 @@ public class UserModel extends BaseModel {
 						Toast.makeText(context,"É¾³ý³É¹¦",Toast.LENGTH_SHORT).show();
 						c.deleteBatchMessage(adapter.getMessages());
 						adapter.notifyDataSetChanged();
-						fragmentPart.refreshNewFriend();
-						fragmentPart.converdb.deleteCoversationById(c.getConversationId());
-						fragmentPart.refreshConversations(2,c.getConversationId());
+						fragmentChat.refreshNewFriend();
+						fragmentChat.converdb.deleteCoversationById(c.getConversationId());
+						fragmentChat.refreshConversations(2,c.getConversationId());
 						
 						Intent intent=new Intent(context,weather_info.class);
 						context.startActivity(intent);

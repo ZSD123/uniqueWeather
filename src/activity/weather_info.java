@@ -24,6 +24,7 @@ import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
 
@@ -64,21 +65,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class weather_info extends baseFragmentActivity {
-     public String accountName;
+
      public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
 	 public static String address3="http://route.showapi.com/9-2";
-	
-	 public static ViewPager mViewPager;
-	 private List<fragmentPart> fragList=new ArrayList<fragmentPart>();
-	 private String [] title=new String[]{
-	    		"weather","map"
-	         };
+
 	 public static myUserdbHelper dbHelper;
 	 public static myUserDB myUserdb;
 
-	 private FragmentPagerAdapter mAdapter;
-	 private String username;
-	 public myMessageHandler handler;
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{   
@@ -86,61 +79,58 @@ public class weather_info extends baseFragmentActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 	    init();	
-	    mViewPager.setAdapter(mAdapter);
+
 	    UniversalImageLoader.initImageLoader(this);
 	    
 	 }		
 	private void init() 
-	{  mViewPager=(ViewPager)findViewById(R.id.id_viewpager);
-	   for (int i=0;i<title.length;i++)                     //加载fragmentPart
-	      {   
-		      fragmentPart fragP=fragmentPart.getInstance(this);
-		      Bundle bundle =new Bundle();
-		      bundle.putString(fragmentPart.keyToGet,title[i]);
-		      fragP.setArguments(bundle);
-		      fragList.add(fragP);
-	      }
-	   mAdapter=new FragmentPagerAdapter(getSupportFragmentManager()) {
-		
-		@Override
-		public int getCount() 
-		{
-			
-			return fragList.size();
-		}
-		
-		@Override
-		public android.support.v4.app.Fragment getItem(int position) 
-		{
-			return fragList.get(position);
-			
-		}
-	   };
-	   
-	   myUserdb=myUserDB.getInstance(this);
-	   username=(String)MyUser.getObjectByKey("username");
-	  
-	   MyUser newUser=new MyUser();
-	   newUser.setInstallationId(BmobInstallation.getInstallationId(weather_info.this));
-	   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
-	   newUser.update(bmobUser.getObjectId(), new UpdateListener() {
-		
-		@Override
-		public void done(BmobException e) {
-			if(e==null){
+	{
 
-			}else if(e.getErrorCode()==206){
-				Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
-				MyUser.logOut();
-				MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
-				Intent intent=new Intent(getApplicationContext(),loginAct.class);
-				startActivity(intent);
-				finish();
+	   myUserdb=myUserDB.getInstance(this);
+
+	   
+	   BmobQuery<MyUser> bmobQuery=new BmobQuery<MyUser>();
+	   bmobQuery.getObject((String)MyUser.getObjectByKey("objectId"),new QueryListener<MyUser>() {
+		
+		@Override
+		public void done(MyUser myUser, BmobException e) {
+			if(e==null){
+				if(myUser.getInstallationId().equals(loginAct.installationId)){
+					
+				 }else {
+					 
+					   fragmentChat.refreshUserPicture(null, 1);  //为1的时候表示联网更新
+					 
+					   MyUser newUser=new MyUser();
+					   newUser.setInstallationId(loginAct.installationId);
+					   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
+					   newUser.update(bmobUser.getObjectId(), new UpdateListener() {
+						
+						@Override
+						public void done(BmobException e) {
+							if(e==null){
+
+							}else if(e.getErrorCode()==206){
+								Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
+								MyUser.logOut();
+								MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+								Intent intent=new Intent(getApplicationContext(),loginAct.class);
+								startActivity(intent);
+								finish();
+							}
+							
+							
+						}
+					    });
+				 }
+			}else {
+				Toast.makeText(weather_info.this,"失败,"+e.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 			
-			
 		}
-	    });
+	  });
+	   
+	
 		
 	}
 	@Override
@@ -156,7 +146,7 @@ public class weather_info extends baseFragmentActivity {
 			ContentResolver cr=this.getContentResolver();
 			try{
 				Bitmap bitmap=BitmapFactory.decodeStream(cr.openInputStream(uri));
-				fragmentPart.refreshUserPicture(bitmap);
+				fragmentChat.refreshUserPicture(bitmap,0);
 		        
 				bitmap=compressImage(bitmap);
 				File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png");
@@ -356,11 +346,11 @@ public class weather_info extends baseFragmentActivity {
 	public static boolean isGooglePhotosUri(Uri uri) {  
 	    return "com.google.android.apps.photos.content".equals(uri.getAuthority());  
 	}  
-	private Bitmap compressImage(Bitmap image) {
+	public static  Bitmap compressImage(Bitmap image) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos);//质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中
         int options = 100;
-        while ( baos.toByteArray().length / 1024>1000) {    //循环判断如果压缩后图片是否大于100kb,大于继续压缩        
+        while ( baos.toByteArray().length /1024>1000) {    //循环判断如果压缩后图片是否大于100kb,大于继续压缩        
             baos.reset();//重置baos即清空baos
             options -= 10;//每次都减少10
             image.compress(Bitmap.CompressFormat.JPEG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中

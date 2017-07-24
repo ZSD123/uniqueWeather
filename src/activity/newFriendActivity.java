@@ -87,8 +87,8 @@ public class newFriendActivity extends Activity {
 			
 	
 		newFriendManager=NewFriendManager.getInstance(newFriendActivity.this);
-		fragmentPart.newFriendImage.setVisibility(View.GONE);//这是为了进入这个页面之后相应的红点会消失
-		fragmentPart.newFriendImage1.setVisibility(View.GONE);
+		fragmentChat.newFriendImage.setVisibility(View.GONE);//这是为了进入这个页面之后相应的红点会消失
+		fragmentChat.newFriendImage1.setVisibility(View.GONE);
 		
 		bAdapter=new newFriendAdapter(newFriendActivity.this,newFriendManager);
 	

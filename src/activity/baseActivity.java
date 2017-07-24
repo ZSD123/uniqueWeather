@@ -39,9 +39,7 @@ public  class baseActivity extends Activity {
 	}
 	
 	public void checkLogin() {
-		Log.d("Main","2");
 		bmobObjectId=(String)MyUser.getObjectByKey("objectId");
-	    Log.d("Main","1");
 		final BmobRealTimeData rtd=new BmobRealTimeData();
 	    rtd.start(new ValueEventListener() {
 			
@@ -87,7 +85,7 @@ public  class baseActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				Intent intent=new Intent(getApplicationContext(),loginAct.class);
 				startActivity(intent);
-				 finish();
+				finish();
 
 			}
 		});
@@ -98,7 +96,7 @@ public  class baseActivity extends Activity {
 	@Override
     protected void onDestroy() {
         super.onDestroy();
-        fragmentPart.yongbDb.deleteAll();
+        fragmentMap.yongbDb.deleteAll();
         if (dialog != null) {
             dialog.dismiss();
         }

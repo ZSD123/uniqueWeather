@@ -30,7 +30,7 @@ import model.UserModel;
 import myCustomView.CircleImageView;
 import Util.Utility;
 import activity.MyUser;
-import activity.fragmentPart;
+import activity.fragmentChat;
 import activity.newFriendActivity;
 import android.R.integer;
 import android.app.Activity;
@@ -194,7 +194,7 @@ public class newFriendAdapter extends BaseAdapter {
 					@Override
 					public void done(String arg0, BmobException e) {
 						  if (e == null) {
-	                            fragmentPart.refreshNewFriend();
+	                            fragmentChat.refreshNewFriend();
 	                            notifyDataSetChanged();
 	                        } else {
 	                        	

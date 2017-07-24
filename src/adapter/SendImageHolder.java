@@ -8,7 +8,6 @@ import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaCodec.CryptoInfo.Pattern;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;

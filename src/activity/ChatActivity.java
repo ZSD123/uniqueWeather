@@ -113,7 +113,6 @@ import db.FaceText;
  */
 public class ChatActivity extends baseFragmentActivity implements ObseverListener,MessageListHandler{
 
-    private static final List<View> listViews = null;
 
 	LinearLayout ll_chat;
 
@@ -776,8 +775,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
       //  msg.setExtraMap(map);
         
         c.sendMessage(msg, listener);
-        fragmentPart.converdb.saveNewContentById(c.getConversationId(),text);
-        fragmentPart.converdb.saveTimeById(c.getConversationId(),msg.getCreateTime());
+        fragmentChat.converdb.saveNewContentById(c.getConversationId(),text);
+        fragmentChat.converdb.saveTimeById(c.getConversationId(),msg.getCreateTime());
     }
 
     /**
@@ -810,8 +809,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				String path=weather_info.getPath(ChatActivity.this, uri);
 				BmobIMImageMessage image =new BmobIMImageMessage(path);
 			    c.sendMessage(image, listener);
-			    fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[Õº∆¨]");
-			    fragmentPart.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
+			    fragmentChat.converdb.saveNewContentById(c.getConversationId(),"[Õº∆¨]");
+			    fragmentChat.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
 			}
 			break;
 		case 3:
@@ -821,8 +820,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 					 BmobIMImageMessage image =new BmobIMImageMessage(path);
 				     c.sendMessage(image, listener);
 				     
-					 fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[Õº∆¨]");
-					 fragmentPart.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
+					 fragmentChat.converdb.saveNewContentById(c.getConversationId(),"[Õº∆¨]");
+					 fragmentChat.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
 				}
 			}
 		default:
@@ -846,8 +845,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         //…Ë÷√”Ô“ÙŒƒº˛ ±≥§£∫ø…—°
 //        audio.setDuration(length);
         c.sendMessage(audio, listener);
-	    fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[”Ô“Ù]");
-	    fragmentPart.converdb.saveTimeById(c.getConversationId(),audio.getCreateTime());
+	    fragmentChat.converdb.saveNewContentById(c.getConversationId(),"[”Ô“Ù]");
+	    fragmentChat.converdb.saveTimeById(c.getConversationId(),audio.getCreateTime());
     }
 
     /**
@@ -856,8 +855,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     private void sendVideoMessage(){
         BmobIMVideoMessage video =new BmobIMVideoMessage("/storage/sdcard0/bimagechooser/11.png");
         c.sendMessage(video, listener);
-	    fragmentPart.converdb.saveNewContentById(c.getConversationId(),"[ ”∆µ]");
-	    fragmentPart.converdb.saveTimeById(c.getConversationId(),video.getCreateTime());
+	    fragmentChat.converdb.saveNewContentById(c.getConversationId(),"[ ”∆µ]");
+	    fragmentChat.converdb.saveTimeById(c.getConversationId(),video.getCreateTime());
     }
 
     /**
@@ -1040,7 +1039,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         }
         hideSoftInputView();
         
-        fragmentPart.refreshConversations(1,c.getConversationId());
+        fragmentChat.refreshConversations(1,c.getConversationId());
         
         super.onDestroy();
     }

@@ -2,7 +2,7 @@ package Util;
 
 import com.amap.api.maps2d.model.Marker;
 
-import activity.fragmentPart;
+import activity.fragmentChat;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

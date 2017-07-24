@@ -2,12 +2,13 @@ package Util;
 
 import java.io.File;
 
-import activity.fragmentPart;
+import activity.fragmentChat;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -37,9 +38,10 @@ public class download {
 			public void done(String savePath, BmobException e) {
 	
 			      if(e==null){
-			    
-	                  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
-			    	  fragmentPart.userPicture.setImageBitmap(bitmap);
+			          BitmapFactory.Options options=new BitmapFactory.Options();
+			          options.inSampleSize=2;
+	                  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,options);
+			    	  fragmentChat.userPicture.setImageBitmap(bitmap);
 			    	 
 			    	  
 			      }else if(e.getErrorCode()==9016){
@@ -86,7 +88,7 @@ public class download {
     	 File file =new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
 			if(file.exists()){
 				 Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
-		    	 fragmentPart.userPicture.setImageBitmap(bitmap);
+		    	 fragmentChat.userPicture.setImageBitmap(bitmap);
 			}
      }
      
