@@ -27,5 +27,14 @@
         android:drawableTop="@drawable/btn_chat_add_camera_selector"
         android:text="@string/camera"
         />
- 
+      <TextView 
+        android:id="@+id/tv_video"
+        android:layout_width="0dp"
+        android:layout_weight="1.0"
+        android:drawablePadding="10dp"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:drawableTop="@drawable/btn_chat_add_video_selector"
+        android:text="@string/video"
+        />
 </LinearLayout>

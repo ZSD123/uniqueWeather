@@ -267,6 +267,12 @@ public class register extends Activity {
 												}
 											};
 											timer.schedule(task, 1000,1000);
+										}else if(e.getErrorCode()==10010){
+											Toast.makeText(register.this,"该手机号发送短信达到限制，"+e.getMessage() ,Toast.LENGTH_SHORT).show();
+										}else if(e.getErrorCode()==10011){
+											Toast.makeText(register.this,"该账户无可用的发送短信条数，"+e.getMessage() ,Toast.LENGTH_SHORT).show();
+										}else if(e.getErrorCode()==10012){
+											Toast.makeText(register.this,"身份信息必须审核通过才能使用该功能，"+e.getMessage() ,Toast.LENGTH_SHORT).show();
 										}else {
 											Toast.makeText(register.this, "发送验证短信失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 										}
@@ -288,7 +294,10 @@ public class register extends Activity {
 												startActivity(intent);
 												finish();
 									        }else if(e!=null){
-									        	Toast.makeText(register.this,"注册失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+									        	if(e.getErrorCode()==207)
+									        		Toast.makeText(register.this,"注册失败，验证码错误"+e.getMessage(), Toast.LENGTH_SHORT).show();
+									        	else 
+									        	    Toast.makeText(register.this,"注册失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 									        }
 									    }
 								});
@@ -338,9 +347,17 @@ public class register extends Activity {
 										}
 									};
 									timer.schedule(task, 1000,1000);
+								}else if(e.getErrorCode()==10010){
+									Toast.makeText(register.this,"该手机号发送短信达到限制，"+e.getMessage() ,Toast.LENGTH_SHORT).show();
+								}else if(e.getErrorCode()==10011){
+									Toast.makeText(register.this,"该账户无可用的发送短信条数，"+e.getMessage() ,Toast.LENGTH_SHORT).show();
+								}else if(e.getErrorCode()==10012){
+									Toast.makeText(register.this,"身份信息必须审核通过才能使用该功能，"+e.getMessage() ,Toast.LENGTH_SHORT).show();
 								}else {
 									Toast.makeText(register.this, "发送验证短信失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 								}
+								
+								
 								
 							}
 							

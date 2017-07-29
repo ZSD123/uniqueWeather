@@ -45,7 +45,7 @@ public class ReceiveTextHolder extends BaseViewHolder {
 
 
   protected TextView tv_message;
-
+  
   public ReceiveTextHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
     super(context, root,onRecyclerViewListener,view);
     iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);

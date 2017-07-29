@@ -144,13 +144,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             return new ReceiveTextHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_message,parent,false));
         } else if (viewType == TYPE_RECEIVER_IMAGE) {
             return new ReceiveImageHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_image,parent,false));
-        }
-         else if (viewType == TYPE_RECEIVER_VOICE) {
+        } else if (viewType == TYPE_RECEIVER_VOICE) {
             return new ReceiveVoiceHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_voice,parent,false));
         } else if (viewType == TYPE_SEND_VIDEO) {
-            return new SendVideoHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_message,parent,false));
+            return new SendVideoHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_video,parent,false));
         } else if (viewType == TYPE_RECEIVER_VIDEO) {
-            return new ReceiveVideoHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_message,parent,false));
+            return new ReceiveVideoHolder(parent.getContext(), parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_received_video,parent,false));
         }else if(viewType ==TYPE_AGREE) {
             return new AgreeHolder(parent.getContext(),parent,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_agree,parent,false));
         }else{//开发者自定义的其他类型，可自行处理

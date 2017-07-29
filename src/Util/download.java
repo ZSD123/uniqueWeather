@@ -38,11 +38,18 @@ public class download {
 			public void done(String savePath, BmobException e) {
 	
 			      if(e==null){
-			          BitmapFactory.Options options=new BitmapFactory.Options();
-			          options.inSampleSize=2;
-	                  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,options);
-			    	  fragmentChat.userPicture.setImageBitmap(bitmap);
-			    	 
+			    	     BitmapFactory.Options opts=new BitmapFactory.Options();
+						opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+						
+						opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+						opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+						
+						opts.inSampleSize=2;
+						opts.inInputShareable=true;//设置解码位图的尺寸信息
+						
+	                    Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,opts);
+			    	    fragmentChat.userPicture.setImageBitmap(bitmap);
+			    	  
 			    	  
 			      }else if(e.getErrorCode()==9016){
 					Toast.makeText(context,"无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
@@ -74,8 +81,8 @@ public class download {
 			      if(e==null){
 						Toast.makeText(context,"图片下载成功，保存在"+savePath, Toast.LENGTH_SHORT).show();
 			    	  }else if(e.getErrorCode()==9016){
-					Toast.makeText(context,"无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
-					setBitmapWithoutWeb(filename);
+				     	Toast.makeText(context,"无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+					    setBitmapWithoutWeb(filename);
 					}else {
 						Toast.makeText(context,e.getMessage(), Toast.LENGTH_SHORT).show();
 						setBitmapWithoutWeb(filename);
@@ -87,8 +94,18 @@ public class download {
      public static void setBitmapWithoutWeb(String filename){
     	 File file =new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
 			if(file.exists()){
-				 Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
-		    	 fragmentChat.userPicture.setImageBitmap(bitmap);
+				
+				   BitmapFactory.Options opts=new BitmapFactory.Options();
+					opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+					
+					opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+					opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+					
+					opts.inSampleSize=2;
+					opts.inInputShareable=true;//设置解码位图的尺寸信息
+					
+                   Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,opts);
+		           fragmentChat.userPicture.setImageBitmap(bitmap);
 			}
      }
      

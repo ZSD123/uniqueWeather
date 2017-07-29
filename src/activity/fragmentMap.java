@@ -554,7 +554,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	private void addYonghuDataView(final Marker marker){
 	     
 	      RelativeLayout fujinData;
-        yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
+          yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
 		  fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
 		  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 		  layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -588,7 +588,6 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			public void onClick(View v) {
 			  BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();   //这里出现的问题把我折磨死了，我查了好久，折腾好久，原来就是String的nizhen没办法加在setName中
 			  bmobIMUserInfo.setUserId((String) marker.getObject());
-			  Log.d("Main","mark.getObject="+(String) marker.getObject());
 			  bmobIMUserInfo.setAvatar(yongbDb.loadUserTouxiangUrl((String)marker.getObject()));
 			  if(nizhen==null||nizhen.equals("")){
 				  bmobIMUserInfo.setName((String) marker.getObject());
@@ -853,8 +852,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			   }
 		   }
 		@Override
-		public void onCameraChange(CameraPosition arg0) {
-			// TODO Auto-generated method stub
+		public void onCameraChange(CameraPosition cameraPosition) {
+			addLoveding(cameraPosition);
 			
 		}
 		@Override

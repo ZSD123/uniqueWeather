@@ -75,6 +75,7 @@ import myCustomView.EmoticonsEditText;
 
 
 import com.amap.api.mapcore2d.di;
+import com.amap.api.services.a.br;
 import com.koushikdutta.async.Util;
 import com.uniqueweather.app.R;
 
@@ -113,7 +114,6 @@ import db.FaceText;
  */
 public class ChatActivity extends baseFragmentActivity implements ObseverListener,MessageListHandler{
 
-
 	LinearLayout ll_chat;
 
     SwipeRefreshLayout sw_refresh;
@@ -151,6 +151,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     ImageView iv_record;
     TextView tv_picture;
     TextView tv_camera;
+    TextView tv_video;
     
     ViewPager emoPager;
     TextView talkpartername;
@@ -257,6 +258,8 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
         userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
         talkpartername.setText(userInfo.getName());
+        
+        tv_video=(TextView)findViewById(R.id.tv_video);
         
       // initNaviView();
         initEmoView();
@@ -369,6 +372,37 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				
 			}
 		});
+        tv_video.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				  AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+				     final String[] xuanzeweizhi={"打开摄像头","本地视频"};
+				     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							  if(which==0){
+								  Toast.makeText(ChatActivity.this,"请稍等", Toast.LENGTH_SHORT).show();
+							      Intent intent=new Intent();
+							      intent.setAction("android.media.action.VIDEO_CAPTURE");
+							      intent.addCategory("android.intent.category.DEFAULT");
+							   
+                                  startActivityForResult(intent, 4);
+						    	 
+							  }else if(which==1){
+									Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+							        intent.setType("video/*");
+							        startActivityForResult(intent,4);
+							        
+							   }
+						}  
+					});
+				     builder.show();
+				
+			}
+		});
+        
        threeCircle.setOnClickListener(new OnClickListener() {
 		
 		@Override
@@ -548,7 +582,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     	  Date curDate=new Date(System.currentTimeMillis());
     	  String str=format.format(curDate);
     	  
-    	  path=Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/"+str+".jpg";
+    	  path=Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/picture/"+str+".jpg";
     	  Uri uri=Uri.fromFile(new File(path));
     	  intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
     	  startActivityForResult(intent,3);
@@ -803,7 +837,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     @Override
 	protected void onActivityResult(int requestCode,int resultCode,Intent data) {
 	     switch (requestCode) {
-		case 2:
+		case 2:          //这里2是取照片后返回
 			if(resultCode==RESULT_OK){
 				Uri uri=data.getData();
 				String path=weather_info.getPath(ChatActivity.this, uri);
@@ -813,7 +847,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			    fragmentChat.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
 			}
 			break;
-		case 3:
+		case 3:     //这里3是拍照后返回
 			if(resultCode==RESULT_OK){
 				File file=new File(path);
 				if(file.exists()){
@@ -824,6 +858,22 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 					 fragmentChat.converdb.saveTimeById(c.getConversationId(),image.getCreateTime());
 				}
 			}
+			break;
+		case 4:      //这里4是拍摄视频和取本地视频后返回
+			if(resultCode==RESULT_OK){
+	
+				Uri uri=data.getData();
+				String path=weather_info.getPath(ChatActivity.this, uri);
+				 File file=new File(path);
+				if(file.exists()){
+					BmobIMVideoMessage videoMessage=new BmobIMVideoMessage(file);
+					c.sendMessage(videoMessage,listener);
+					
+				    fragmentChat.converdb.saveNewContentById(c.getConversationId(),"[视频]");
+				    fragmentChat.converdb.saveTimeById(c.getConversationId(),videoMessage.getCreateTime());
+				}
+			}
+			break;
 		default:
 			break;
 		}

@@ -26,7 +26,9 @@ public class baseFragmentActivity extends FragmentActivity {
 		
 		super.onCreate(savedInstanceState);
 		//自动登陆状态下检测是否在其他设备登陆
-		bmobObjectId=(String)MyUser.getObjectByKey("objectId");
+	
+			bmobObjectId=(String)MyUser.getObjectByKey("objectId");
+		
 		checkLogin();
 	}
 	@Override

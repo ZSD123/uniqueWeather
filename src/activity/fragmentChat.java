@@ -1,7 +1,10 @@
 package activity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.BitmapFactory.Options;
 
 import android.os.Bundle;
 import android.os.Environment;
@@ -89,7 +93,7 @@ public  class fragmentChat extends Fragment
     public static SharedPreferences.Editor editor;
     public static SharedPreferences pre;
     
-    private static Bitmap bitmap;
+    private static Bitmap bitmap;  //天气bitmap
     
     private static Context context;
 
@@ -287,8 +291,7 @@ public  class fragmentChat extends Fragment
 	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
 	  							content="[语音]";
 							}
-							
-							Log.d("Main","content="+content);
+
 							converdb.saveNewContentById(id, content);
 							
 							if(conversations.get(i).getMessages().size()>0)
@@ -597,7 +600,8 @@ public  class fragmentChat extends Fragment
 		    if(nick!=null){
 		    	userName.setText(nick);
 		    	Toast.makeText(context,nick+ ",欢迎您", Toast.LENGTH_SHORT).show();
-		    }	else 
+		    }	
+		       else 
 			{   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
 			    query.getObject((String)MyUser.getObjectByKey("objectId"),new QueryListener<MyUser>() {
 
@@ -622,11 +626,26 @@ public  class fragmentChat extends Fragment
 		    
 		    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
 		    
-            File file=new File(path);
+             File file=new File(path);
 		      if(file.exists()){
-					  bitmap1=BitmapFactory.decodeFile(path);
-	                  userPicture.setImageBitmap(bitmap1);
-	                  path=null;
+				   try {
+					InputStream is=new FileInputStream(file);
+					
+					BitmapFactory.Options opts=new BitmapFactory.Options();
+					opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+					
+					opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+					opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+					
+					opts.inSampleSize=2;
+					opts.inInputShareable=true;//设置解码位图的尺寸信息
+					
+					bitmap1=BitmapFactory.decodeStream(is, null, opts);
+					userPicture.setImageBitmap(bitmap1);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				   }else {
 					  refreshUserPicture(null, 1);
 				}
@@ -782,8 +801,7 @@ public  class fragmentChat extends Fragment
     public static void showWeather(Context context)
 		{
 		    
-
-		     weather.setText(pre.getString("weatherInfo", ""));
+             weather.setText(pre.getString("weatherInfo", ""));
 		     temper.setText(pre.getString("temperature", ""));
 
 		     if(bitmap!=null)

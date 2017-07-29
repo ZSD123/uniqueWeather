@@ -6,7 +6,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="engDig">qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM1234567890</string>
         <string name="picture">照片</string>
-    <string name="camera">拍摄</string>
+    <string name="camera">拍照</string>
+    <string name="video">摄像</string>
         <string name="longclick_speak">长按说话</string>
         
             <string name="voice_up_tips">手指上滑,取消发送</string>

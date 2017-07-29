@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import cn.bmob.newim.BmobIM;
+import cn.bmob.newim.core.command.e;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobInstallation;
 import cn.bmob.v3.BmobQuery;
@@ -77,10 +78,7 @@ public class loginAct extends Activity {
     
     private int widthPixels;
     private int heightPixels;
-       
-	private static final String PASSWORD = "pamcigam";
     
-    private boolean kedenglu=false;  //邮箱验证登录
     
     private Button button1;  //登录按钮
     private Button button2;  //手机验证登录
@@ -115,7 +113,6 @@ public class loginAct extends Activity {
     
     public static String installationId;
     private int daojishi=30;   
-    private Message message;
     private Timer timer=new Timer();
     private Handler handler=new Handler(){
     	public void handleMessage(Message msg){
@@ -139,8 +136,6 @@ public class loginAct extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
 		
-		final SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(loginAct.this).edit();
-	    SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(loginAct.this);	
 		  
 	    
 	  //  Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");	
@@ -257,9 +252,9 @@ public class loginAct extends Activity {
 													  finish();
 												}else {
 													 if(e.getErrorCode()==101)
-												      	Toast.makeText(loginAct.this,"登录失败,密码错误",Toast.LENGTH_SHORT ).show();
+												      	Toast.makeText(loginAct.this,"登录失败,账户名或密码错误，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
 													 else if(e.getErrorCode()==9016)
-													    Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
+													    Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
 													 else{
 														 Toast.makeText(loginAct.this,"登录失败,"+e.getMessage(),Toast.LENGTH_SHORT ).show();
 													 }
@@ -281,7 +276,7 @@ public class loginAct extends Activity {
 						    	 }
 						    	}
 						     }else if(e.getErrorCode()==9016){
-						    	  Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络", Toast.LENGTH_SHORT).show();
+						    	  Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 						     } else{
 								Toast.makeText(loginAct.this,"连接失败，请稍后再试，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 							}
@@ -302,8 +297,10 @@ public class loginAct extends Activity {
 										  startActivity(intent);
 										  finish();
 									}else {
-										 if(e.getErrorCode()==9016)
-											  Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络",Toast.LENGTH_SHORT ).show();
+										 if(e.getErrorCode()==101)
+										      	Toast.makeText(loginAct.this,"登录失败,账户名或密码错误，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
+										 else if(e.getErrorCode()==9016)
+											  Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
 										else {
 											 Toast.makeText(loginAct.this,"登录失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 									  	}
@@ -384,7 +381,8 @@ public class loginAct extends Activity {
 																     finish();
 													             }
 													             else {
-																	  Toast.makeText(loginAct.this,"登录失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
+													            	    if(e.getErrorCode()==207)
+																	  Toast.makeText(loginAct.this,"登录失败，验证码错误，"+e.getMessage(),Toast.LENGTH_SHORT).show();
 																	  if(relativeRoot.getAlpha()==0.3f){
 																			progressBar.setVisibility(View.GONE);
 																			relativeRoot.setAlpha(1);
@@ -513,7 +511,14 @@ public class loginAct extends Activity {
 					 		}
 					 	};
 							timer.schedule(task, 1000,1000);	
+						}else if(ex.getErrorCode()==10010){
+							Toast.makeText(loginAct.this,"该手机号发送短信达到限制，"+ex.getMessage() ,Toast.LENGTH_SHORT).show();
+						}else if(ex.getErrorCode()==10011){
+							Toast.makeText(loginAct.this,"该账户无可用的发送短信条数，"+ex.getMessage() ,Toast.LENGTH_SHORT).show();
+						}else if(ex.getErrorCode()==10012){
+							Toast.makeText(loginAct.this,"身份信息必须审核通过才能使用该功能，"+ex.getMessage() ,Toast.LENGTH_SHORT).show();
 						}
+						
 					}
 				   });
 				}

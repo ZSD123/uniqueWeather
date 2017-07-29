@@ -123,8 +123,6 @@ public class SendImageHolder extends BaseViewHolder {
 
     //发送的不是远程图片地址，则取本地地址
     ImageLoaderFactory.getLoader().load(iv_picture,TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteUrl(),R.drawable.ic_launcher,null);
-//  ViewUtil.setPicture(TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteU,R.drawable.ic_launcher,null);
-//    ViewUtil.setPicture(TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteUrl(), R.mipmap.ic_launcher, iv_picture,null);
 
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -170,7 +168,7 @@ public class SendImageHolder extends BaseViewHolder {
  			
  			@Override
  			public void onLoadingStarted(String arg0, View arg1) {
- 				// TODO Auto-generated method stub
+ 		     
  				
  			}
  			
