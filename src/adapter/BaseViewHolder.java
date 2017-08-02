@@ -2,9 +2,16 @@ package adapter;
 
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 
+import myCustomView.CircleImageView;
+
 import com.amap.api.services.a.o;
+import com.uniqueweather.app.R;
 
 import butterknife.ButterKnife;
 import activity.baseActivity;
@@ -114,7 +121,48 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
 	  Bitmap bitmap = media.getFrameAtTime();
 	  return bitmap;
 	}
+  protected void setTouXiangImage(File file,CircleImageView iv_avatar){
 
+	      try {
+			InputStream is=new FileInputStream(file);
+			
+			BitmapFactory.Options opts=new BitmapFactory.Options();
+			opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+			
+			opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+			opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+			
+			opts.inSampleSize=2;
+			opts.inInputShareable=true;//设置解码位图的尺寸信息
+			
+			Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
+			iv_avatar.setImageBitmap(bitmap2);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
+  }
+  protected void setTouXiangWithResource(File file,CircleImageView iv_avatar){
+	  try {
+			InputStream is=new FileInputStream(file);
+			
+			BitmapFactory.Options opts=new BitmapFactory.Options();
+			opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+			
+			opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+			opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+			
+			opts.inSampleSize=2;
+			opts.inInputShareable=true;//设置解码位图的尺寸信息
+			
+			Bitmap bitmap2=BitmapFactory.decodeResource(context.getResources(),R.drawable.userpicture, opts);
+			iv_avatar.setImageBitmap(bitmap2);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+  }
 
 }

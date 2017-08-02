@@ -1,13 +1,17 @@
 package db;
 
+import activity.MyUser;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class conversationdbHelper extends SQLiteOpenHelper {
-    public static final String CREATE_CONVERSATION="create table conversation("
+	
+    public static final String CREATE_CONVERSATION="create table conversation ("
     		+ "id Text UNIQUE,"
+    		+ "fromId Text,"
     		+ "nickName Text,"
     		+ "touXiang Text,"
     		+ "unReadNum Integer,"
@@ -27,9 +31,7 @@ public class conversationdbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("drop table if exists conversation");
-		onCreate(db);
-
+	
 	}
 
 }

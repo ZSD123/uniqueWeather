@@ -51,6 +51,7 @@ public class baseFragmentActivity extends FragmentActivity {
 						if(!webinstallationId.equals(loginAct.installationId)){
 							MyUser.logOut();
 							MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+							
 							showLogOutDialog();
 						}
 					} catch (JSONException e) {
@@ -83,6 +84,7 @@ public class baseFragmentActivity extends FragmentActivity {
 			public void onClick(DialogInterface dialog, int which) {
 				 Intent intent=new Intent(getApplicationContext(),loginAct.class);
 				 startActivity(intent);
+				 fragmentChat.converdb.deleteAll();
 				 finish();
 			}
 		});

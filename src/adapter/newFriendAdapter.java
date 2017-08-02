@@ -1,6 +1,9 @@
 package adapter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -157,7 +160,26 @@ public class newFriendAdapter extends BaseAdapter {
 		final CircleImageView image=(CircleImageView)view.findViewById(R.id.agreefriendimage);
 	    File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_");
 		if(file.exists()){
-			image.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_"));
+			
+             try {
+				InputStream is=new FileInputStream(file);
+				
+				BitmapFactory.Options opts=new BitmapFactory.Options();
+				opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+				
+				opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+				opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+				
+				opts.inSampleSize=2;
+				opts.inInputShareable=true;//设置解码位图的尺寸信息
+				
+				Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
+				image.setImageBitmap(bitmap2);
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		}else {
 		    new Thread(new Runnable() {
 				

@@ -21,6 +21,7 @@ import Util.TimeUtil;
 import Util.Utility;
 import Util.download;
 
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -85,7 +86,7 @@ public  class fragmentChat extends Fragment
 	private static TextView temper;
 	public static CircleImageView userPicture;
 
-		
+   
 	
 	//private ListView chatList;      //聊天列表
   private static ImageView pic;
@@ -144,12 +145,12 @@ public  class fragmentChat extends Fragment
 	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
             
 	        username=(String)MyUser.getObjectByKey("username");
-	        if(context==null)
-	        	context=getActivity();
+	
+	        	if(context==null)
+	   	        	context=getActivity();
 	        converdb=conversationDB.getInstance(context);
-	        
-			
-             MyUser user=MyUser.getCurrentUser(MyUser.class);
+		
+	        MyUser user=MyUser.getCurrentUser(MyUser.class);
             if(user.getObjectId()!=null)
               BmobIM.connect(user.getObjectId(),new ConnectListener() {
 				
@@ -157,7 +158,6 @@ public  class fragmentChat extends Fragment
 				public void done(String uid, BmobException e) {
 					if(e==null){
 						Log.d("Main","连接成功");
-						
 					}else {
 						Toast.makeText(context, "连接失败，"+e.getErrorCode(),Toast.LENGTH_SHORT).show();
 					}
@@ -266,7 +266,7 @@ public  class fragmentChat extends Fragment
             	TextView unReadText;
             	
             }
-      
+           final String objectId=(String)MyUser.getObjectByKey("objectId");
   			 baseAdapter1=new BaseAdapter() {
   				
   				@Override
@@ -274,14 +274,19 @@ public  class fragmentChat extends Fragment
   					
   					
   				  	if(converList.size()==0){
-  				     	int count=getCount();
-  						for (int i = 0; i < count; i++) {
+  				     	int count=getCount();   //获得不为0的数目
+  				     	int count1=0;
+  						for (int i = 0; count1 < count;i++ ) {
+  							
+  							if(conversations.get(i).getMessages().size()>0&&conversations.get(i).getMessages().get(0).getFromId().equals(objectId)){
+  							
+  							count1++;//这里i++是为了真正获取到不为0的会话	
+  								
   							String id=conversations.get(i).getConversationId();
 							converdb.saveId(id);
 							
 							String content="";
-							if(conversations.get(i).getMessages().size()>0){
-								
+				
 							if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
 								content=conversations.get(i).getMessages().get(0).getContent();
 	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
@@ -290,23 +295,21 @@ public  class fragmentChat extends Fragment
 	  							content="[视频]";
 	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
 	  							content="[语音]";
-							}
+							
 
 							converdb.saveNewContentById(id, content);
-							
-							if(conversations.get(i).getMessages().size()>0)
-						    	converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
+							converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
 							converdb.saveTouXiangById(id, conversations.get(i).getConversationIcon());
 						}
+  							
+  					}
   						converList=converdb.getConverByTime();
   					}else {
   						converList.clear();
   						converList=converdb.getConverByTime();  //如果不为0就按照时间排序获取会话
 					}
   					
-  				  	
-  				
-  					final ViewHolder1 viewHolder1;
+  				  	final ViewHolder1 viewHolder1;
   					
   					if(convertView==null){
   						convertView=layoutInflater.inflate(R.layout.item_conversation, null);
@@ -326,12 +329,28 @@ public  class fragmentChat extends Fragment
   					if(nickName!=null){
   						viewHolder1.nameText.setText(nickName);
   					}
-  					String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+conversations.get(position).getConversationId()+".jpg_";
+  					
+  					String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_";
   					File file=new File(path);
-  						if(file.exists()){
-                            BitmapFactory.Options options=new BitmapFactory.Options();
-                            options.inSampleSize=2;
-  							viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeFile(path,options));
+  						if(file.exists()){		
+  						  try {
+  							InputStream is=new FileInputStream(file);
+  							
+  							BitmapFactory.Options opts=new BitmapFactory.Options();
+  							opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+  							
+  							opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+  							opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+  							
+  							opts.inSampleSize=2;
+  							opts.inInputShareable=true;//设置解码位图的尺寸信息
+  							
+  							Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
+  							viewHolder1.imageView.setImageBitmap(bitmap2);
+  						} catch (FileNotFoundException e1) {
+  							// TODO Auto-generated catch block
+  							e1.printStackTrace();
+  						}
   							path=null;
   						}else {
                               if(converList.get(position).getConversationIcon()!=null){
@@ -394,7 +413,7 @@ public  class fragmentChat extends Fragment
   				@Override
   				public int getCount() {
   					int count=0;
-                    if(bmobIM.loadAllConversation()!=null){
+                    if(bmobIM.loadAllConversation()!=null&&bmobIM.loadAllConversation().size()>0){
                     	 for (int i = 0; i < bmobIM.loadAllConversation().size(); i++) {
 							 if(conversations.get(i).getMessages().size()>0){
 								 count++;
@@ -491,10 +510,26 @@ public  class fragmentChat extends Fragment
 								       
 								    	File file=new File(path);
 										if(file.exists()){
-											BitmapFactory.Options options=new BitmapFactory.Options();
-											options.inSampleSize=2;
-											circleImageView.setImageBitmap(BitmapFactory.decodeFile(path,options));
-											path=null;
+											
+											  try {
+						  							InputStream is=new FileInputStream(file);
+						  							
+						  							BitmapFactory.Options opts=new BitmapFactory.Options();
+						  							opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+						  							
+						  							opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+						  							opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+						  							
+						  							opts.inSampleSize=2;
+						  							opts.inInputShareable=true;//设置解码位图的尺寸信息
+						  							
+						  							Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
+						  							circleImageView.setImageBitmap(bitmap2);
+						  						} catch (FileNotFoundException e1) {
+						  							// TODO Auto-generated catch block
+						  							e1.printStackTrace();
+						  						}
+										
 										}else {
 											if(onceContact==0)
 											    new Thread(new Runnable() {
@@ -520,9 +555,7 @@ public  class fragmentChat extends Fragment
 										
 										textView.setText(friends.get(position-1).getFriendUser().getNick());
 										
-										
-										
-								    	return view6;
+										return view6;
 							    	}
 							    
 							 return view6;
@@ -736,6 +769,7 @@ public  class fragmentChat extends Fragment
 						Intent intent=new Intent(context,loginAct.class);
 						startActivity(intent);
 						Activity activity=(Activity)context;
+						fragmentChat.converdb.deleteAll();
 						activity.finish();
 					}
 				});

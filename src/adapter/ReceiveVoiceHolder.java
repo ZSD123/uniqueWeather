@@ -13,6 +13,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 
 import myCustomView.CircleImageView;
@@ -72,17 +75,10 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
     String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
-		BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = 2;      
-      try {
-         Bitmap bmp = BitmapFactory.decodeFile(path, opts);
-         iv_avatar.setImageBitmap(bmp);
-      } catch (OutOfMemoryError err) {
-    	  err.printStackTrace();
-     }
+    	setTouXiangImage(file, iv_avatar); 
     }else {
-    	
-    	iv_avatar.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.userpicture));
+    	setTouXiangWithResource(file, iv_avatar);
+
     }
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyƒÍMM‘¬dd»’ HH:mm");

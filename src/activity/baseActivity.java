@@ -85,6 +85,7 @@ public  class baseActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				Intent intent=new Intent(getApplicationContext(),loginAct.class);
 				startActivity(intent);
+				fragmentChat.converdb.deleteAll();
 				finish();
 
 			}

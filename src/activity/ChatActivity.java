@@ -902,12 +902,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     /**
      * 发送视频文件
      */
-    private void sendVideoMessage(){
-        BmobIMVideoMessage video =new BmobIMVideoMessage("/storage/sdcard0/bimagechooser/11.png");
-        c.sendMessage(video, listener);
-	    fragmentChat.converdb.saveNewContentById(c.getConversationId(),"[视频]");
-	    fragmentChat.converdb.saveTimeById(c.getConversationId(),video.getCreateTime());
-    }
 
     /**
      * 发送地理位置
