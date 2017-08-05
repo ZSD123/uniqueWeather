@@ -66,71 +66,8 @@ public class Http {
 		}).start();
 		
 	}
-    public static void sendjingdiancityRequest(final HttpCallbackListener listener)
-    {
-    	new Thread(new  Runnable() {
-    			@Override
-				public void run() {
-    				try{
-    				HttpClient httpClient=new DefaultHttpClient();
-					HttpPost httpPost=new HttpPost("http://apis.haoservice.com/lifeservice/travel/cityList");
-					List<NameValuePair> params=new ArrayList<NameValuePair>();
-					params.add(new BasicNameValuePair("key", "1b2b0212fabe4b33bcbd1e21e46e9b75"));
-					UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params,"utf-8");
-						httpPost.setEntity(entity);
-						HttpResponse httpResponse=httpClient.execute(httpPost); 
-						if(httpResponse.getStatusLine().getStatusCode()==200)
-						{
-							HttpEntity entity1=httpResponse.getEntity();
-							String response=EntityUtils.toString(entity1,"utf-8");
-							if(listener!=null)
-								listener.onFinish(response);
-						}
-					} catch (UnsupportedEncodingException e) {
-					
-						e.printStackTrace();
-					} catch (ClientProtocolException e) {
-						
-						e.printStackTrace();
-					} catch (IOException e) {
-					
-						e.printStackTrace();
-					}
-					
-				}
-			}).start();
-    	
-    }
-    public static void sendjingdianRequest(final String cid,final HttpCallbackListener listener)//获得cid城市的景点情况
-    {
-    	new Thread(new  Runnable() {
-    			@Override
-				public void run() {
-    				try{
-    				HttpClient httpClient=new DefaultHttpClient();
-					HttpPost httpPost=new HttpPost("http://apis.haoservice.com/lifeservice/travel/scenery");
-					List<NameValuePair> params=new ArrayList<NameValuePair>();
-					params.add(new BasicNameValuePair("key", "1b2b0212fabe4b33bcbd1e21e46e9b75"));
-					params.add(new BasicNameValuePair("cid",cid));
-					UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params,"utf-8");
-						httpPost.setEntity(entity);
-						HttpResponse httpResponse=httpClient.execute(httpPost); 
-						if(httpResponse.getStatusLine().getStatusCode()==200)
-						{
-							HttpEntity entity1=httpResponse.getEntity();
-							String response=EntityUtils.toString(entity1,"utf-8");
-							if(listener!=null)
-								listener.onFinish(response);
-						}
-					} catch(Exception e)
-					{
-						e.printStackTrace();
-					}
-					
-				}
-			}).start();
-    	
-    }
+    
+  
 	public static void queryAreaById(final String id,final String address,final HttpCallbackListener listener )
 	{
 		new Thread(new Runnable()

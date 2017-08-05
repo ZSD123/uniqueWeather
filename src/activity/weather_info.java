@@ -71,7 +71,8 @@ public class weather_info extends baseFragmentActivity {
 
 	 public static myUserdbHelper dbHelper;
 	 public static myUserDB myUserdb;
-
+     public static String objectId;
+	 
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{   
@@ -79,15 +80,13 @@ public class weather_info extends baseFragmentActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 	    init();	
-
+        objectId=(String)MyUser.getCurrentUser().getObjectId();
 	    UniversalImageLoader.initImageLoader(this);
-	    
 	 }		
 	private void init() 
 	{
 
 	   myUserdb=myUserDB.getInstance(this);
-
 	   
 	   BmobQuery<MyUser> bmobQuery=new BmobQuery<MyUser>();
 	   bmobQuery.getObject((String)MyUser.getObjectByKey("objectId"),new QueryListener<MyUser>() {
@@ -129,7 +128,8 @@ public class weather_info extends baseFragmentActivity {
 			
 		}
 	  });
-	   
+
+	    BmobIM.registerDefaultMessageHandler(new myMessageHandler(weather_info.this));
 	
 		
 	}

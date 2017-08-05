@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import message.myMessageHandler;
 import model.Friend;
 import model.UserModel;
 import myCustomView.CircleImageView;
@@ -73,11 +74,16 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.uniqueweather.app.R;
 
 import db.conversationDB;
 
-public  class fragmentChat extends Fragment 
+public  class fragmentChat extends Fragment implements AMapLocationListener 
 {   
     
 
@@ -85,7 +91,7 @@ public  class fragmentChat extends Fragment
 
 	private static TextView temper;
 	public static CircleImageView userPicture;
-
+    private MessageListHandler messageListHandler;
    
 	
 	//private ListView chatList;      //聊天列表
@@ -100,6 +106,8 @@ public  class fragmentChat extends Fragment
 
     public MyHorizontalView horizontalView;
 
+    private AMapLocationClientOption mLocationOption=null;
+    private AMapLocationClient mLocationClient;
     
     private myChatPager chatPager;
 
@@ -125,7 +133,7 @@ public  class fragmentChat extends Fragment
 	private static List<Friend> friends=new ArrayList<Friend>(); 
 	public static LayoutInflater layoutInflater;
 	
-	public static BmobIM bmobIM=BmobIM.getInstance();
+	public static BmobIM bmobIM;
     public static  List<BmobIMConversation>  conversations;
 	private List<BmobIMConversation> converList=new ArrayList<BmobIMConversation>();//这里是为了回应点击事件进行加载MyUser的信息资料
     
@@ -145,7 +153,6 @@ public  class fragmentChat extends Fragment
 	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
             
 	        username=(String)MyUser.getObjectByKey("username");
-	
 	        	if(context==null)
 	   	        	context=getActivity();
 	        converdb=conversationDB.getInstance(context);
@@ -165,15 +172,14 @@ public  class fragmentChat extends Fragment
 				}
 			});
             
-            TextView myCity;
             Button button1;
             Button button2;//logout Button
             TextView myAccount;     //我的账户TextView 
             View view3;    //消息界面View
             
+            
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
-			myCity=(TextView)view.findViewById(R.id.myCity);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
 			button2=(Button)view.findViewById(R.id.button1);
@@ -189,7 +195,6 @@ public  class fragmentChat extends Fragment
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
 			
 			//会话列表点击事件
-			
             ListView conversationList=(ListView)view3;
             conversationList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -226,17 +231,18 @@ public  class fragmentChat extends Fragment
 				
 				}
 			});
-			
             
+            bmobIM=BmobIM.getInstance();
             conversations=bmobIM.loadAllConversation();
-            bmobIM.addMessageListHandler(new MessageListHandler() {
+            messageListHandler=new MessageListHandler() {
 				
 				@Override
 				public void onMessageReceive(List<MessageEvent> list) {
 					 for (int i = 0; i <list.size(); i++) {
+					      if(!(list.get(i).getMessage().getFromId()).equals(list.get(i).getMessage().getToId())){
 						 String content="";
 		  		         String id=list.get(i).getConversation().getConversationId();
-							if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.TEXT.getType()))
+							    if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.TEXT.getType()))
 								content=list.get(i).getMessage().getContent();
 								else if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
 				                        content="[图片]";
@@ -245,17 +251,16 @@ public  class fragmentChat extends Fragment
 								else if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.VOICE.getType()))
 									content="[语音]";
 							
-							converdb.saveNewContentById(id, content);
-							converdb.saveTimeById(id, list.get(i).getMessage().getCreateTime());
-							
-							refreshConversations(0,list.get(i).getConversation().getConversationId());
-							
+								converdb.saveNewContentById(id, content);
+								converdb.saveTimeById(id, list.get(i).getMessage().getCreateTime());
+						    	refreshConversations(0,list.get(i).getConversation().getConversationId());
+						 }
 						}
 					 
-					}
 					
 				}
-			);
+			};
+            bmobIM.addMessageListHandler(messageListHandler);
             //会话列表适配器
             //会话列表的ViewHolder
             class ViewHolder1{
@@ -266,25 +271,24 @@ public  class fragmentChat extends Fragment
             	TextView unReadText;
             	
             }
-           final String objectId=(String)MyUser.getObjectByKey("objectId");
+          
   			 baseAdapter1=new BaseAdapter() {
   				
   				@Override
   				public View getView(final int position, View convertView, ViewGroup parent) {
   					
-  					
   				  	if(converList.size()==0){
   				     	int count=getCount();   //获得不为0的数目
-  				     	int count1=0;
-  						for (int i = 0; count1 < count;i++ ) {
-  							
-  							if(conversations.get(i).getMessages().size()>0&&conversations.get(i).getMessages().get(0).getFromId().equals(objectId)){
-  							
-  							count1++;//这里i++是为了真正获取到不为0的会话	
-  								
+  				     	
+  				        int count1=0;
+  						for (int i = 0; count1 < count&&i<conversations.size();i++ ) {
+  						   if(conversations.get(i).getMessages().size()>0){
+  							  if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId)){
+  								 if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId())){
+  							count1++;   
   							String id=conversations.get(i).getConversationId();
+       
 							converdb.saveId(id);
-							
 							String content="";
 				
 							if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
@@ -300,8 +304,9 @@ public  class fragmentChat extends Fragment
 							converdb.saveNewContentById(id, content);
 							converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
 							converdb.saveTouXiangById(id, conversations.get(i).getConversationIcon());
+  						   }
 						}
-  							
+  					   }	
   					}
   						converList=converdb.getConverByTime();
   					}else {
@@ -310,7 +315,7 @@ public  class fragmentChat extends Fragment
 					}
   					
   				  	final ViewHolder1 viewHolder1;
-  					
+
   					if(convertView==null){
   						convertView=layoutInflater.inflate(R.layout.item_conversation, null);
   						viewHolder1=new ViewHolder1();
@@ -324,7 +329,8 @@ public  class fragmentChat extends Fragment
   							viewHolder1=(ViewHolder1)convertView.getTag();
   						}
   	
-  					
+  					if(converList.size()>0&&position<converList.size()&&!converList.get(position).getConversationId().equals(weather_info.objectId)){   //禁止和自己发生对话
+  						if(converdb.getNewContentById(converList.get(position).getConversationId())!=null){  //禁止读取信息为空的消息
   					String nickName=converList.get(position).getConversationTitle();
   					if(nickName!=null){
   						viewHolder1.nameText.setText(nickName);
@@ -389,14 +395,15 @@ public  class fragmentChat extends Fragment
   					
   					viewHolder1.timeText.setText(""+TimeUtil.getChatTime(false,time));
   					
-  					if(converdb.getUnReadNumById(converList.get(position).getConversationId())!=0){
-  					viewHolder1.unReadText.setVisibility(View.VISIBLE);
-  					viewHolder1.unReadText.setText(""+converdb.getUnReadNumById(converList.get(position).getConversationId()));
-  					}
-  					else {
+  					  if(converdb.getUnReadNumById(converList.get(position).getConversationId())!=0){
+  				    	viewHolder1.unReadText.setVisibility(View.VISIBLE);
+  				    	viewHolder1.unReadText.setText(""+converdb.getUnReadNumById(converList.get(position).getConversationId()));
+  				     	}
+  					  else {
 						viewHolder1.unReadText.setVisibility(View.INVISIBLE);
-					}
-  					
+				    	}
+  					}
+  				}
   					return convertView;
   				}
   				
@@ -413,21 +420,29 @@ public  class fragmentChat extends Fragment
   				@Override
   				public int getCount() {
   					int count=0;
-                    if(bmobIM.loadAllConversation()!=null&&bmobIM.loadAllConversation().size()>0){
-                    	 for (int i = 0; i < bmobIM.loadAllConversation().size(); i++) {
+                 if(conversations!=null&&conversations.size()>0){
+                    	 for (int i = 0; i < conversations.size(); i++) {
+        
 							 if(conversations.get(i).getMessages().size()>0){
-								 count++;
+								 if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
+									 if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId()))
+								    count++;   //上面确定真正的有消息，下面确定的是该消息属于本账户，双重筛选,最下面是防止自己和自己的对话加入，三重筛选
 							 }
 						}
+
                     	 return count;
-                    }
-                    else {
+                    }else {
   						return 0;
   					}
 
   				}
   			};
+  			
+  			
+  			
   			((ListView)view3).setAdapter(baseAdapter1);
+  			
+  			
 		   //联系人列表点击事件
 			ListView contactsList=(ListView)view4;
 		    contactsList.setOnItemClickListener(new OnItemClickListener() {
@@ -475,6 +490,7 @@ public  class fragmentChat extends Fragment
 					
 					if(e==null||e.getErrorCode()==0){
 						friends=list;
+					
 					   baseAdapter2=new BaseAdapter() {
 							
 							@Override
@@ -497,11 +513,13 @@ public  class fragmentChat extends Fragment
 							    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
 							    	}else if(convertView!=null&&position!=1){
 							    		view6=convertView;
-							    	}
-
+							    	} 
+			
+                                      
 							    	  converdb.saveId(friends.get(position-1).getFriendUser().getObjectId());  //这里存储联系人的id和昵称，然后获取会话的时候就不存储联系人的昵称了，有时候昵称错误
 							    	  converdb.saveNickById(friends.get(position-1).getFriendUser().getObjectId(), friends.get(position-1).getFriendUser().getNick());
 							    	  converdb.saveTouXiangById(friends.get(position-1).getFriendUser().getObjectId(), friends.get(position-1).getFriendUser().getTouXiangUrl());
+                             
 							    	  
 							    	   final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
 								    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
@@ -591,7 +609,7 @@ public  class fragmentChat extends Fragment
 			((ListView)view4).setAdapter(baseAdapter2);
 			
 		    refreshNewFriend();
-		    
+  
 			views=new ArrayList<View>();
 			views.add(view3);
 			views.add(view4);
@@ -654,7 +672,15 @@ public  class fragmentChat extends Fragment
 			editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(context);
 			
-		
+		    mLocationClient=new AMapLocationClient(context);
+		    mLocationOption=new AMapLocationClientOption();
+		    mLocationClient.setLocationListener(this);
+		    mLocationOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
+		    mLocationOption.setInterval(5000);
+		    mLocationClient.setLocationOption(mLocationOption);
+		    mLocationClient.startLocation();
+		    
+		    
 		    Bitmap bitmap1;
 		    
 		    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
@@ -728,17 +754,7 @@ public  class fragmentChat extends Fragment
 					}
 				});
 				
-				myCity.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						Intent intent=new Intent(context,myCityAction.class);
-						intent.putExtra("selectedCityName",pre.getString("locCity", "") );
-						intent.putExtra("temp", pre.getString("temperature",""));
-						startActivity(intent);
-						
-					}
-				});
+			
 			    button1.setOnClickListener(new OnClickListener() {
 					
 					@Override
@@ -764,12 +780,16 @@ public  class fragmentChat extends Fragment
 					
 					@Override
 					public void onClick(View view) {
-					    BmobUser.logOut();
+					    MyUser.logOut();
 						BmobUser currentUser=BmobUser.getCurrentUser();
 						Intent intent=new Intent(context,loginAct.class);
 						startActivity(intent);
 						Activity activity=(Activity)context;
-						fragmentChat.converdb.deleteAll();
+						bmobIM.removeMessageListHandler(messageListHandler);
+						converList.clear();
+						friends.clear();
+						conversations.clear();
+						
 						activity.finish();
 					}
 				});
@@ -894,4 +914,29 @@ public  class fragmentChat extends Fragment
 		    baseAdapter1.notifyDataSetChanged();
 		   
 	  }
+
+
+
+	@Override
+	public void onLocationChanged(AMapLocation amaplocation) {
+		if(amaplocation!=null)
+		  {  
+			
+			if(amaplocation.getErrorCode()==0)
+			   {
+				   double lat=amaplocation.getLatitude();
+				   double lon=amaplocation.getLongitude();
+					String address="http://route.showapi.com/238-2";  //经纬度转化为地址
+					Http.queryAreaByXY(lat, lon, address, new HttpCallbackListener() {
+						@Override
+						public void onFinish(String response) {
+						    Utility.handleAreaByXY(response, context);
+							queryWeather(context);
+							
+						}
+					});
+			   }
+			}
+		
+	}
 }

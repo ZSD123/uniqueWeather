@@ -978,8 +978,10 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         Log.i("Main","聊天页面接收到消息：" + list.size());
         //当注册页面消息监听时候，有消息（包含离线消息）到来时会回调该方法
         for (int i=0;i<list.size();i++){
-        
-            addMessage2Chat(list.get(i));
+           Log.d("Main", "fromId="+list.get(i).getMessage().getFromId());
+           Log.d("Main", "toId="+list.get(i).getMessage().getToId());
+           if(!(list.get(i).getMessage().getFromId()).equals(list.get(i).getMessage().getToId()))
+               addMessage2Chat(list.get(i));
         }
     }
 
@@ -1009,6 +1011,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
      * @param event
      */
     private void addMessage2Chat(MessageEvent event){
+    	Log.d("Main","进入这里");
         BmobIMMessage msg =event.getMessage();
         if(c!=null && event!=null && c.getConversationId().equals(event.getConversation().getConversationId()) //如果是当前会话的消息
                 && !msg.isTransient()){//并且不为暂态消息

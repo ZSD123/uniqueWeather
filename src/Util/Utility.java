@@ -16,7 +16,6 @@ import org.json.JSONObject;
 
 import com.uniqueweather.app.R;
 
-import db.jingdianDB;
 import db.yonghuDB;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -25,8 +24,6 @@ import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
 
 public class Utility {
-	public static jingdiancity jingdiancity1;
-	public static jingdianDB jingdiandb;
 	public static void handleWeather(String weather,Context context)
 	{  String time;
 	   String weatherInfo;
@@ -116,45 +113,8 @@ public class Utility {
 
         return bitmap;
 	}
-     public static void handlejingdiancity(String response,Context context)
-     {   jingdiandb=jingdianDB.getInstance(context);
-    	 try{
-    	 JSONObject jsonObject=new JSONObject(response);
-    	 JSONArray jArray=jsonObject.getJSONArray("result");
-    	 for(int i=0;i<jArray.length();i++)
-    	 {jingdiancity1=new jingdiancity();
-    	  JSONObject jsonObject2=jArray.getJSONObject(i);
-    	  jingdiancity1.setjingdiancityid(jsonObject2.getString("cityId"));
-    	  jingdiancity1.setjingdiancityName(jsonObject2.getString("cityName"));
-    	  jingdiandb.savejingdianCity(jingdiancity1);
-    	 }
-    	 
-     }catch(Exception e)
-     {
-    	 e.printStackTrace();
-     }
-     }
-     public static void handlejingdian(String response,Context context)
-     {   jingdiandb=jingdianDB.getInstance(context);
-    	 try{
-    		 JSONObject jsonObject=new JSONObject(response);
-    		 JSONArray jsonArray=jsonObject.getJSONArray("result");
-    		 for(int i=0;i<jsonArray.length();i++)
-    		 {
-    			 jingdian jingdian1=new jingdian();
-    			 jingdian1.setCityId(jsonArray.getJSONObject(i).getString("cityId"));
-    			 jingdian1.setGrade(jsonArray.getJSONObject(i).getString("grade"));
-    			 jingdian1.setImageUrl(jsonArray.getJSONObject(i).getString("imgurl"));
-    			 jingdian1.setjingdiantitle(jsonArray.getJSONObject(i).getString("title"));
-    			 jingdian1.setPrice_min(jsonArray.getJSONObject(i).getString("price_min"));
-    			 jingdian1.seturlString(jsonArray.getJSONObject(0).getString("url"));
-    			 jingdiandb.savejingdian(jingdian1);
-    		 }
-    	 }catch(Exception e)
-    	 {
-    		 e.printStackTrace();
-    	 }
-     }
+ 
+   
      public static void handleAreaByXY(String response,Context context)
      {   SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
     	 try{

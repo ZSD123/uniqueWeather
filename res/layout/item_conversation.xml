@@ -74,6 +74,7 @@
             android:background="@drawable/bullet_red1"
             android:textColor="#FFF"
             android:gravity="center"
+            android:visibility="invisible"
             android:textSize="10.0dip" />
     </RelativeLayout>
 

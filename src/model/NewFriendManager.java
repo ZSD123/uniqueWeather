@@ -42,6 +42,7 @@ public class NewFriendManager {
             dao = new NewFriendManager(context,loginId);
             daoMap.put(loginId, dao);
         }
+        
         return dao;
     }
 

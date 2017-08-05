@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import cn.bmob.newim.bean.BmobIMMessage;
+import cn.bmob.newim.bean.BmobIMMessageType;
 import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.event.OfflineMessageEvent;
 import cn.bmob.newim.listener.BmobIMMessageHandler;
@@ -30,7 +31,8 @@ public class myMessageHandler extends BmobIMMessageHandler {
 	@Override
 	public void onMessageReceive(MessageEvent event) {
 		super.onMessageReceive(event);
-		processMessage(event);
+		if(MyUser.getCurrentUser()!=null)
+		     processMessage(event,0);
 	}
 
 	@Override
@@ -43,12 +45,12 @@ public class myMessageHandler extends BmobIMMessageHandler {
 	            List<MessageEvent> list = entry.getValue();
 	            int size = list.size();
 	            for (int i = 0; i < size; i++) {
-	                processMessage(list.get(i));
+	                processMessage(list.get(i),1);  //当后者为1的时候表示离线信息，登录后要save到数据库
 	            }
 	        }
 		
 	}
-     private void processMessage(MessageEvent event){
+     private void processMessage(MessageEvent event,int i){
     	 newFriendManager=NewFriendManager.getInstance(mContext);
     	  BmobIMMessage bmobIMMessage=event.getMessage();
     	  if(bmobIMMessage.getMsgType().equals("add")){
@@ -63,6 +65,9 @@ public class myMessageHandler extends BmobIMMessageHandler {
               addFriend(agree.getFromId());//添加消息的发送方为好友
               fragmentChat.refreshNewFriend();
               
+              if(fragmentChat.converdb.getNickById(event.getConversation().getConversationId())==null)    //只有原来的为null才更新     
+ 			     fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getConversation().getConversationTitle());   
+              fragmentChat.converdb.saveNewContentById(event.getConversation().getConversationId(),"我已经通过了你的好友请求，一起来聊天吧");
               //这里应该也需要做下校验--来检测下是否已经同意过该好友请求，我这里省略了
           }else if(bmobIMMessage.getMsgType().equals("decline")){  //接收到拒绝的消息
         	  NewFriend newFriend=declineFriendMessage.convert(bmobIMMessage);
@@ -74,8 +79,23 @@ public class myMessageHandler extends BmobIMMessageHandler {
         	  fragmentChat.newFriendImage.setVisibility(View.VISIBLE);
     		  fragmentChat.newFriendImage1.setVisibility(View.VISIBLE);
     		} else {
-    			
-				//fragmentPart.refreshConversations(0,event.getConversation().getConversationId());
+    			if(i==1){
+    				String content="";
+    				        if(event.getMessage().getMsgType().equals(BmobIMMessageType.TEXT.getType()))
+						    	content=event.getMessage().getContent();
+							else if(event.getMessage().getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
+			                        content="[图片]";
+							else if(event.getMessage().getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
+								content="[视频]";
+							else if(event.getMessage().getMsgType().equals(BmobIMMessageType.VOICE.getType()))
+								content="[语音]";
+    		     if(fragmentChat.converdb.getNickById(event.getConversation().getConversationId())==null)    //只有原来的为null才更新     
+    			     fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getConversation().getConversationTitle()) ;       
+    			  fragmentChat.converdb.saveNewContentById(event.getMessage().getConversationId(),content);
+    			  fragmentChat.converdb.saveTimeById(event.getMessage().getConversationId(), event.getMessage().getCreateTime());
+                  fragmentChat.refreshConversations(0,event.getConversation().getConversationId());
+    			}
+			
 			}
     		  
      }

@@ -97,7 +97,6 @@ public  class baseActivity extends Activity {
 	@Override
     protected void onDestroy() {
         super.onDestroy();
-        fragmentMap.yongbDb.deleteAll();
         if (dialog != null) {
             dialog.dismiss();
         }

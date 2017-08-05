@@ -10,8 +10,8 @@ import android.util.Log;
 public class conversationdbHelper extends SQLiteOpenHelper {
 	
     public static final String CREATE_CONVERSATION="create table conversation ("
-    		+ "id Text UNIQUE,"
-    		+ "fromId Text,"
+    		+ "id Text ,"
+    		+ "fromId Text,"  //±æ’Àªß
     		+ "nickName Text,"
     		+ "touXiang Text,"
     		+ "unReadNum Integer,"

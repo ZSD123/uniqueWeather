@@ -38,31 +38,7 @@
             android:text="未命名"
             />
 
- 
-  <LinearLayout 
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:layout_marginTop="20dp"
-      >
-      <ImageView
-        android:id="@+id/cityPicture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:src="@drawable/citypicture" />
 
-    <TextView
-        android:id="@+id/myCity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#fff"
-        android:textSize="20sp" 
-        android:text="我的城市"
-        android:layout_marginLeft="20dp"
-        android:clickable="true"
-        />
-  </LinearLayout>
   <LinearLayout 
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
