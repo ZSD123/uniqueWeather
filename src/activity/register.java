@@ -37,6 +37,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class register extends Activity {
@@ -63,7 +64,6 @@ public class register extends Activity {
     private static final int TOFASONG=1; 
     
     private int daojishi=30;   
-    private Message message;
     private Timer timer;
     private Handler handler=new Handler(){
     	public void handleMessage(Message msg){
@@ -100,6 +100,16 @@ public class register extends Activity {
 		
 		checkBox=(CheckBox)findViewById(R.id.checkbox);
 		checkBox.setChecked(true);		
+		TextView fuwu=(TextView)findViewById(R.id.fuwu);
+		fuwu.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent=new Intent(register.this,fuwuAct.class);
+				startActivity(intent);
+				
+			}
+		});
 		
 		imageButton.setOnClickListener(new OnClickListener() {
 			
@@ -173,7 +183,7 @@ public class register extends Activity {
 						if(isEmail(input)){
 							MyUser bu=new MyUser();
 							bu.setUsername(input);
-							bu.setPassword(MD5Util.getMD5String(passwordString));
+							bu.setPassword(passwordString);
 							bu.setEmail(input);
 						    bu.setEmailVerified(false);
 						    bu.signUp(new SaveListener<MyUser>() {

@@ -66,21 +66,20 @@ import android.widget.Toast;
 
 public class weather_info extends baseFragmentActivity {
 
-     public static String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
-	 public static String address3="http://route.showapi.com/9-2";
-
-	 public static myUserdbHelper dbHelper;
 	 public static myUserDB myUserdb;
      public static String objectId;
-	 
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{   
 		super.onCreate(savedInstance);
+		 MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+		 if(currentUser!=null){
+			 objectId=currentUser.getObjectId();
+		 }
+		 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 	    init();	
-        objectId=(String)MyUser.getCurrentUser().getObjectId();
 	    UniversalImageLoader.initImageLoader(this);
 	 }		
 	private void init() 
@@ -132,6 +131,16 @@ public class weather_info extends baseFragmentActivity {
 	    BmobIM.registerDefaultMessageHandler(new myMessageHandler(weather_info.this));
 	
 		
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if(fragmentChat.horizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
+			fragmentChat.horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
+		}else {
+			super.onBackPressed();
+		}
+
 	}
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent data)

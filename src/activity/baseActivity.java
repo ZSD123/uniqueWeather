@@ -27,6 +27,9 @@ public  class baseActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		//自动登陆状态下检测是否在其他设备登陆
+		  MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+          if(currentUser!=null)
+		   bmobObjectId=currentUser.getObjectId();
 		checkLogin();
 		
 	}
@@ -39,7 +42,6 @@ public  class baseActivity extends Activity {
 	}
 	
 	public void checkLogin() {
-		bmobObjectId=(String)MyUser.getObjectByKey("objectId");
 		final BmobRealTimeData rtd=new BmobRealTimeData();
 	    rtd.start(new ValueEventListener() {
 			

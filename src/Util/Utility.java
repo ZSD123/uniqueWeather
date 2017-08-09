@@ -25,25 +25,24 @@ import android.preference.PreferenceManager;
 
 public class Utility {
 	public static void handleWeather(String weather,Context context)
-	{  String time;
+	{  
 	   String weatherInfo;
 	   String temperature;
 	   String weather_pic;
 		try{
 		JSONObject jsonobject=new JSONObject(weather);
 		JSONObject obj1=jsonobject.getJSONObject("showapi_res_body");
-		time=obj1.getString("time");
 		JSONObject obj2=obj1.getJSONObject("now");
 		weatherInfo=obj2.getString("weather");
 		weather_pic=obj2.getString("weather_pic");
 		temperature=obj2.getString("temperature");
-		saveWeatherInfo(time,weatherInfo,temperature,weather_pic,context);
+		saveWeatherInfo(weatherInfo,temperature,weather_pic,context);
 	}catch(Exception e)
 	{
 		e.printStackTrace();
 	}
 	}
-	public static void saveWeatherInfo(String time,String weatherInfo,String temperature,String weather_pic,Context context)
+	public static void saveWeatherInfo(String weatherInfo,String temperature,String weather_pic,Context context)
 	{
 		
 		SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();

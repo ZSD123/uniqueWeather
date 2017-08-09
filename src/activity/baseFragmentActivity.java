@@ -24,12 +24,12 @@ public class baseFragmentActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
      
 		
-		super.onCreate(savedInstanceState);
+		  super.onCreate(savedInstanceState);
 		//自动登陆状态下检测是否在其他设备登陆
-	
-			bmobObjectId=(String)MyUser.getObjectByKey("objectId");
-		
-		checkLogin();
+          MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+          if(currentUser!=null)
+		   bmobObjectId=currentUser.getObjectId();
+          checkLogin();
 	}
 	@Override
 	protected void onResume() {

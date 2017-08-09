@@ -63,11 +63,15 @@ public class myMessageHandler extends BmobIMMessageHandler {
     	  } else if (bmobIMMessage.getMsgType().equals("agree")) {//接收到的对方同意添加自己为好友,此时需要做的事情：1、添加对方为好友，2、显示通知
               AgreeAddFriendMessage agree = AgreeAddFriendMessage.convert(bmobIMMessage);
               addFriend(agree.getFromId());//添加消息的发送方为好友
-              fragmentChat.refreshNewFriend();
+
+              fragmentChat.converdb.saveId(event.getConversation().getConversationId(), 1);//先存Id
+              fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getConversation().getConversationTitle());//存NickName
+              fragmentChat.converdb.saveNewContentById(event.getConversation().getConversationId(),"我已经通过了你的好友请求，一起来聊天吧");//存content
+              fragmentChat.converdb.saveTouXiangById(event.getConversation().getConversationId(), event.getConversation().getConversationIcon());
+              fragmentChat.converdb.saveTimeById(event.getConversation().getConversationId(), event.getMessage().getCreateTime());
               
-              if(fragmentChat.converdb.getNickById(event.getConversation().getConversationId())==null)    //只有原来的为null才更新     
- 			     fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getConversation().getConversationTitle());   
-              fragmentChat.converdb.saveNewContentById(event.getConversation().getConversationId(),"我已经通过了你的好友请求，一起来聊天吧");
+              fragmentChat.refreshConversations(0,event.getConversation().getConversationId());
+              
               //这里应该也需要做下校验--来检测下是否已经同意过该好友请求，我这里省略了
           }else if(bmobIMMessage.getMsgType().equals("decline")){  //接收到拒绝的消息
         	  NewFriend newFriend=declineFriendMessage.convert(bmobIMMessage);
@@ -108,6 +112,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
                      public void done(String s, BmobException e) {
                          if (e == null) {
                              Log.e("Main","success");
+                             fragmentChat.refreshNewFriend();
                          } else {
                              Log.e("Main",e.getMessage());
                              Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();

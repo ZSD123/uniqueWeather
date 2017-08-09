@@ -499,6 +499,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 									   friends.add(friend2);
 									}
 								UserModel.getInstance().deleteFriends(ChatActivity.this, friends,c,adapter);
+								
 								}else {
 									Toast.makeText(ChatActivity.this,"É¾³ýÊ§°Ü,"+e.getMessage(), Toast.LENGTH_SHORT).show();
 								}

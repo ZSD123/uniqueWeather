@@ -217,9 +217,11 @@ public class newFriendAdapter extends BaseAdapter {
 					public void done(String arg0, BmobException e) {
 						  if (e == null) {
 	                            fragmentChat.refreshNewFriend();
+	                            fragmentChat.converdb.saveisFriend(newFriends.get(mPosition).getUid(), 1);
 	                            notifyDataSetChanged();
+	                            
 	                        } else {
-	                        	
+	                        	Toast.makeText(mContext, "Ê§°Ü£¬"+e.getMessage(), Toast.LENGTH_SHORT).show();
 	                        }
 						
 					}

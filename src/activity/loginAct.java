@@ -40,6 +40,8 @@ import com.uniqueweather.app.R;
 import Util.AES;
 import Util.MD5Util;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -72,7 +74,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 public class loginAct extends Activity {
 
-    private CustomFont customFont;
+    private CustomFontTextView customFont;
     private myCaihong caihong;
     private int []location=new int[2];
     
@@ -85,7 +87,6 @@ public class loginAct extends Activity {
     private Button button3;  //快速注册
     
     private TextView text1;  //先体验
-    private TextView text2;  //忘记密码
     private boolean flag1=true;    //button1亮色，true表示启动
     private boolean flag2=false;    //button2亮色
     private TextView account;       //帐号
@@ -135,9 +136,8 @@ public class loginAct extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
-		
-		  
-	    
+		TextView fuwu=(TextView)findViewById(R.id.fuwu);
+		   
 	  //  Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");	
 	    BmobIM.init(this);
 	  
@@ -153,16 +153,15 @@ public class loginAct extends Activity {
 			startActivity(intent);
 			finish();
 		}
+		
 		button1=(Button)findViewById(R.id.login);
 		button2=(Button)findViewById(R.id.shoujidenglu);
 		button3=(Button)findViewById(R.id.register);
 		button3.setBackgroundColor(0);
-	    customFont=(CustomFont)findViewById(R.id.text_EndRain);
+	    customFont=(CustomFontTextView)findViewById(R.id.text_EndRain);
 	    caihong=(myCaihong)findViewById(R.id.caihong);
 	    text1=(TextView)findViewById(R.id.wangjimima);
-	    text2=(TextView)findViewById(R.id.xiantiyan);
 	    text1.setText(Html.fromHtml("<u>"+"忘记密码"+"</u>"));
-	    text2.setText(Html.fromHtml("<u>"+"先体验"+"</u>"));
 	    account=(TextView)findViewById(R.id.account);
 	    password=(TextView)findViewById(R.id.password);
 	    
@@ -186,8 +185,28 @@ public class loginAct extends Activity {
 	    textView.setVisibility(View.GONE);
 	    
 	    button2.setBackgroundColor(0);
-	   
-		  button1.setOnTouchListener(new OnTouchListener() {
+	    
+	    fuwu.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent=new Intent(loginAct.this,fuwuAct.class);
+				startActivity(intent);
+			}
+		});
+	    
+	    text1.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			
+					Intent intent=new Intent(loginAct.this,resetPassword.class);
+					startActivity(intent);
+			
+			}
+		});
+	    
+	      button1.setOnTouchListener(new OnTouchListener() {
 			
 			@Override
 			public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -217,10 +236,10 @@ public class loginAct extends Activity {
 					   relativeRoot.setAlpha(0.3f);
 					   textView.setVisibility(View.VISIBLE);
 					   
-					   bu.setUsername(input);
-					   bu.setPassword(MD5Util.getMD5String(passwordString));			  
+					   bu.setUsername(input);			  
 					   
 					   if(isEmail(input)){
+				       bu.setPassword(passwordString);
 					   BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
 					   query.addWhereEqualTo("username",input);
 				       query.findObjects(new FindListener<MyUser>() {
@@ -285,6 +304,7 @@ public class loginAct extends Activity {
 						 
 					});
 					   }else if(isMobileNO(input)){
+						   bu.setPassword(MD5Util.getMD5String(passwordString));
 						    bu.login(new SaveListener<MyUser>(){
 
                                 @Override
@@ -604,6 +624,10 @@ public class loginAct extends Activity {
 		}
 	@Override
 	public void onBackPressed() {
+		
+		
+		
+		
 		if(relativeRoot.getAlpha()==0.3f){
 			progressBar.setVisibility(View.GONE);
 			relativeRoot.setAlpha(1);

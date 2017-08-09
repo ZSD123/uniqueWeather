@@ -24,7 +24,7 @@
         <TextView
             android:id="@+id/tv_recent_name"
             android:layout_width="wrap_content"
-            android:layout_height="25.0dip"
+            android:layout_height="25.0dp"
             android:layout_marginLeft="10.0dip"
             android:layout_marginRight="58.0dip"
             android:layout_toRightOf="@id/iv_recent_avatar"
@@ -32,12 +32,13 @@
             android:gravity="left|center"
             android:singleLine="true"
             android:textSize="20sp"
+            android:text="张扬"
             />
 
         <TextView
             android:id="@+id/tv_recent_msg"
             android:layout_width="fill_parent"
-            android:layout_height="35.0dip"
+            android:layout_height="35.0dp"
             android:layout_below="@id/tv_recent_name"
              android:layout_toRightOf="@id/iv_recent_avatar"
             android:layout_marginLeft="5dp"
@@ -47,6 +48,7 @@
             android:paddingLeft="6.0dip"
             android:paddingRight="6.0dip"
             android:singleLine="true"
+            android:text="你好"
             android:textSize="15.0sp" />
 
         <TextView

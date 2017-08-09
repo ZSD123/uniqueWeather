@@ -55,9 +55,10 @@ public class MyHorizontalView extends HorizontalScrollView {
 	   int motion=ev.getAction();
 	   switch (motion) {
 	   case MotionEvent.ACTION_UP:
+		   
 		   int x=getScrollX();
 		   if(x>=mMenuWidth/2)
-		   {
+		   {   
 			   this.smoothScrollTo(mMenuWidth, 0);//这是表示菜单部分滑到最左边
 		   }
 		   else{

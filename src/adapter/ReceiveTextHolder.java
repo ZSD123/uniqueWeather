@@ -2,9 +2,12 @@ package adapter;
 
 
 import activity.MyUser;
+import activity.xiangxiDataAct;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -25,6 +28,8 @@ import java.util.regex.Pattern;
 
 import myCustomView.CircleImageView;
 
+import com.amap.api.services.a.bu;
+import com.amap.api.services.a.m;
 import com.uniqueweather.app.R;
 
 import butterknife.Bind;
@@ -48,7 +53,6 @@ public class ReceiveTextHolder extends BaseViewHolder {
 
 
   protected TextView tv_message;
-  
   public ReceiveTextHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
     super(context, root,onRecyclerViewListener,view);
     iv_avatar=(CircleImageView)view.findViewById(R.id.iv_avatar);
@@ -89,6 +93,15 @@ public class ReceiveTextHolder extends BaseViewHolder {
 		public void done(MyUser user, BmobException e ) {
 		      if(e==null){
 		    	  myUser.setNick(user.getNick());
+		    	  myUser.setTouXiangUrl(user.getTouXiangUrl());
+		    	  myUser.setSex(user.getSex());
+		    	  myUser.setAge(user.getAge());
+		    	  myUser.setShengri(user.getShengri());
+		    	  myUser.setZhiye(user.getZhiye());
+		    	  myUser.setSchool(user.getSchool());
+		    	  myUser.setSuozaidi(user.getSuozaidi());
+		    	  myUser.setGuxiang(user.getGuxiang());
+		    	  Log.d("Main","zhiye1"+myUser.getZhiye());
 		      }else{
 		    	  toast(e.getMessage());
 		      }
@@ -100,12 +113,12 @@ public class ReceiveTextHolder extends BaseViewHolder {
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-    	  try {
-    		  toast("µã»÷" +myUser.getNick() + "µÄÍ·Ïñ");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        
+    	   Bundle bundle=new Bundle();
+    	   bundle.putSerializable("myUser", myUser);
+    	   Intent intent=new Intent(context,xiangxiDataAct.class);
+    	   intent.putExtra("bundle", bundle);
+    	   context.startActivity(intent);
+    	   
       }
     });
     tv_message.setOnClickListener(new View.OnClickListener() {

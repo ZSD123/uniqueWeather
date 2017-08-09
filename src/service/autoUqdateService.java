@@ -40,10 +40,10 @@ public class autoUqdateService extends Service {
 		
 	}
 	public void uqdateWeather()
-	{
+	{   String address3="http://route.showapi.com/9-2";
 		SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(this);
 		String coName=pre.getString("locDistrict", "");
-		Http.sendWeatherRequest(coName,weather_info.address3,new HttpCallbackListener()
+		Http.sendWeatherRequest(coName,address3,new HttpCallbackListener()
 		{
 			@Override
 			public void onFinish(String response)

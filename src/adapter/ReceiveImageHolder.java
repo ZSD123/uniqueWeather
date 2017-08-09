@@ -141,11 +141,7 @@ public class ReceiveImageHolder extends BaseViewHolder {
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-    	  try {
-    		  toast("µã»÷" + myUser.getNick() + "µÄÍ·Ïñ");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    	
       
       }
     });

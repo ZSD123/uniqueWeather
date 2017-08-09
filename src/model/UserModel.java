@@ -320,8 +320,9 @@ public class UserModel extends BaseModel {
 						Toast.makeText(context,"É¾³ý³É¹¦",Toast.LENGTH_SHORT).show();
 						c.deleteBatchMessage(adapter.getMessages());
 						adapter.notifyDataSetChanged();
-						fragmentChat.refreshNewFriend();
+						
 						fragmentChat.converdb.deleteCoversationById(c.getConversationId());
+						fragmentChat.refreshNewFriend();
 						fragmentChat.refreshConversations(2,c.getConversationId());
 						
 						Intent intent=new Intent(context,weather_info.class);

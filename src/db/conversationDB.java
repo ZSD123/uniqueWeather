@@ -3,6 +3,8 @@ package db;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Friend;
+
 import cn.bmob.newim.bean.BmobIMConversation;
 
 import com.amap.api.services.a.v;
@@ -41,14 +43,20 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
     	 }
     	 return condb;
      }
-     public void saveId(String id){
+     public void saveId(String id,int j){   //当j为1的时候表示联网查询朋友并且存储为朋友
     	 if(!id.equals(weather_info.objectId)){
     	 ContentValues values=new ContentValues();
     	 values.put("id", id);
     	 values.put("fromId", weather_info.objectId);
+    	 if(j==1){
+     		values.put("isFriend", 1);
+     	 }
     	 int i= db.update("conversation",values, "id=? AND fromId=?",new String[]{id,weather_info.objectId});//这里就是为了判断是否有之前的，这里用update的原因在于用insert会提示错误的，当影响的行数等于0的时候表示之前没有就直接插入
     	  if(i==0){
         	values.put("unReadNum", 0);
+        	if(j==1){
+        		values.put("isFriend", 1);
+        	 }
     	 	db.insert("conversation", null, values);
     	 	
      	  }
@@ -129,7 +137,6 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
     	 return touXiang;
      }
      public void saveNewContentById(String id,String content){
-    	 Log.d("Main", "saveContent:id="+id+"objectId="+weather_info.objectId+"content="+content);
     	 ContentValues values=new ContentValues();
     	 values.put("newContent", content);
     	 db.update("conversation", values, "id=? AND fromId=?", new String[]{id,weather_info.objectId});
@@ -150,5 +157,39 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
      public void deleteAll(){
     	 db.delete("conversation", null, null);
      }
-     
+     public void saveisFriend(String id,int j){
+    	 if(!id.equals(weather_info.objectId)){
+        	 ContentValues values=new ContentValues();
+        	 values.put("id", id);
+        	 values.put("fromId", weather_info.objectId);
+        	 values.put("isFriend", j);
+        	 int i= db.update("conversation",values, "id=? AND fromId=?",new String[]{id,weather_info.objectId});//这里就是为了判断是否有之前的，这里用update的原因在于用insert会提示错误的，当影响的行数等于0的时候表示之前没有就直接插入
+        	  if(i==0){
+            	values.put("unReadNum", 0);
+        	 	db.insert("conversation", null, values);
+        	 	
+         	  }
+        	 }
+     }
+     public List<Friend> getFriends(){
+    	 List<Friend> list=new ArrayList<Friend>();
+    	 Log.d("Main", "object="+weather_info.objectId);
+    	 Cursor cursor=db.query("conversation", null,"fromId=? AND isFriend=?",new String[]{weather_info.objectId,"1"}, null, null, null);
+    	 if(cursor.moveToFirst()){
+    		 do {
+				Friend friend=new Friend();
+				friend.setFriendUser(new MyUser());
+				friend.getFriendUser().setObjectId(cursor.getString(cursor.getColumnIndex("id")));
+				friend.getFriendUser().setNick(cursor.getString(cursor.getColumnIndex("nickName")));
+				friend.getFriendUser().setTouXiangUrl(cursor.getString(cursor.getColumnIndex("touXiang")));
+				list.add(friend);
+			} while (cursor.moveToNext());
+    	 }
+    	 return list; 
+     }
+     public void updateIsFriend0(String objectId){
+    	  ContentValues values=new ContentValues();
+    	  values.put("isFriend",0);
+    	  db.update("conversation", values,"fromId=? AND id=?",new String []{weather_info.objectId,objectId});
+     }
 }

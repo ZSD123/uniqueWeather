@@ -3,10 +3,10 @@
     package="com.uniqueweather.app"
     android:versionCode="1"
     android:versionName="1.0" >
-
+   
     <uses-sdk
         android:minSdkVersion="11"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="19" /> 
     <uses-permission 
         android:name="android.permission.ACCESS_MOCK_LOCATION"
         />
@@ -108,6 +108,24 @@
             ></activity>
         <activity 
             android:name="activity.videoAct"
+            ></activity>
+        <activity 
+            android:name="activity.resetPassword"
+            ></activity>
+        <activity 
+            android:name="activity.resetPassword1"
+            ></activity>
+        <activity 
+            android:name="activity.fuwuAct"
+            ></activity>
+        <activity 
+            android:name="activity.manageAct"
+            ></activity>
+        <activity 
+            android:name="activity.modifypasswordAct"
+            ></activity>
+        <activity 
+            android:name="activity.xiangxiDataAct"
             ></activity>
         <service
             android:name="service.autoUqdateService"/>

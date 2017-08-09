@@ -9,11 +9,11 @@
     android:layout_height="match_parent"
     android:background="#E6E6FA" >
  
- <activity.CustomFont
+ <activity.CustomFontTextView
     android:id="@+id/text_EndRain"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="EndRain"
+    android:text="共享交友"
     android:textSize="40sp"
     android:layout_centerHorizontal="true"
     android:layout_marginTop="90dp"
@@ -115,20 +115,14 @@
        android:layout_below="@id/shoujidenglu"
        android:text="快速注册"
        />
-   <TextView 
-       android:id="@+id/xiantiyan"
-       android:layout_below="@id/register"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:layout_alignParentRight="true"
-       android:clickable="true"
-       />
+
    <TextView 
        android:id="@+id/wangjimima"
        android:layout_below="@id/register"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_alignParentLeft="true"
+       android:layout_margin="10dp"
        android:clickable="true"
        />
    <activity.myCaihong
