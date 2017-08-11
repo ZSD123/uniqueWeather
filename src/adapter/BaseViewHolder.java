@@ -14,6 +14,8 @@ import com.amap.api.services.a.o;
 import com.uniqueweather.app.R;
 
 import butterknife.ButterKnife;
+import activity.ChatActivity;
+import activity.MyUser;
 import activity.baseActivity;
 import activity.baseFragmentActivity;
 import android.content.ContentValues;
@@ -39,7 +41,8 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
 
   OnRecyclerViewListener onRecyclerViewListener;
   protected Context context;
-
+  protected MyUser myUser;
+  
   public BaseViewHolder(Context context, ViewGroup root,OnRecyclerViewListener listener,View view) {
 	super(view);
     this.context=context;
@@ -47,6 +50,7 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
     this.onRecyclerViewListener =listener;
     itemView.setOnClickListener(this);
     itemView.setOnLongClickListener(this);
+    myUser=ChatActivity.myUser;
   }
 
   public Context getContext() {
@@ -75,16 +79,11 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
 
   @Override
   public void onClick(View v) {
-    if(onRecyclerViewListener!=null){
-      onRecyclerViewListener.onItemClick(getPosition());
-    }
+	  
   }
 
   @Override
   public boolean onLongClick(View v) {
-    if(onRecyclerViewListener!=null){
-      onRecyclerViewListener.onItemLongClick(getPosition());
-    }
     return true;
   }
   public Bitmap createVideoThumbnail(String url, int width, int height) {

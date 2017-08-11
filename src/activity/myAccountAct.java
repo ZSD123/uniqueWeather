@@ -133,10 +133,10 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	    editText5.setText((String)MyUser.getObjectByKey("school"));
 	    editText6.setText((String)MyUser.getObjectByKey("suozaidi"));
 	    editText7.setText((String)MyUser.getObjectByKey("guxiang"));
-	    if(loginAct.isMobileNO((String)MyUser.getObjectByKey("username"))){
-	    	editText8.setText((String)MyUser.getObjectByKey("username"));
-	    }else if(loginAct.isEmail((String)MyUser.getObjectByKey("username"))){
-			editText9.setText((String)MyUser.getObjectByKey("username"));
+	    if(loginAct.isMobileNO(BmobUser.getCurrentUser(MyUser.class).getUsername())){
+	    	editText8.setText(BmobUser.getCurrentUser(MyUser.class).getUsername());
+	    }else if(loginAct.isEmail(BmobUser.getCurrentUser(MyUser.class).getUsername())){
+			editText9.setText(BmobUser.getCurrentUser(MyUser.class).getUsername());
 		}
 	    
 	    final String arr[]=new String[]{
@@ -238,7 +238,7 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 				  button.setText("保    存");
 				  button1.setVisibility(View.VISIBLE);
 	            }
-	            else if(button.getText().equals("保    存")){
+	            else if(button.getText().equals("保    存")&&!editText1.getText().equals("")){
 	            	editText1.setEnabled(false); 
 	            	editText2.setEnabled(false);
 	            	editText3.setEnabled(false);
@@ -277,6 +277,8 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 							
 						}
 					});
+				}else if(editText1.getText().equals("")){
+					Toast.makeText(myAccountAct.this,"尊称不能为空", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});

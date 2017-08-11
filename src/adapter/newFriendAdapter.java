@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMConversation;
@@ -27,6 +28,7 @@ import com.uniqueweather.app.R;
 import message.AgreeAddFriendMessage;
 import message.Config;
 import message.declineFriendMessage;
+import model.Friend;
 import model.NewFriend;
 import model.NewFriendManager;
 import model.UserModel;
@@ -68,9 +70,15 @@ public class newFriendAdapter extends BaseAdapter {
 		newFriends=manager.getAllNewFriend();
 		this.manager=manager;
 	}
-   
+    class ViewHolder{
+    	TextView newFriendBeizhu;
+    	Button button;
+    	Button button2;
+    	CheckBox checkBox;
+    	CircleImageView image;
+    	TextView  textView;
+    }
 	 
-	
 	@Override
 	public void notifyDataSetChanged() {
 		newFriends=manager.getAllNewFriend();
@@ -86,35 +94,36 @@ public class newFriendAdapter extends BaseAdapter {
     	 return list;
     }
     public List<Integer> getIntList(){
-    	for (int i = 0; i < intlist.size(); i++) {
-			Log.d("Main", "int="+intlist.get(i));
-		}
+  
     	return intlist;
     }
-
+   
+    
 	@Override
 	public View getView(  final int position, View convertView, ViewGroup parent) {
-
-		
-		
-		View view;
+        final ViewHolder viewHolder;
 		final int mPosition=position;
 		if(convertView==null){
 			LayoutInflater layoutInflater=((Activity)mContext).getLayoutInflater();
-			view=layoutInflater.inflate(R.layout.agreefriend, null);
+			convertView=layoutInflater.inflate(R.layout.agreefriend, null);
+			viewHolder=new ViewHolder();
+			viewHolder.newFriendBeizhu=(TextView)convertView.findViewById(R.id.agreefriendbeizhu);
+			viewHolder.button=(Button)convertView.findViewById(R.id.btn_add);
+			viewHolder.button2=(Button)convertView.findViewById(R.id.btn_decline);
+			viewHolder.checkBox=(CheckBox)convertView.findViewById(R.id.agreefriendcheck);
+			viewHolder.textView=(TextView)convertView.findViewById(R.id.agreefriend_msg);
+			viewHolder.image=(CircleImageView)convertView.findViewById(R.id.agreefriendimage);
+			convertView.setTag(viewHolder);
 		}else {
-			view=convertView;
+			viewHolder=(ViewHolder)convertView.getTag();
 		}
-		TextView newFriendBeizhu=(TextView)view.findViewById(R.id.agreefriendbeizhu);
-		Button button=(Button)view.findViewById(R.id.btn_add);
-		Button button2=(Button)view.findViewById(R.id.btn_decline);
-	    CheckBox checkBox=(CheckBox)view.findViewById(R.id.agreefriendcheck);
+	
 		if(state==8){
-			checkBox.setVisibility(View.GONE);
+			viewHolder.checkBox.setVisibility(View.GONE);
 		}else if(state==0){
-			checkBox.setVisibility(View.VISIBLE);
+			viewHolder.checkBox.setVisibility(View.VISIBLE);
 		}
-	    checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	    viewHolder.checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -127,37 +136,33 @@ public class newFriendAdapter extends BaseAdapter {
 			}
 		});
 		
-		TextView textView=(TextView)view.findViewById(R.id.agreefriend_msg);
 		if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_IREFUSE){
 			 
-			 button.setVisibility(View.GONE);
-			 button2.setVisibility(View.GONE);
-			 textView.setVisibility(View.VISIBLE);
-			 textView.setText("您已拒绝对方的好友请求");
-			 newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
+			 viewHolder.button.setVisibility(View.GONE);
+			 viewHolder. button2.setVisibility(View.GONE);
+			 viewHolder.textView.setVisibility(View.VISIBLE);
+			 viewHolder. textView.setText("您已拒绝对方的好友请求");
+			 viewHolder.newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
 			 
 		}else if(newFriends.get(position).getStatus()==Config.STATUS_VERIFY_REFUSE){
-			 button.setVisibility(View.GONE);
-			 button2.setVisibility(View.GONE);
-			 textView.setVisibility(View.VISIBLE);
-			 textView.setText("对方已拒绝您的好友请求");
-			 newFriendBeizhu.setVisibility(View.VISIBLE);
-			 newFriendBeizhu.setText("\n"+newFriends.get(position).getName());
+			viewHolder.button.setVisibility(View.GONE);
+			viewHolder.button2.setVisibility(View.GONE);
+			viewHolder.textView.setVisibility(View.VISIBLE);
+			viewHolder.textView.setText("对方已拒绝您的好友请求");
+			viewHolder.newFriendBeizhu.setVisibility(View.VISIBLE);
+			viewHolder.newFriendBeizhu.setText("\n"+newFriends.get(position).getName());
 			 
 		}else if(newFriends.get(position).getStatus()==Config.STATUS_VERIFIED){
-			 button.setVisibility(View.GONE);
-			 button2.setVisibility(View.GONE);
-			 textView.setVisibility(View.VISIBLE);
-			 textView.setText("您已添加对方");
-			 newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
+			viewHolder.button.setVisibility(View.GONE);
+			viewHolder.button2.setVisibility(View.GONE);
+			viewHolder.textView.setVisibility(View.VISIBLE);
+			viewHolder.textView.setText("您已添加对方");
+			viewHolder.newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
 		}else{
-			newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
+			viewHolder.newFriendBeizhu.setText(newFriends.get(position).getName()+"\n"+newFriends.get(position).getMsg());
 		}
 	   
 	
-	
-		
-		final CircleImageView image=(CircleImageView)view.findViewById(R.id.agreefriendimage);
 	    File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_");
 		if(file.exists()){
 			
@@ -174,7 +179,8 @@ public class newFriendAdapter extends BaseAdapter {
 				opts.inInputShareable=true;//设置解码位图的尺寸信息
 				
 				Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
-				image.setImageBitmap(bitmap2);
+				if(bitmap2!=null)
+			    	viewHolder.image.setImageBitmap(bitmap2);
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -192,7 +198,7 @@ public class newFriendAdapter extends BaseAdapter {
 							@Override
 							public void run() {
 								if(bitmap!=null)
-									image.setImageBitmap(bitmap);
+									viewHolder.image.setImageBitmap(bitmap);
 							}
 						});
 					
@@ -204,7 +210,7 @@ public class newFriendAdapter extends BaseAdapter {
 		
 		
 	
-		button.setOnClickListener(new OnClickListener() {
+		viewHolder.button.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -229,7 +235,7 @@ public class newFriendAdapter extends BaseAdapter {
 		     }
 		});
 
-		button2.setOnClickListener(new OnClickListener() {
+		viewHolder.button2.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -242,7 +248,7 @@ public class newFriendAdapter extends BaseAdapter {
 				
 			}
 		});
-		return view;
+		return convertView;
 	}
 	
 	@Override
@@ -252,10 +258,6 @@ public class newFriendAdapter extends BaseAdapter {
 	
 	@Override
 	public Object getItem(int position) {
-		for (int i = 0; i < newFriends.size(); i++) {
-			Log.d("Main","getItemstatus="+newFriends.get(position).getStatus());
-			
-		}
 	
 		// TODO Auto-generated method stub
 		return newFriends.get(position);
@@ -263,8 +265,14 @@ public class newFriendAdapter extends BaseAdapter {
 	
 	@Override
 	public int getCount() {
+		for (int i = 0; i < newFriends.size(); i++) {
+			
+		}
+	
 		return newFriends.size();
 	}
+	
+	
 	private void sendAgreeAddFriendMessage(final NewFriend add,final SaveListener listener){
     	BmobIMUserInfo info=new BmobIMUserInfo(add.getUid(), add.getName(),add.getAvatar());
     	BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(info, true, null);  //这里后面的info是对方的用户信息和资料

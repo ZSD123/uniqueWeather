@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
-public class videoAct extends Activity {
+public class videoAct extends baseActivity {
 	 private VideoView videoView;
 	 MediaController mMediaCtrl;
 	 

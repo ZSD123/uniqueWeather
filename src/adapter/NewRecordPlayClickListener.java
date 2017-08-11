@@ -6,6 +6,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 

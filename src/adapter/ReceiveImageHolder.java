@@ -4,11 +4,17 @@ package adapter;
 import Util.download;
 import activity.MyUser;
 import activity.baseFragmentActivity;
+import activity.xiangxiDataAct;
 import android.R.integer;
+import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.util.Pools.Pool;
 import android.util.Log;
@@ -25,6 +31,7 @@ import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -39,6 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import myCustomView.CircleImageView;
+import myCustomView.TouchImageView;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMConversation;
@@ -80,23 +88,8 @@ public class ReceiveImageHolder extends BaseViewHolder {
 	 
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
-    final String info = msg.getFromId();
-    final MyUser myUser=new MyUser();
+
     
-    BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-    query.getObject(info, new QueryListener<MyUser>() {
-		
-		@Override
-		public void done(MyUser user, BmobException e ) {
-		      if(e==null){
-		    	  myUser.setNick(user.getNick());
-		      }else{
-		    	  toast(e.getMessage());
-		      }
-			
-		}
-	});
-  
     String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
@@ -115,7 +108,7 @@ public class ReceiveImageHolder extends BaseViewHolder {
     final BmobIMImageMessage message = BmobIMImageMessage.buildFromDB(false,msg);
     //显示图片
   
-    ImageLoaderFactory.getLoader().load(iv_picture,message.getRemoteUrl(),  R.drawable.ic_launcher,new ImageLoadingListener(){
+    ImageLoaderFactory.getLoader().load(iv_picture,message.getRemoteUrl(),  R.drawable.no404,new ImageLoadingListener(){
 
     @Override
       public void onLoadingStarted(String s, View view) {
@@ -141,7 +134,12 @@ public class ReceiveImageHolder extends BaseViewHolder {
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-    	
+    	  Bundle bundle=new Bundle();
+     	   bundle.putSerializable("myUser", myUser);
+   	       Intent intent=new Intent(context,xiangxiDataAct.class);
+   	      intent.putExtra("bundle", bundle);
+   	      context.startActivity(intent);
+   	   
       
       }
     });
@@ -169,7 +167,7 @@ public class ReceiveImageHolder extends BaseViewHolder {
 				return false;
 			}
 		});
-         ImageView imageView=(ImageView) view.findViewById(R.id.image);
+         TouchImageView imageView=(TouchImageView) view.findViewById(R.id.image);
          RelativeLayout relativeLayout=(RelativeLayout)view.findViewById(R.id.picturerela);
          relativeLayout.setOnClickListener(new OnClickListener() {
 			
@@ -239,9 +237,21 @@ public class ReceiveImageHolder extends BaseViewHolder {
     iv_picture.setOnLongClickListener(new View.OnLongClickListener() {
       @Override
       public boolean onLongClick(View v) {
-        if (onRecyclerViewListener != null) {
-          onRecyclerViewListener.onItemLongClick(getPosition());
-        }
+    	    AlertDialog.Builder builder=new AlertDialog.Builder(context);
+		     final String[] xuanzeweizhi={"删除"};
+		     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					 if(which==0){
+						  if (onRecyclerViewListener != null) {
+					            onRecyclerViewListener.onItemLongClick(getPosition());
+					         }
+					  }
+				}
+			});
+		     builder.show();
+   
         return true;
       }
     });

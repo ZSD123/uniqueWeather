@@ -1,31 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout 
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-<RelativeLayout  
+<?xml version="1.0" encoding="utf-8"?> 
+ <RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/relativeRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E6E6FA" >
- 
- <activity.CustomFontTextView
-    android:id="@+id/text_EndRain"
-    android:layout_width="wrap_content"
+
+    <LinearLayout 
+    android:id="@+id/lin1"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="共享交友"
-    android:textSize="40sp"
-    android:layout_centerHorizontal="true"
-    android:layout_marginTop="90dp"
-    android:textColor="#00BFFF"
-    />     
+    android:gravity="center_vertical"
+    android:background="#00FF00"
+    >
+    <ImageButton 
+        android:id="@+id/imagebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/jiantou"
+        android:clickable="true"
+        />
+    
+</LinearLayout>
+ 
      <activity.CustomFontTextView
     android:id="@+id/text_huanyinnin"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
+    android:layout_below="@id/lin1"
     android:text="欢迎您"
-    android:layout_below="@id/text_EndRain"
+    android:layout_margin="10dp"
     android:textSize="30sp"
     android:layout_centerHorizontal="true"
     />
@@ -42,7 +46,7 @@
         android:id="@+id/account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="帐号"
+        android:text="手机号"
         android:textSize="20sp"
         
         />
@@ -51,11 +55,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:hint="手机号或者邮箱"
+        android:hint="11位手机号"
         />
    </LinearLayout>
 
-   <LinearLayout 
+  <LinearLayout 
      android:id="@+id/linear2"
      android:layout_below="@id/linear1"
      android:layout_width="match_parent"
@@ -66,7 +70,7 @@
          android:id="@+id/password"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:text="密码"
+         android:text="验证码"
          android:textSize="20sp"
          />
      <EditText 
@@ -74,66 +78,30 @@
          android:layout_width="0dp"
          android:layout_height="wrap_content"
          android:layout_weight="1"
-         android:inputType="textPassword"
          />
-     <ImageView
-         android:id="@+id/kekanmima"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:src="@drawable/eyeclose"
-         android:clickable="true"
-         />
+ 
      <Button 
          android:id="@+id/sendYanzhengma"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:text="发送验证码"
-         android:visibility="gone"
          />
-   </LinearLayout>
-
-    <Button 
-        android:id="@+id/login"
+    </LinearLayout>
+          <Button 
+        android:id="@+id/yanzhenglogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/linear2"
+        android:layout_margin="10dp"
+        android:text="手机验证登录"
+        />
+    <RelativeLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/linear2"
-        android:layout_centerHorizontal="true"
-        android:background="#00FF00"
-        android:text="登录"
-        />
-      <Button 
-          android:id="@+id/shoujidenglu"
-          android:text="手机一键注册登录"
-          android:layout_below="@id/login"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          />
-      <Button 
-       android:id="@+id/register"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:layout_below="@id/shoujidenglu"
-       android:text="快速注册"
-       />
-
-   <TextView 
-       android:id="@+id/wangjimima"
-       android:layout_below="@id/register"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:layout_alignParentLeft="true"
-       android:layout_margin="10dp"
-       android:clickable="true"
-       />
-   <activity.myCaihong
-       android:id="@+id/caihong"
-       android:layout_alignParentBottom="true"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:layout_gravity="center_horizontal"
-       android:src="@drawable/caihong"
-       />
-   <CheckBox
+        >
+    <CheckBox
        android:id="@+id/checkbox"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
@@ -145,14 +113,13 @@
       android:id="@+id/fuwu"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_alignParentBottom="true"
-      android:layout_toRightOf="@id/checkbox"
       android:layout_alignBaseline="@id/checkbox"
+      android:layout_toRightOf="@id/checkbox"
       android:text="服务条款"
       android:textColor="#00C957"
       />
-</RelativeLayout>
- <RelativeLayout 
+  </RelativeLayout>
+   <RelativeLayout 
     android:id="@+id/relativelayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -173,4 +140,5 @@
          android:layout_below="@id/progressBar"
          />
   </RelativeLayout>
-</RelativeLayout>
+  
+  </RelativeLayout>

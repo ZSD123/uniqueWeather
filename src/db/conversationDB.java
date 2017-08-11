@@ -106,6 +106,7 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
     	 values.put("newTime", time);
     	 db.update("conversation", values, "id=? AND fromId=?", new String[]{id,weather_info.objectId});
      }
+  
      public List<BmobIMConversation> getConverByTime(){
     	 List<BmobIMConversation> list=new ArrayList<BmobIMConversation>();
     	 Cursor cursor=db.rawQuery("select * from conversation where fromId=? order by newTime DESC ", new String []{weather_info.objectId});
@@ -173,7 +174,6 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
      }
      public List<Friend> getFriends(){
     	 List<Friend> list=new ArrayList<Friend>();
-    	 Log.d("Main", "object="+weather_info.objectId);
     	 Cursor cursor=db.query("conversation", null,"fromId=? AND isFriend=?",new String[]{weather_info.objectId,"1"}, null, null, null);
     	 if(cursor.moveToFirst()){
     		 do {
@@ -191,5 +191,15 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
     	  ContentValues values=new ContentValues();
     	  values.put("isFriend",0);
     	  db.update("conversation", values,"fromId=? AND id=?",new String []{weather_info.objectId,objectId});
+     }
+     public int getIsFriend(String objectId){
+    	 int isFriend=0;
+    	 Cursor cursor=db.query("conversation", new String []{"isFriend"},"id=? AND fromId=?",new String[]{objectId,weather_info.objectId}, null, null, null);
+    	 if(cursor.moveToFirst()){
+    		 do {
+				isFriend=cursor.getInt(cursor.getColumnIndex("isFriend"));
+			} while (cursor.moveToNext());
+    	 }
+    	 return isFriend;
      }
 }

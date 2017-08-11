@@ -2,8 +2,13 @@ package adapter;
 
 
 import activity.MyUser;
+import activity.chooseAreaActivity;
+import activity.myAccountAct;
 import activity.xiangxiDataAct;
+import android.app.AlertDialog;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,9 +19,11 @@ import android.text.SpannableString;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,32 +89,9 @@ public class ReceiveTextHolder extends BaseViewHolder {
     tv_time.setText(time);
     String content =  message.getContent();
     tv_message.setText(replace(content));
+
     
-    final String info = message.getFromId();
-    final MyUser myUser=new MyUser();
-    
-    BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-    query.getObject(info, new QueryListener<MyUser>() {
-		
-		@Override
-		public void done(MyUser user, BmobException e ) {
-		      if(e==null){
-		    	  myUser.setNick(user.getNick());
-		    	  myUser.setTouXiangUrl(user.getTouXiangUrl());
-		    	  myUser.setSex(user.getSex());
-		    	  myUser.setAge(user.getAge());
-		    	  myUser.setShengri(user.getShengri());
-		    	  myUser.setZhiye(user.getZhiye());
-		    	  myUser.setSchool(user.getSchool());
-		    	  myUser.setSuozaidi(user.getSuozaidi());
-		    	  myUser.setGuxiang(user.getGuxiang());
-		    	  Log.d("Main","zhiye1"+myUser.getZhiye());
-		      }else{
-		    	  toast(e.getMessage());
-		      }
-			
-		}
-	});
+  
     
     
     iv_avatar.setOnClickListener(new View.OnClickListener() {
@@ -121,22 +105,30 @@ public class ReceiveTextHolder extends BaseViewHolder {
     	   
       }
     });
-    tv_message.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-          toast("µã»÷"+message.getContent());
-          if(onRecyclerViewListener!=null){
-            onRecyclerViewListener.onItemClick(getPosition());
-          }
-        }
-    });
+    
 
     tv_message.setOnLongClickListener(new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-          if (onRecyclerViewListener != null) {
-            onRecyclerViewListener.onItemLongClick(getPosition());
-          }
+        
+          AlertDialog.Builder builder=new AlertDialog.Builder(context);
+		     final String[] xuanzeweizhi={"¸´ÖÆµ½¼ôÌù°å","É¾³ý"};
+		     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					  if(which==0){
+						  ClipboardManager cManager=(ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
+						  cManager.setText(tv_message.getText());
+						  Toast.makeText(context,"ÒÑ¾­¸´ÖÆµ½¼ôÌù°å", Toast.LENGTH_SHORT).show();
+					  }else if(which==1){
+						  if (onRecyclerViewListener != null) {
+					            onRecyclerViewListener.onItemLongClick(getPosition());
+					         }
+					  }
+				}
+			});
+		     builder.show();
           return true;
         }
     });

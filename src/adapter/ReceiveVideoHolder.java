@@ -1,17 +1,23 @@
 package adapter;
 
 
+import Util.CommonUtils;
 import Util.download;
 import activity.MyUser;
 import activity.baseFragmentActivity;
+import activity.loginAct;
 import activity.videoAct;
+import activity.xiangxiDataAct;
+import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
@@ -51,7 +57,11 @@ import cn.bmob.newim.bean.BmobIMImageMessage;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.bean.BmobIMVideoMessage;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.QueryListener;
 
 /**
  * 接收到的视频类型--这是举个例子，并没有展示出视频缩略图等信息，开发者可自行设置
@@ -83,7 +93,9 @@ public class ReceiveVideoHolder extends BaseViewHolder {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
     String time = dateFormat.format(message.getCreateTime());
     tv_time.setText(time);
-    final BmobIMUserInfo info = message.getBmobIMUserInfo();
+    
+
+    
     
     String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+message.getFromId()+".jpg_";
     File file=new File(path);
@@ -106,24 +118,85 @@ public class ReceiveVideoHolder extends BaseViewHolder {
     	progress_load.setVisibility(View.GONE);
     	
     }else {
-    	iv_picture.setImageBitmap(BitmapFactory.decodeResource(context.getResources(),R.drawable.ic_launcher));
+    	iv_picture.setImageBitmap(BitmapFactory.decodeResource(context.getResources(),R.drawable.no404));
     	progress_load.setVisibility(View.GONE);
 	}
     iv_picture.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
+			 if(CommonUtils.isWifi(context)){
 			
-			 Intent intent=new Intent(context,videoAct.class);
-			 intent.putExtra("path", msg.getRemoteUrl());
-			 context.startActivity(intent);
+				 Intent intent=new Intent(context,videoAct.class);
+				 intent.putExtra("path", msg.getRemoteUrl());
+				 context.startActivity(intent);
+			}else {
+
+				AlertDialog.Builder builder=new AlertDialog.Builder(context);
+				final AlertDialog alertDialog=builder.create();
+				builder.setTitle("非wifi环境提醒");
+				builder.setMessage("当前非wifi环境，确定播放吗？");
+				builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+
+						 Intent intent=new Intent(context,videoAct.class);
+						 intent.putExtra("path", msg.getRemoteUrl());
+						 context.startActivity(intent);
+						
+						  
+					}
+				});
+				builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if(alertDialog.isShowing()){
+							alertDialog.dismiss();
+						}
+					}
+				});
+				
+				builder.show();
+				
+			  
+			  }
+		
 		}
 	});
+    
+    iv_picture.setOnLongClickListener(new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+      	    AlertDialog.Builder builder=new AlertDialog.Builder(context);
+  		     final String[] xuanzeweizhi={"删除"};
+  		     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+  				
+  				@Override
+  				public void onClick(DialogInterface dialog, int which) {
+  					 if(which==0){
+  						  if (onRecyclerViewListener != null) {
+  					            onRecyclerViewListener.onItemLongClick(getPosition());
+  					         }
+  					  }
+  				}
+  			});
+  		     builder.show();
+     
+          return true;
+        }
+      });
    
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        toast("点击" + info.getName() + "的头像");
+    	  Bundle bundle=new Bundle();
+   	     bundle.putSerializable("myUser", myUser);
+   	     Intent intent=new Intent(context,xiangxiDataAct.class);
+   	     intent.putExtra("bundle", bundle);
+   	      context.startActivity(intent);
+   	   
       }
     });
 

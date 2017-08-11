@@ -2,32 +2,44 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    
-    <Button  
-        android:id="@+id/buttonXiangXi"  
-        android:layout_width="match_parent"  
-        android:layout_height="wrap_content"  
-        android:layout_alignParentLeft="true"  
-        android:layout_alignParentTop="true"   
-        android:text="详细资料" />  
+
   
     <Button  
-        android:id="@+id/buttonGuanLiao"  
+        android:id="@+id/buttonQingLiao"  
         android:layout_width="match_parent"  
         android:layout_height="wrap_content"  
         android:layout_alignParentLeft="true"  
-        android:layout_below="@+id/buttonXiangXi"  
-        android:text="管理聊天" />  
+        android:text="清空聊天" />  
+   <Button  
+        android:id="@+id/buttonJuBao"  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:layout_alignParentLeft="true"  
+        android:layout_below="@id/buttonQingLiao"  
+        android:gravity="center"
+        android:text="举     报" /> 
    <Button  
         android:id="@+id/buttonDelete"  
         android:layout_width="match_parent"  
         android:layout_height="wrap_content"  
         android:layout_alignParentLeft="true"  
-        android:layout_below="@+id/buttonGuanLiao"
+        android:layout_below="@id/buttonJuBao"
         android:background="#F00" 
         android:textColor="#FFF" 
         android:gravity="center"
-        android:text="删除" />  
+        android:text="删     除" />  
+    <Button  
+        android:id="@+id/buttonLaHei"  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:layout_alignParentLeft="true"  
+        android:layout_below="@id/buttonDelete"  
+        android:gravity="center"
+        android:background="#000"
+        android:textColor="#FFF"
+        android:text="拉     黑" />  
+   
+        
 
 
 </RelativeLayout>

@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 
 import message.myMessageHandler;
 import model.BmobIMApplication;
+import model.Jubao;
 import model.UniversalImageLoader;
 
 import cn.bmob.newim.BmobIM;
@@ -30,6 +31,7 @@ import cn.bmob.v3.listener.UploadFileListener;
 
 
 import com.amap.api.location.AMapLocationClient;
+import com.amap.api.mapcore2d.bm;
 import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
@@ -38,6 +40,7 @@ import db.myUserdbHelper;
 
 
 import android.R.integer;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -68,17 +71,18 @@ public class weather_info extends baseFragmentActivity {
 
 	 public static myUserDB myUserdb;
      public static String objectId;
+     private AlertDialog dialog1;
 	@Override
 	public void onCreate(Bundle savedInstance)
-	{   
+	{   MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+	     if(currentUser!=null){
+	    	objectId=currentUser.getObjectId();
+     	 }
+	    zhudongLogin=getIntent().getIntExtra("login", 0);
 		super.onCreate(savedInstance);
-		 MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
-		 if(currentUser!=null){
-			 objectId=currentUser.getObjectId();
-		 }
-		 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
+
 	    init();	
 	    UniversalImageLoader.initImageLoader(this);
 	 }		
@@ -88,17 +92,41 @@ public class weather_info extends baseFragmentActivity {
 	   myUserdb=myUserDB.getInstance(this);
 	   
 	   BmobQuery<MyUser> bmobQuery=new BmobQuery<MyUser>();
-	   bmobQuery.getObject((String)MyUser.getObjectByKey("objectId"),new QueryListener<MyUser>() {
+	   
+	   bmobQuery.getObject(objectId,new QueryListener<MyUser>() {
 		
 		@Override
 		public void done(MyUser myUser, BmobException e) {
 			if(e==null){
-				if(myUser.getInstallationId().equals(loginAct.installationId)){
-					
-				 }else {
-					 
+				if(myUser.getInstallationId()==null&&loginAct.installationId!=null){
+					   MyUser newUser=new MyUser();
+					   newUser.setInstallationId(loginAct.installationId);
+					   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
+					   newUser.update(bmobUser.getObjectId(), new UpdateListener() {
+						
+					@Override
+						public void done(BmobException e) {
+							if(e==null){
+                                 zhudongLogin=0;
+                                 checkJuBao();
+							}else if(e.getErrorCode()==206){
+								Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
+							   MyUser.logOut();
+								MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+								Intent intent=new Intent(getApplicationContext(),loginAct.class);
+								startActivity(intent);
+								finish();
+						}
+						}
+					    });
+				}else if(myUser.getInstallationId().equals(loginAct.installationId)){    
+					zhudongLogin=0;
+					checkJuBao();
+				  }else {
 					   fragmentChat.refreshUserPicture(null, 1);  //为1的时候表示联网更新
-					 
+					   fragmentChat.refreshNewFriend();
+					   fragmentChat.refreshConversations(2, null);
+					   
 					   MyUser newUser=new MyUser();
 					   newUser.setInstallationId(loginAct.installationId);
 					   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
@@ -107,7 +135,8 @@ public class weather_info extends baseFragmentActivity {
 						@Override
 						public void done(BmobException e) {
 							if(e==null){
-
+								zhudongLogin=1;
+								checkJuBao();
 							}else if(e.getErrorCode()==206){
 								Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
 								MyUser.logOut();
@@ -116,8 +145,6 @@ public class weather_info extends baseFragmentActivity {
 								startActivity(intent);
 								finish();
 							}
-							
-							
 						}
 					    });
 				 }
@@ -128,7 +155,7 @@ public class weather_info extends baseFragmentActivity {
 		}
 	  });
 
-	    BmobIM.registerDefaultMessageHandler(new myMessageHandler(weather_info.this));
+	  //  BmobIM.registerDefaultMessageHandler(new myMessageHandler(weather_info.this));
 	
 		
 	}
@@ -141,6 +168,43 @@ public class weather_info extends baseFragmentActivity {
 			super.onBackPressed();
 		}
 
+	}
+	private void checkJuBao(){
+		BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
+		MyUser myUser=new MyUser();
+		myUser.setObjectId(objectId);
+		bmobQuery.addWhereEqualTo("myUser",myUser);
+		bmobQuery.findObjects(new FindListener<Jubao>() {
+
+			@Override
+			public void done(List<Jubao> list, BmobException e) {
+				if(list.size()>0){
+					int i=list.get(0).getSum();
+					if(i>1){
+					
+							AlertDialog.Builder builder=new AlertDialog.Builder(weather_info.this);
+							builder.setMessage("您当前账户被举报多次，暂时无法登陆，请联系客服");
+							builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+								
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									 Intent intent=new Intent(weather_info.this,loginAct.class);
+									 startActivity(intent);
+									 if(dialog1!=null){
+										 dialog1.dismiss();
+									 }
+									 MyUser.logOut();
+									 finish();
+								}
+							});
+							builder.setCancelable(false);
+							dialog1=builder.create();
+						    dialog1.show();
+					}
+				}
+				
+			}
+		});
 	}
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent data)

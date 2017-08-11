@@ -8,8 +8,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import model.jingdian;
-import model.jingdiancity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,7 +49,7 @@ public class Utility {
 		editor.putString("weather_pic", weather_pic);
 		editor.commit();
 	}
-	public static Bitmap getPicture(String urlstring)
+	public static Bitmap getPicture(String urlstring)  //要开启一个线程
 	{
 		Bitmap bitmap=null;
 		HttpURLConnection connection=null;

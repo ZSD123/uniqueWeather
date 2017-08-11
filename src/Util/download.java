@@ -1,7 +1,9 @@
 package Util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 
+import activity.MyUser;
 import activity.fragmentChat;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -108,6 +110,23 @@ public class download {
 		           fragmentChat.userPicture.setImageBitmap(bitmap);
 			}
      }
+	   public static  void saveYonghuPic(Bitmap bitmap,String obj){  //´æ´¢ÓÃ»§Í·Ïñ
+			  File file1=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head");
+	  
+			  if(!file1.exists())
+			    	file1.mkdirs();
+	           File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+
+				try{
+				FileOutputStream out=new FileOutputStream(file);
+				bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+				out.flush();
+				out.close();
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+		  }
      
      
 }

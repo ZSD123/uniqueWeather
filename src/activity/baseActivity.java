@@ -3,10 +3,14 @@ package activity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobRealTimeData;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.ValueEventListener;
 
+import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,7 +23,6 @@ import android.view.inputmethod.InputMethodManager;
 
 public  class baseActivity extends Activity {
 	private String bmobObjectId;
-	
 	private Dialog dialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,10 +30,9 @@ public  class baseActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		//自动登陆状态下检测是否在其他设备登陆
-		  MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
-          if(currentUser!=null)
-		   bmobObjectId=currentUser.getObjectId();
-		checkLogin();
+		   bmobObjectId=weather_info.objectId;
+		   checkLogin();
+		
 		
 	}
 	@Override
@@ -50,10 +52,30 @@ public  class baseActivity extends Activity {
 			    try {
 					JSONObject jsonObject=data.getJSONObject("data");
 					String webinstallationId=jsonObject.getString("installationId");
+					
+					    
 					if(!webinstallationId.equals(loginAct.installationId)){
 						MyUser.logOut();
 						MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
-						showLogOutDialog();
+						if(dialog==null)
+					    	showLogOutDialog();
+					} else{
+						BmobQuery<MyUser> bmobQuery=new BmobQuery<MyUser>();   //这里改动添加因为有时候即使数据改了返回的是原来的数据
+					     bmobQuery.getObject(bmobObjectId, new QueryListener<MyUser>() {
+							
+						@Override
+						public void done(MyUser myUser, BmobException e) {
+							if(e==null){
+								if(!myUser.getInstallationId().equals(loginAct.installationId)){
+									MyUser.logOut();
+									MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+									if(dialog==null)
+									   showLogOutDialog();
+								}
+							}
+							
+						}
+				    	});
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -72,13 +94,8 @@ public  class baseActivity extends Activity {
 	}
 	@SuppressWarnings("unused")
 	public void showLogOutDialog(){
-		Activity activity=baseActivity.this;
-		if(activity==null){
-			if(activity.getParent()!=null){
-				activity=activity.getParent();
-			}
-		}
-		AlertDialog.Builder builder=new AlertDialog.Builder(activity.getParent());
+	
+		AlertDialog.Builder builder=new AlertDialog.Builder(baseActivity.this);
 		
 		builder.setMessage("您当前账户在其他设备上登录，即将下线");
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -87,14 +104,17 @@ public  class baseActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				Intent intent=new Intent(getApplicationContext(),loginAct.class);
 				startActivity(intent);
-				fragmentChat.converdb.deleteAll();
+				if(baseActivity.this.dialog!=null){
+					baseActivity.this.dialog.dismiss();
+				}
 				finish();
 
 			}
 		});
         builder.setCancelable(false);
         dialog=builder.create();
-		dialog.show();
+        if(!dialog.isShowing())
+	    	dialog.show();
 	}
 	@Override
     protected void onDestroy() {

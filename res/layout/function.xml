@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+ <ScrollView 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+     >
+    <LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+        >
+ <TextView 
+     android:text="共享交友v1.0功能介绍"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     />
+ <TextView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:text="1、文字、语音、图片、视频聊天"
+     />
+ <ImageView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:src="@drawable/talk"
+     />
+ <TextView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:text="2、添加好友功能"
+    
+     />
+ <ImageView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:src="@drawable/haoyou"
+     />
+  <TextView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:text="3、查看附近人大致位置"
+    
+     />
+   <ImageView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:src="@drawable/dili"
+     />
+    <TextView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:text="4、与附近人加好友、聊天"
+    
+     />
+     <ImageView 
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_margin="10dp"
+     android:src="@drawable/jiahaoyou"
+     />
+     </LinearLayout>
+  </ScrollView>
+</LinearLayout>

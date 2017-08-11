@@ -4,10 +4,15 @@ package adapter;
 import Util.download;
 import activity.MyUser;
 import activity.baseFragmentActivity;
+import activity.xiangxiDataAct;
+import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,6 +40,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 
 import myCustomView.CircleImageView;
+import myCustomView.TouchImageView;
 
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
@@ -47,6 +53,7 @@ import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMSendStatus;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.listener.MessageSendListener;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 
@@ -84,7 +91,6 @@ public class SendImageHolder extends BaseViewHolder {
   public void bindData(Object o) {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
-    final BmobIMUserInfo info = msg.getBmobIMUserInfo();
 
     
      String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
@@ -119,12 +125,27 @@ public class SendImageHolder extends BaseViewHolder {
     }
 
     //发送的不是远程图片地址，则取本地地址
-    ImageLoaderFactory.getLoader().load(iv_picture,TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteUrl(),R.drawable.ic_launcher,null);
+    ImageLoaderFactory.getLoader().load(iv_picture,TextUtils.isEmpty(message.getRemoteUrl()) ? message.getLocalPath():message.getRemoteUrl(),R.drawable.no404,null);
 
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        toast("点击" + info.getName() + "的头像");
+    	 Bundle bundle=new Bundle();
+    	 MyUser currentUser=new MyUser();
+    	 currentUser.setAge(BmobUser.getCurrentUser(MyUser.class).getAge());
+    	 currentUser.setConstellation(BmobUser.getCurrentUser(MyUser.class).getConstellation());
+    	 currentUser.setGuxiang(BmobUser.getCurrentUser(MyUser.class).getGuxiang());
+    	 currentUser.setNick(BmobUser.getCurrentUser(MyUser.class).getNick());
+    	 currentUser.setSchool(BmobUser.getCurrentUser(MyUser.class).getSchool());
+    	 currentUser.setSex(BmobUser.getCurrentUser(MyUser.class).getSex());
+    	 currentUser.setShengri(BmobUser.getCurrentUser(MyUser.class).getShengri());
+    	 currentUser.setSuozaidi(BmobUser.getCurrentUser(MyUser.class).getSuozaidi());
+    	 currentUser.setTouXiangUrl(BmobUser.getCurrentUser(MyUser.class).getTouXiangUrl());
+    	 currentUser.setZhiye(BmobUser.getCurrentUser(MyUser.class).getZhiye());
+ 	     bundle.putSerializable("myUser", currentUser);
+ 	     Intent intent=new Intent(context,xiangxiDataAct.class);
+ 	     intent.putExtra("bundle", bundle);
+ 	     context.startActivity(intent);
       }
     });
     iv_picture.setOnClickListener(new View.OnClickListener() {
@@ -150,7 +171,7 @@ public class SendImageHolder extends BaseViewHolder {
  				return false;
  			}
  		});
-          ImageView imageView=(ImageView) view.findViewById(R.id.image);
+          TouchImageView imageView=(TouchImageView) view.findViewById(R.id.image);
           RelativeLayout relativeLayout=(RelativeLayout)view.findViewById(R.id.picturerela);
           relativeLayout.setOnClickListener(new OnClickListener() {
  			
@@ -227,9 +248,20 @@ public class SendImageHolder extends BaseViewHolder {
     iv_picture.setOnLongClickListener(new View.OnLongClickListener() {
       @Override
       public boolean onLongClick(View v) {
-        if (onRecyclerViewListener != null) {
-          onRecyclerViewListener.onItemLongClick(getPosition());
-        }
+    	  AlertDialog.Builder builder=new AlertDialog.Builder(context);
+		     final String[] xuanzeweizhi={"删除"};
+		     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					 if(which==0){
+						  if (onRecyclerViewListener != null) {
+					            onRecyclerViewListener.onItemLongClick(getPosition());
+					         }
+					  }
+				}
+			});
+		     builder.show();
         return true;
       }
     });

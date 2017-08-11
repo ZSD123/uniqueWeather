@@ -18,7 +18,6 @@ import message.AddFriendMessage;
 import message.AgreeAddFriendMessage;
 import message.Config;
 import message.declineFriendMessage;
-import model.DemoMessageHandler;
 import model.NewFriend;
 import model.NewFriendManager;
 import model.RefreshEvent;
@@ -71,7 +70,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class newFriendActivity extends Activity {
+public class newFriendActivity extends baseActivity {
    public static TextView newFriendBeizhu;
    private Button buttonGuan;
    private ListView listView;
@@ -83,8 +82,6 @@ public class newFriendActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.new_friend_list);
-	
-			
 	
 		newFriendManager=NewFriendManager.getInstance(newFriendActivity.this);
 		fragmentChat.newFriendImage.setVisibility(View.GONE);//这是为了进入这个页面之后相应的红点会消失

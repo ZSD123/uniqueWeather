@@ -313,7 +313,7 @@ public class UserModel extends BaseModel {
 						if(exception!=null&&exception.getErrorCode()!=101){
 							count++;
 							Toast.makeText(context,"Ê§°Ü,"+exception.getMessage(),Toast.LENGTH_SHORT).show();
-							Log.d("Main","Ê§°Ü+"+exception.getMessage());
+
 						}
 					}
 					if(count==0){

@@ -319,12 +319,13 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
   				        int count1=0;
   						for (int i = 0; count1 < count&&i<conversations.size();i++ ) {
   						   if(conversations.get(i).getMessages().size()>0){
-  							  if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId)){
-  								 if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId())){
+  							if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId)){
+  						     if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId())){
+  						      if(!conversations.get(i).getMessages().get(0).getMsgType().equals("decline")){
   							count1++;   
   							String id=conversations.get(i).getConversationId();
        
-							converdb.saveId(id,0);
+							converdb.saveId(id,-1);
 							String content="";
 				
 							if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
@@ -341,7 +342,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 							converdb.saveNewContentById(id, content);
 							converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
 							converdb.saveTouXiangById(id, conversations.get(i).getConversationIcon());
-							
+  							}
   						   }
 						}
   					   }	
@@ -406,7 +407,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
       										    final Bitmap bitmap=Utility.getPicture(converList.get(position).getConversationIcon());
       											if(bitmap!=null){
       												onceConversation=1;
-      												savePicture(bitmap, Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_");
+      												download.saveYonghuPic(bitmap,converList.get(position).getConversationId());
       												getActivity().runOnUiThread(new Runnable() {
 														
 														@Override
@@ -464,7 +465,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 							 if(conversations.get(i).getMessages().size()>0){
 								 if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
 									 if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId()))
-								    count++;   //上面确定真正的有消息，下面确定的是该消息属于本账户，双重筛选,最下面是防止自己和自己的对话加入，三重筛选
+									   if(!conversations.get(i).getMessages().get(0).getMsgType().equals("decline"))
+								     count++;   //上面确定真正的有消息，下面确定的是该消息属于本账户，下面是防止自己和自己的对话加入，下面一行是防止拒绝信息加入，四重筛选,
 							 }
 						}
 
@@ -498,27 +500,39 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 							if(e==null||e.getErrorCode()==0){
 								friends.clear();
 								friends=list;
-								List<Friend> dbFriends=new ArrayList<Friend>();
-
+								
+                                Log.d("Main","list="+list.get(0).getFriendUser().getNick());
 								for (int i = 0; i < list.size(); i++) {
 									converdb.saveId(friends.get(i).getFriendUser().getObjectId(),1);  //这里存储联系人的id和昵称，然后获取会话的时候就不存储联系人的昵称了，有时候昵称错误，然后这里可以存储isFriend，就此判断是否是朋友
 							    	converdb.saveNickById(friends.get(i).getFriendUser().getObjectId(), friends.get(i).getFriendUser().getNick());
 							    	converdb.saveTouXiangById(friends.get(i).getFriendUser().getObjectId(), friends.get(i).getFriendUser().getTouXiangUrl());
-	                               
+	                                
 								}
-								dbFriends=converdb.getFriends();
-								for (int j = 0; j < dbFriends.size(); j++) {
-									int k=checkCunZai(friends,dbFriends.get(j));    //如果本地库没有相应的朋友，更新为0
-							    	if(k==2){
-							    		converdb.updateIsFriend0(dbFriends.get(j).getFriendUser().getObjectId());
-							    	 }
+								
+								List<Friend> dbfriends=new ArrayList<Friend>();
+								dbfriends=converdb.getFriends();
+								 Log.d("Main","dbFriend="+dbfriends.get(0).getFriendUser().getNick());
+								if(friends.size()>0){
+								for (int i = 0; i <dbfriends.size(); i++) {
+									int k=checkLocalAndWebFriend(friends, dbfriends.get(i));
+									if(k==2){   //如果k==2表示没有这个朋友
+									
+										converdb.updateIsFriend0(dbfriends.get(i).getFriendUser().getObjectId());
+								  	}
 								}
-						    
+								}else {     //也要考虑0的情况
+									for (int i = 0; i < dbfriends.size(); i++) {
+										converdb.updateIsFriend0(dbfriends.get(i).getFriendUser().getObjectId());
+									}
+								 }
 								
 	                            baseAdapter2.notifyDataSetChanged();
 								sw_refresh2.setRefreshing(false);
-							}else{
-								Toast.makeText(getActivity(),"查询朋友有误,"+e.getMessage()+e.getErrorCode(),Toast.LENGTH_SHORT).show();
+							}else if(e.getErrorCode()==9015){
+								Toast.makeText(getActivity(),"查询朋友有误,请退出后再尝试",Toast.LENGTH_SHORT).show();
+								sw_refresh2.setRefreshing(false);
+							}else {
+								Toast.makeText(getActivity(),"查询朋友有误"+e.getMessage()+e.getErrorCode(),Toast.LENGTH_SHORT).show();
 								sw_refresh2.setRefreshing(false);
 							}
 							
@@ -584,6 +598,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		    //联系人列表加载适配器
 			 friends.clear();
 			 friends=fragmentChat.converdb.getFriends();
+			 
+			
+			 
 		    baseAdapter2=new BaseAdapter() {
 				
 				@Override
@@ -638,6 +655,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 							
 							}else {
 								if(onceContact==0)
+									if(friends.get(position-1).getFriendUser().getTouXiangUrl()!=null){
 								    new Thread(new Runnable() {
 										
 										@Override
@@ -649,6 +667,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 												public void run() {
 													if(bitmap!=null){
 												     	circleImageView.setImageBitmap(bitmap);
+												     	download.saveYonghuPic(bitmap, friends.get(position-1).getFriendUser().getObjectId());
 												     	onceContact=1;
 													}
 													
@@ -657,6 +676,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 										
 										}
 									}).start();
+									}else {
+										circleImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.userpicture));
+									}
 							}
 							
 							textView.setText(friends.get(position-1).getFriendUser().getNick());
@@ -729,7 +751,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 
 		    if(nick!=null){
 		    	userName.setText(nick);
-		    	Toast.makeText(getActivity(),nick+ ",欢迎您", Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(getActivity(),nick+ ",欢迎回家", Toast.LENGTH_SHORT).show();
 		    }	
 		       else 
 			{   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
@@ -951,8 +973,18 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					{   
 						Utility.handleWeather(response,context);
 						bitmap=Utility.getPicture(pre.getString("weather_pic", ""));
-						if(bitmap!=null)
-						    savePicture(bitmap,ALBUM_PATH);
+						if(bitmap!=null){
+							File file=new File(ALBUM_PATH);
+							try{
+							FileOutputStream out=new FileOutputStream(file);
+							bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+							out.flush();
+							out.close();
+							}catch(Exception e)
+							{
+								e.printStackTrace();
+							}
+						}
 					    ((Activity) context).runOnUiThread(new Runnable(){
 					    @Override
 					    public void run(){
@@ -963,19 +995,19 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				});
 		}
      
-	public static void savePicture(Bitmap bitmap,String path)
-		{   
-			File file=new File(path);
-			try{
-			FileOutputStream out=new FileOutputStream(file);
-			bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-			out.flush();
-			out.close();
-			}catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
+	//   private void savePicture(Bitmap bitmap,String path)
+	//	{   
+		//	File file=new File(path);
+		//	try{
+		//	FileOutputStream out=new FileOutputStream(file);
+			//bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+		//	out.flush();
+		//	out.close();
+			//}catch(Exception e)
+		///	{
+		//		e.printStackTrace();
+			//}
+	//	}
 	
     public static void showWeather(Context context)
 		{
@@ -1089,13 +1121,13 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			mLocationClient.onDestroy();
 		}
 	}
-	private int  checkCunZai(List<Friend> friends,Friend dbfriend){
-		for (int i = 0; i < friends.size(); i++) {
-		     if(friends.get(i).getFriendUser().getObjectId().equals(dbfriend.getFriendUser().getObjectId())){
-		    	 return 1;
-		     }
-		}
-		return 2;
-	}
+	private int checkLocalAndWebFriend(List<Friend> Webfriends,Friend friend){   
+		  for (int i = 0; i < Webfriends.size(); i++) {
+			    if(Webfriends.get(i).getFriendUser().getObjectId().equals(friend.getFriendUser().getObjectId())){
+			    	  return 1;
+			     }
+	    	}
+		  return 2;
+	 }
 	
 }

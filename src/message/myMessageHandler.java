@@ -3,22 +3,30 @@ package message;
 import java.util.List;
 import java.util.Map;
 
+import model.Friend;
 import model.NewFriend;
 import model.NewFriendManager;
 import model.UserModel;
 import activity.MyUser;
 import activity.fragmentChat;
 import activity.newFriendActivity;
+import activity.weather_info;
+import android.R.integer;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.Visibility;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMMessageType;
+import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.event.OfflineMessageEvent;
 import cn.bmob.newim.listener.BmobIMMessageHandler;
+import cn.bmob.newim.notification.BmobNotificationManager;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.SaveListener;
 
@@ -54,18 +62,20 @@ public class myMessageHandler extends BmobIMMessageHandler {
     	 newFriendManager=NewFriendManager.getInstance(mContext);
     	  BmobIMMessage bmobIMMessage=event.getMessage();
     	  if(bmobIMMessage.getMsgType().equals("add")){
+    		  if(checkCunZai(newFriendManager.getAllNewFriend(), bmobIMMessage.getFromId())!=1){//等于1表示该请求存在，！=1表示该请求不存在
     		  NewFriend newFriend=AddFriendMessage.convert(bmobIMMessage);
     		  newFriendManager.insertOrUpdateNewFriend(newFriend);
     		  
     		  fragmentChat.newFriendImage.setVisibility(View.VISIBLE);
     		  fragmentChat.newFriendImage1.setVisibility(View.VISIBLE);
-    		  
+    		  }
     	  } else if (bmobIMMessage.getMsgType().equals("agree")) {//接收到的对方同意添加自己为好友,此时需要做的事情：1、添加对方为好友，2、显示通知
               AgreeAddFriendMessage agree = AgreeAddFriendMessage.convert(bmobIMMessage);
               addFriend(agree.getFromId());//添加消息的发送方为好友
-
+              
               fragmentChat.converdb.saveId(event.getConversation().getConversationId(), 1);//先存Id
-              fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getConversation().getConversationTitle());//存NickName
+
+              fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getFromUserInfo().getName());//存NickName
               fragmentChat.converdb.saveNewContentById(event.getConversation().getConversationId(),"我已经通过了你的好友请求，一起来聊天吧");//存content
               fragmentChat.converdb.saveTouXiangById(event.getConversation().getConversationId(), event.getConversation().getConversationIcon());
               fragmentChat.converdb.saveTimeById(event.getConversation().getConversationId(), event.getMessage().getCreateTime());
@@ -77,13 +87,15 @@ public class myMessageHandler extends BmobIMMessageHandler {
         	  NewFriend newFriend=declineFriendMessage.convert(bmobIMMessage);
         	  long id=newFriendManager.insertOrUpdateNewFriend(newFriend);
         	  if(id>0){
-        		  Toast.makeText(mContext, "拒绝添加成功",Toast.LENGTH_SHORT).show();
+        		  Toast.makeText(mContext, bmobIMMessage.getBmobIMUserInfo().getName()+"拒绝了您的添加",Toast.LENGTH_SHORT).show();
         	  }
         	  newFriendActivity.bAdapter.notifyDataSetChanged();
         	  fragmentChat.newFriendImage.setVisibility(View.VISIBLE);
     		  fragmentChat.newFriendImage1.setVisibility(View.VISIBLE);
     		} else {
     			if(i==1){
+    				
+    				fragmentChat.converdb.saveId(event.getConversation().getConversationId(),0);
     				String content="";
     				        if(event.getMessage().getMsgType().equals(BmobIMMessageType.TEXT.getType()))
 						    	content=event.getMessage().getContent();
@@ -119,5 +131,38 @@ public class myMessageHandler extends BmobIMMessageHandler {
                          }
                      }
                  });
+         
+         
      }
+     private int checkCunZai(List<NewFriend> friends,String objectId){
+ 		for (int i = 0; i < friends.size(); i++) {
+ 			if(friends.get(i).getStatus()==0)      //status为0的只有一条就可以了
+ 		     if(friends.get(i).getUid().equals(objectId)){
+ 		    	 return 1;
+ 		     }
+ 		}
+ 		return 2;
+ 	}
+     private void showAddNotify(NewFriend friend) {
+         Intent pendingIntent = new Intent(mContext, newFriendActivity.class);
+         pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+         //这里可以是应用图标，也可以将聊天头像转成bitmap
+         Bitmap largetIcon = BitmapFactory.decodeResource(mContext.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
+         BmobNotificationManager.getInstance(mContext).showNotification(largetIcon,
+                 friend.getName(), friend.getMsg(), friend.getName() + "请求添加你为朋友", pendingIntent);
+     }
+
+     /**
+      * 显示对方同意添加自己为好友的通知
+      *
+      * @param info
+      * @param agree
+      */
+     private void showAgreeNotify(BmobIMUserInfo info, AgreeAddFriendMessage agree) {
+         Intent pendingIntent = new Intent(mContext, weather_info.class);
+         pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+         Bitmap largetIcon = BitmapFactory.decodeResource(mContext.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
+         BmobNotificationManager.getInstance(mContext).showNotification(largetIcon, info.getName(), agree.getMsg(), agree.getMsg(), pendingIntent);
+     }
+
 }

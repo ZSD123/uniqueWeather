@@ -2,13 +2,20 @@ package adapter;
 
 
 import activity.MyUser;
+import activity.xiangxiDataAct;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -29,6 +36,7 @@ import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMSendStatus;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.listener.MessageSendListener;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 
 /**
@@ -47,7 +55,7 @@ public class SendVoiceHolder extends BaseViewHolder {
 
   protected TextView tv_voice_length;
   protected ImageView iv_voice;
-
+  protected LinearLayout voice_layout;
   @Bind(R.id.tv_send_status)
   protected TextView tv_send_status;
 
@@ -65,13 +73,13 @@ public class SendVoiceHolder extends BaseViewHolder {
     iv_voice=(ImageView)view.findViewById(R.id.iv_voice);
     tv_send_status=(TextView)view.findViewById(R.id.tv_send_status);
     progress_load=(ProgressBar)view.findViewById(R.id.progress_load);
+    voice_layout=(LinearLayout)view.findViewById(R.id.layout_voice);
   }
 
   @Override
   public void bindData(Object o) {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
-    final BmobIMUserInfo info = msg.getBmobIMUserInfo();
    
     String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
     File file=new File(path);
@@ -109,14 +117,25 @@ public class SendVoiceHolder extends BaseViewHolder {
         tv_voice_length.setVisibility(View.VISIBLE);
     }
 
-    iv_voice.setOnClickListener(new NewRecordPlayClickListener(getContext(),message,iv_voice));
+    voice_layout.setOnClickListener(new NewRecordPlayClickListener(getContext(),message,iv_voice));
 
-    iv_voice.setOnLongClickListener(new View.OnLongClickListener() {
+    voice_layout.setOnLongClickListener(new View.OnLongClickListener() {
       @Override
       public boolean onLongClick(View v) {
-          if (onRecyclerViewListener != null) {
-              onRecyclerViewListener.onItemLongClick(getOldPosition());
-          }
+    	  AlertDialog.Builder builder=new AlertDialog.Builder(context);
+		     final String[] xuanzeweizhi={"删除"};
+		     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					 if(which==0){
+						  if (onRecyclerViewListener != null) {
+					            onRecyclerViewListener.onItemLongClick(getPosition());
+					         }
+					  }
+				}
+			});
+		     builder.show();
           return true;
       }
     });
@@ -124,7 +143,22 @@ public class SendVoiceHolder extends BaseViewHolder {
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        toast("点击" + info.getName() + "的头像");
+    	  Bundle bundle=new Bundle();
+     	 MyUser currentUser=new MyUser();
+     	 currentUser.setAge(BmobUser.getCurrentUser(MyUser.class).getAge());
+     	 currentUser.setConstellation(BmobUser.getCurrentUser(MyUser.class).getConstellation());
+     	 currentUser.setGuxiang(BmobUser.getCurrentUser(MyUser.class).getGuxiang());
+     	 currentUser.setNick(BmobUser.getCurrentUser(MyUser.class).getNick());
+     	 currentUser.setSchool(BmobUser.getCurrentUser(MyUser.class).getSchool());
+     	 currentUser.setSex(BmobUser.getCurrentUser(MyUser.class).getSex());
+     	 currentUser.setShengri(BmobUser.getCurrentUser(MyUser.class).getShengri());
+     	 currentUser.setSuozaidi(BmobUser.getCurrentUser(MyUser.class).getSuozaidi());
+     	 currentUser.setTouXiangUrl(BmobUser.getCurrentUser(MyUser.class).getTouXiangUrl());
+     	 currentUser.setZhiye(BmobUser.getCurrentUser(MyUser.class).getZhiye());
+  	     bundle.putSerializable("myUser", currentUser);
+  	     Intent intent=new Intent(context,xiangxiDataAct.class);
+  	     intent.putExtra("bundle", bundle);
+  	     context.startActivity(intent);
       }
     });
     //重发

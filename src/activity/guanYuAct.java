@@ -1,45 +1,38 @@
 package activity;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-import myCustomView.CircleImageView;
-
 import com.uniqueweather.app.R;
 
+import activity.manageAct.ViewHolder;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class manageAct extends baseActivity {
-	
-	//这是账户管理修改密码什么的
+public class guanYuAct extends baseActivity {
+    private ListView listView;
     class ViewHolder{
     	TextView textView;
     	
     }
     ViewHolder viewHolder;
-    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.manage);
-		RelativeLayout relativeLayout=(RelativeLayout)findViewById(R.id.relativeGuanyu);
-		ListView listView=(ListView)findViewById(R.id.listview);
+		setContentView(R.layout.guanyu);
+		listView=(ListView)findViewById(R.id.listview);
 		final List<String> list=new ArrayList<String>();
-		list.add("修改密码");
+		list.add("功能介绍");
 		BaseAdapter baseAdapter=new BaseAdapter() {
 			
 			@Override
@@ -82,21 +75,12 @@ public class manageAct extends baseActivity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				 if(position==0){
-					 Intent intent=new Intent(manageAct.this,modifypasswordAct.class);
-					 startActivity(intent);
+				     Intent intent=new Intent(guanYuAct.this,functionAct.class);
+				     startActivity(intent);
 				 }
 				
 			}
 		});
-		
-		relativeLayout.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-		      Intent intent=new Intent(manageAct.this,guanYuAct.class);
-			  startActivity(intent);
-			}
-		});
 	}
-    
+     
 }

@@ -62,6 +62,8 @@ import Util.Http;
 import Util.HttpCallbackListener;
 import Util.SensorEventHelper;
 import Util.Utility;
+import Util.download;
+import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -481,15 +483,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 					addCircle(latLng1, amaplocation.getAccuracy());//添加定位精度圆
 					addMarker(latLng1);//添加定位图标
 					mSensorEventHelper.setCurrentMarker(mLocMarker);//定位图标旋转
-					String address="http://route.showapi.com/238-2";  //经纬度转化为地址
-					Http.queryAreaByXY(lat, lon, address, new HttpCallbackListener() {
-						@Override
-						public void onFinish(String response) {
-						    Utility.handleAreaByXY(response, context);
-							fragmentChat.queryWeather(context);
-							
-						}
-					});
+	
 				} else {
 					mCircle.setCenter(latLng1);
 					mCircle.setRadius(amaplocation.getAccuracy());
@@ -565,6 +559,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		  ImageView imageView=(ImageView)fujinData.findViewById(R.id.yonghu_data_image);
 		  BitmapDescriptor descriptor=marker.getIcons().get(0);
 		  imageView.setImageBitmap(descriptor.getBitmap());
+		  
 		  Bundle bundle=new Bundle(yongbDb.loadData((String) marker.getObject()));
 		  if(bundle!=null){
 			  nizhen=bundle.getString("nickName");
@@ -586,6 +581,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			
 			@Override
 			public void onClick(View v) {
+				int i=fragmentChat.converdb.getIsFriend((String) marker.getObject());
+				if(i==0){  //只有当对方是陌生人的时候才可以添加
 			  BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();   //这里出现的问题把我折磨死了，我查了好久，折腾好久，原来就是String的nizhen没办法加在setName中
 			  bmobIMUserInfo.setUserId((String) marker.getObject());
 			  bmobIMUserInfo.setAvatar(yongbDb.loadUserTouxiangUrl((String)marker.getObject()));
@@ -595,6 +592,11 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			     bmobIMUserInfo.setName(nizhen);
 			  }
 			  sendAddFriendMessage(bmobIMUserInfo);
+				}else if(i==1){
+					Toast.makeText(context, "对方已经是您的好友，无需添加", Toast.LENGTH_SHORT).show();
+				}else if(i==2){
+					Toast.makeText(context, "对方已加入黑名单", Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 		  fuzhiMap.addView(fujinData);
@@ -774,7 +776,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 				    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
 				
 				    	 if(bitmap11!=null){
-					     	saveYonghuPic(bitmap11,obString);
+					     	download.saveYonghuPic(bitmap11,obString);
 						    bitmapNum++;
 						    objStrings.add(obString);   //objStrings列表是加载了自己图片的用户的列表obj
 						}	
@@ -797,7 +799,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 					    	 bitmap11=Utility.getTouxiangBitmap(touxiangUrl, context,yongbDb);
 					
 					    	 if(bitmap11!=null){
-						     	saveYonghuPic(bitmap11,obString);
+						     	download.saveYonghuPic(bitmap11,obString);
 							    bitmapNum++;
 							    objStrings.add(obString);   //objStrings列表是加载了自己图片的用户的列表obj
 							}	
@@ -816,23 +818,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			    
 		    
 	   }
-	   public  void saveYonghuPic(Bitmap bitmap,String obj){
-			  File file1=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head");
-	  
-			  if(!file1.exists())
-			    	file1.mkdirs();
-	           File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
 
-				try{
-				FileOutputStream out=new FileOutputStream(file);
-				bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-				out.flush();
-				out.close();
-				}catch(Exception e)
-				{
-					e.printStackTrace();
-				}
-		  }
 
 		  public Bitmap getYonghuPic(String obj){
 			  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");

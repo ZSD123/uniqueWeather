@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import message.myMessageHandler;
+import model.BmobIMApplication;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,12 +36,10 @@ import cn.bmob.v3.listener.ValueEventListener;
 import com.amap.api.services.a.bu;
 import com.uniqueweather.app.R;
 
-
-
-import Util.AES;
 import Util.MD5Util;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -72,7 +71,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-public class loginAct extends Activity {
+public class loginAct extends Activity{
 
     private CustomFontTextView customFont;
     private myCaihong caihong;
@@ -87,23 +86,18 @@ public class loginAct extends Activity {
     private Button button3;  //快速注册
     
     private TextView text1;  //先体验
-    private boolean flag1=true;    //button1亮色，true表示启动
-    private boolean flag2=false;    //button2亮色
     private TextView account;       //帐号
     private TextView password;       //密码
     
     private EditText editText1;     //第一行
     private EditText editText2;     //第二行
-    private Button button4;    //  发送验证码
     
     private String input;      //输入数据
     private String passwordString;   //密码
 
-    private boolean fasong=true;    //注册的时候自动发送标志,true表示可以发送
     private ImageView imageView;
     private boolean eye=false;     //眼睛关上
-    private static final int UPDATE_TEXT=0;
-    private static final int TOFASONG=1;
+
     
     private CheckBox checkBox;       //我同意服务条款checkbox
     
@@ -111,35 +105,22 @@ public class loginAct extends Activity {
     private RelativeLayout relativeLayout;
     private RelativeLayout relativeRoot;
     private TextView textView;
-    
+
     public static String installationId;
-    private int daojishi=30;   
-    private Timer timer=new Timer();
-    private Handler handler=new Handler(){
-    	public void handleMessage(Message msg){
-    		switch(msg.what){
-    		case UPDATE_TEXT:
-    			button4.setText(daojishi+"s后再发送");
-    			break;
-    		case TOFASONG:
-    			button4.setText("发送验证码");
-    			fasong=true;
-    		default:
-    			break;
-    		}
-    	}
-    };
-    private TimerTask task;
+    
+    public static BmobIMApplication application;
+
     @Override
 	public void onCreate(Bundle savedInstanceState)
      {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
+		
+		application=BmobIMApplication.INSTANCE();
+		
 		TextView fuwu=(TextView)findViewById(R.id.fuwu);
-		   
-	  //  Bmob.initialize(this, "f3065817051f7c298d2e49d9329a2a6b");	
-	    BmobIM.init(this);
+	 //   BmobIM.init(this);
 	  
 	    
 		final MyUser bu=new MyUser();
@@ -150,6 +131,7 @@ public class loginAct extends Activity {
 		{   
 			installationId=MyBmobInstallation.getInstallationId(loginAct.this);
 			Intent intent=new Intent(loginAct.this,weather_info.class);
+			intent.putExtra("login", 0);
 			startActivity(intent);
 			finish();
 		}
@@ -174,7 +156,6 @@ public class loginAct extends Activity {
 	    editText2=(EditText)findViewById(R.id.editText_secret);
 	    
 	    editText1.setInputType(InputType.TYPE_CLASS_TEXT);
-	    button4=(Button)findViewById(R.id.sendYanzhengma);
 	    
 	    progressBar=(ProgressBar)findViewById(R.id.progressBar);
 	    progressBar.setVisibility(View.GONE);
@@ -216,8 +197,6 @@ public class loginAct extends Activity {
 					input=editText1.getText().toString();
 					passwordString=editText2.getText().toString();
 					button1.setBackgroundColor(Color.parseColor("#006400"));
-				  if (flag2) 
-				     button2.setBackgroundColor(0);
 				   account.setText("帐号");
 				   account.setTextSize(20);
 				   editText1.setHint("手机号或者邮箱");
@@ -225,10 +204,9 @@ public class loginAct extends Activity {
 				   editText2.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD|InputType.TYPE_CLASS_TEXT);
 				   password.setTextSize(20);
 				   imageView.setVisibility(View.VISIBLE);
-				   button4.setVisibility(View.GONE);
-				   if((input.isEmpty()||passwordString.isEmpty())&&flag1)
+				   if((input.isEmpty()||passwordString.isEmpty()))
 					  Toast.makeText(loginAct.this, "帐号或密码不能为空", Toast.LENGTH_SHORT).show();
-				   else if((isMobileNO(input)||isEmail(input))&&flag1)
+				   else if((isMobileNO(input)||isEmail(input)))
 				   {   
 					   progressBar.setVisibility(View.VISIBLE);
 					   relativeLayout.setVisibility(View.VISIBLE);
@@ -266,6 +244,7 @@ public class loginAct extends Activity {
 													  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
 													  installationId=MyBmobInstallation.getInstallationId(loginAct.this);
 													  Intent intent=new Intent(loginAct.this,weather_info.class);
+													  intent.putExtra("login", 1);
 													  startActivity(intent);
 													  finish();
 												}else {
@@ -313,6 +292,7 @@ public class loginAct extends Activity {
 										  installationId=MyBmobInstallation.getInstallationId(loginAct.this);
                                           Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
 										  Intent intent=new Intent(loginAct.this,weather_info.class);
+										  intent.putExtra("login", 1);
 										  startActivity(intent);
 										  finish();
 									}else {
@@ -337,11 +317,9 @@ public class loginAct extends Activity {
 					   }
 					  
 				
-				   }else if(flag1){
+				   }else {
 					Toast.makeText(loginAct.this,"请输入正确的手机号或者邮箱", Toast.LENGTH_SHORT).show();
-				}
-				   flag1=true;
-				   flag2=false;
+				  }
 				}
 				if(action==MotionEvent.ACTION_UP){
 					
@@ -351,120 +329,15 @@ public class loginAct extends Activity {
 				return false;
 			}
 		});
-	    button2.setOnTouchListener(new OnTouchListener() {
+	    button2.setOnClickListener(new OnClickListener() {
 			
 			@Override
-			public boolean onTouch(View view, MotionEvent motionEvent) 
-			{
-				int action=motionEvent.getAction();
-				if(action==MotionEvent.ACTION_DOWN)
-					{
-					 input=editText1.getText().toString();
-					 passwordString=editText2.getText().toString();
-					 button2.setBackgroundColor(Color.parseColor("#006400"));
-					 if (flag1) 
-					    button1.setBackgroundColor(0);
-					   account.setText("手机号");
-					   account.setTextSize(20);
-					   editText1.setHint("11位手机号");
-					   password.setText("验证码");
-					   editText2.setText("");
-					   editText2.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|InputType.TYPE_CLASS_TEXT);
-					   password.setTextSize(20);
-					   imageView.setVisibility(View.GONE);
-					   button4.setVisibility(View.VISIBLE);
-					   if(passwordString.isEmpty()&&flag2)
-						   Toast.makeText(loginAct.this, "验证码不能为空", Toast.LENGTH_SHORT).show();
-					   else if(flag2&&!passwordString.isEmpty())
-					    {   
-						   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-						   query.addWhereEqualTo("username",input);
-						   query.findObjects(new FindListener<MyUser>() {
-
-							@Override
-							public void done(List<MyUser> object,
-									BmobException e) {
-								if(e==null){
-									if(object.size()>0){
-										  BmobUser.signOrLoginByMobilePhone(input, passwordString, new LogInListener<BmobUser>()
-												   {		
-						                                  
-												           @Override
-											        	    public void done(BmobUser user, BmobException e) 
-												           {
-													             if(user!=null&&e==null)
-													             {   installationId=MyBmobInstallation.getInstallationId(loginAct.this);
-													            	 Toast.makeText(loginAct.this,"登录成功",Toast.LENGTH_SHORT).show();
-													                 Intent intent=new Intent(loginAct.this,weather_info.class);
-																     startActivity(intent);
-																     finish();
-													             }
-													             else {
-													            	    if(e.getErrorCode()==207)
-																	  Toast.makeText(loginAct.this,"登录失败，验证码错误，"+e.getMessage(),Toast.LENGTH_SHORT).show();
-																	  if(relativeRoot.getAlpha()==0.3f){
-																			progressBar.setVisibility(View.GONE);
-																			relativeRoot.setAlpha(1);
-																			relativeLayout.setVisibility(View.GONE);
-																			textView.setVisibility(View.GONE);
-																		}
-																}
-												            }
-												   });
-									}else {
-										MyUser user=new MyUser();
-										user.setMobilePhoneNumber(input);
-										user.setUsername(input);
-										user.setNick(input);
-										user.setPassword(MD5Util.getMD5String(input));
-										user.setMobilePhoneNumber(input);
-										user.setMobilePhoneNumberVerified(false);
-										user.signOrLogin(passwordString,new SaveListener<MyUser>() {
-
-											@Override
-											public void done(MyUser user,
-													BmobException e) {
-											if(e==null){
-												installationId=MyBmobInstallation.getInstallationId(loginAct.this);
-												Toast.makeText(loginAct.this,"注册成功，初始密码为您的手机号，请牢记",Toast.LENGTH_LONG).show();
-												 Intent intent=new Intent(loginAct.this,weather_info.class);
-												  startActivity(intent);
-												  finish();
-											}else{
-												Toast.makeText(loginAct.this,"注册失败，"+e.getMessage(),Toast.LENGTH_LONG).show();
-												 if(relativeRoot.getAlpha()==0.3f){
-														progressBar.setVisibility(View.GONE);
-														relativeRoot.setAlpha(1);
-														relativeLayout.setVisibility(View.GONE);
-														textView.setVisibility(View.GONE);
-													}
-											}
-												
-											}
-										} );
-									}
-								
-								
-								}else{
-									Toast.makeText(loginAct.this,"网络出错",Toast.LENGTH_SHORT).show();
-								}
-							}
-						   });
-						    progressBar.setVisibility(View.VISIBLE);
-							relativeLayout.setVisibility(View.VISIBLE);
-							relativeLayout.setOnClickListener(null);
-							relativeRoot.setAlpha(0.3f);
-							textView.setVisibility(View.VISIBLE);
-					    }
-					   flag1=false;
-					   flag2=true;
-					}
-				  
-				if(action==MotionEvent.ACTION_UP){
-					button2.setBackgroundColor(Color.parseColor("#00FF00"));
-				}
-				return false;
-			}});
+			public void onClick(View v) {
+				Intent intent=new Intent(loginAct.this,moblieLoginAct.class);
+				startActivity(intent);
+				application.add(loginAct.this);
+			 }
+		});
 	    button3.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -472,7 +345,7 @@ public class loginAct extends Activity {
 				 
 				   Intent intent=new Intent(loginAct.this,register.class);
 				   startActivity(intent);
-				
+				   application.add(loginAct.this);
 			}
 		});
         caihong.setOnTouchListener(new OnTouchListener() {
@@ -489,69 +362,7 @@ public class loginAct extends Activity {
 				return false;
 			}
 		});
-       button4.setOnClickListener(new OnClickListener() 
-        {
-			@Override
-			public void onClick(View view) 
-			{   
-				input=editText1.getText().toString();
-				passwordString=editText2.getText().toString();
-				if(fasong)
-		      {	 if(isMobileNO(input))
-				{
-				  BmobSMS.requestSMSCode( input,"短信验证",new QueryListener<Integer>() {
-					
-					@Override
-					public void done(Integer smsId, BmobException ex) {
-						if(ex==null)
-						{
-							Toast.makeText(loginAct.this,"发送成功",Toast.LENGTH_SHORT).show();
-							fasong=false;
-							timer=new Timer();
-						    task=new TimerTask(){
-					 		
-					 		@Override
-					 		public void run() 
-					 		{   daojishi--;
-					 		    Message message=new Message();
-					 			message.what=UPDATE_TEXT;
-					 			handler.sendMessage(message);
-					 
-					 			if(daojishi==0)
-					 			{   
-					 			    message=new Message();
-					 			    message.what=TOFASONG;
-					 			    handler.sendMessage(message);
-					 			    timer.cancel();
-					 			    task.cancel();
-					 			    daojishi=30;
-					 	
-					 			}
-					 		}
-					 	};
-							timer.schedule(task, 1000,1000);	
-						}else if(ex.getErrorCode()==10010){
-							Toast.makeText(loginAct.this,"该手机号发送短信达到限制，"+ex.getMessage() ,Toast.LENGTH_SHORT).show();
-						}else if(ex.getErrorCode()==10011){
-							Toast.makeText(loginAct.this,"该账户无可用的发送短信条数，"+ex.getMessage() ,Toast.LENGTH_SHORT).show();
-						}else if(ex.getErrorCode()==10012){
-							Toast.makeText(loginAct.this,"身份信息必须审核通过才能使用该功能，"+ex.getMessage() ,Toast.LENGTH_SHORT).show();
-						}
-						
-					}
-				   });
-				}
-				else if(input.isEmpty())
-				{
-					Toast.makeText(loginAct.this,"请输入您的手机号" ,Toast.LENGTH_SHORT).show();
-				}
-				else {
-					Toast.makeText(loginAct.this,"请输入正确的手机号码格式", Toast.LENGTH_SHORT).show();
-				}
-		       
-			}
-			}
-		});
+    
        imageView.setOnClickListener(new OnClickListener() {
 		
 		@Override

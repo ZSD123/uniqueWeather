@@ -91,7 +91,7 @@
          android:layout_height="60dp"
          android:layout_centerHorizontal="true"
          android:layout_alignParentBottom="true"
-         android:text="地图"
+         android:text="附       近"
          android:background="@drawable/map"
          />
    

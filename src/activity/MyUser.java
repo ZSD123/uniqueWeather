@@ -15,7 +15,9 @@ public class MyUser extends BmobUser {
 	private String guxiang;
 	private String touxiangUrl;
 	private String installationId;     //Éè±¸Âë
+
 	public String getInstallationId(){
+		
 		return this.installationId;
 	}
 	public void setInstallationId(String installationId){

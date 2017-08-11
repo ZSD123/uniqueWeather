@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.TextView;
 
-public class fuwuAct extends Activity {
+public class fuwuAct extends baseActivity {
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

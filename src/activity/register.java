@@ -60,8 +60,8 @@ public class register extends Activity {
     private boolean bangzhufasongE=true;  //邮箱帮助发送
     private boolean bangzhufasongM=true;  //手机帮助发送
     private boolean fasong=true;    
-    private static final int UPDATE_TEXT=0;
-    private static final int TOFASONG=1; 
+    private final int UPDATE_TEXT=0;
+    private final int TOFASONG=1; 
     
     private int daojishi=30;   
     private Timer timer;
@@ -73,6 +73,7 @@ public class register extends Activity {
     			break;
     		case TOFASONG:
     			button1.setText("发送验证码");
+    			button1.setEnabled(true);
     			fasong=true;
     		default:
     			break;
@@ -107,6 +108,7 @@ public class register extends Activity {
 			public void onClick(View v) {
 				Intent intent=new Intent(register.this,fuwuAct.class);
 				startActivity(intent);
+				
 				
 			}
 		});
@@ -200,7 +202,7 @@ public class register extends Activity {
 													if(e==null){
 														Toast.makeText(register.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
 														fasong=false;
-														
+														button1.setEnabled(false);
 														timer=new Timer();
 														task=new TimerTask(){
 														 		@Override
@@ -255,6 +257,7 @@ public class register extends Activity {
 										if(e==null){
 											 Toast.makeText(register.this,"发送成功，请验证", Toast.LENGTH_SHORT).show();
 											 fasong=false;
+											 button1.setEnabled(false);
 											 timer=new Timer();
 											 task=new TimerTask() {
 												
@@ -302,6 +305,7 @@ public class register extends Activity {
 									        	Toast.makeText(register.this,"注册成功，正在转入", Toast.LENGTH_SHORT).show();
 												Intent intent=new Intent(register.this,weather_info.class);
 												startActivity(intent);
+												loginAct.application.delete();
 												finish();
 									        }else if(e!=null){
 									        	if(e.getErrorCode()==207)
@@ -335,6 +339,7 @@ public class register extends Activity {
 								if(e==null){
 									 Toast.makeText(register.this,"发送成功，请验证", Toast.LENGTH_SHORT).show();
 									 fasong=false;
+									 button1.setEnabled(false);
 									 timer=new Timer();
 									 task=new TimerTask() {
 										
@@ -380,7 +385,7 @@ public class register extends Activity {
 									if(e==null){
 										Toast.makeText(register.this,"发送验证邮箱成功",Toast.LENGTH_SHORT).show();
 										fasong=false;
-										
+										button1.setEnabled(false);
 										timer=new Timer();
 										task=new TimerTask(){
 										 		@Override

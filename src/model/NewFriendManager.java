@@ -120,8 +120,6 @@ public class NewFriendManager {
      * @return
      */
     private NewFriend getNewFriend(String uid,Long time){
-    	Log.d("Main", "uid="+uid);
-    	Log.d("Main", "time="+time);
         NewFriendDao dao =  openReadableDb().getNewFriendDao();
         return dao.queryBuilder().where(NewFriendDao.Properties.Uid.eq(uid))
                 .where(NewFriendDao.Properties.Time.eq(time)).build().unique();

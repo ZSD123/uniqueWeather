@@ -2,13 +2,20 @@ package adapter;
 
 
 import activity.MyUser;
+import activity.xiangxiDataAct;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -28,26 +35,27 @@ import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.core.BmobDownloadManager;
 import cn.bmob.newim.listener.FileDownloadListener;
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.QueryListener;
 
 /**
  * 接收到的文本类型
  */
 public class ReceiveVoiceHolder extends BaseViewHolder {
 
-  @Bind(R.id.iv_avatar)
+
   protected CircleImageView iv_avatar;
 
-  @Bind(R.id.tv_time)
+
   protected TextView tv_time;
 
-  @Bind(R.id.tv_voice_length)
   protected TextView tv_voice_length;
-  @Bind(R.id.iv_voice)
+
   protected ImageView iv_voice;
 
-  @Bind(R.id.progress_load)
+  protected LinearLayout voice_layout;
   protected ProgressBar progress_load;
 
   private String currentUid="";
@@ -63,6 +71,7 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
     tv_time=(TextView)view.findViewById(R.id.tv_time);
     tv_voice_length=(TextView)view.findViewById(R.id.tv_voice_length);
     iv_voice=(ImageView)view.findViewById(R.id.iv_voice);
+    voice_layout=(LinearLayout)view.findViewById(R.id.layout_voice);
     progress_load=(ProgressBar)view.findViewById(R.id.progress_load);
   }
 
@@ -70,8 +79,9 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
   public void bindData(Object o) {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
-    final BmobIMUserInfo info = msg.getBmobIMUserInfo();
-    
+
+ 
+      
     String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
@@ -87,7 +97,12 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
     iv_avatar.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        toast("点击" + info.getName() + "的头像");
+    	     Bundle bundle=new Bundle();
+    	     bundle.putSerializable("myUser", myUser);
+    	     Intent intent=new Intent(context,xiangxiDataAct.class);
+    	     intent.putExtra("bundle", bundle);
+    	     context.startActivity(intent);
+    	   
       }
     });
     //显示特有属性
@@ -122,14 +137,25 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
         tv_voice_length.setVisibility(View.VISIBLE);
         tv_voice_length.setText(message.getDuration() + "\''");
     }
-    iv_voice.setOnClickListener(new NewRecordPlayClickListener(getContext(), message, iv_voice));
+    voice_layout.setOnClickListener(new NewRecordPlayClickListener(getContext(), message, iv_voice));
 
-    iv_voice.setOnLongClickListener(new View.OnLongClickListener() {
+    voice_layout.setOnLongClickListener(new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            if (onRecyclerViewListener != null) {
-                 onRecyclerViewListener.onItemLongClick(getPosition());
-            }
+    	     AlertDialog.Builder builder=new AlertDialog.Builder(context);
+ 		     final String[] xuanzeweizhi={"删除"};
+ 		     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+ 				
+ 				@Override
+ 				public void onClick(DialogInterface dialog, int which) {
+ 					 if(which==0){
+ 						  if (onRecyclerViewListener != null) {
+					            onRecyclerViewListener.onItemLongClick(getPosition());
+					         }
+ 					  }
+ 				}
+ 			});
+ 		     builder.show();
             return true;
         }
     });

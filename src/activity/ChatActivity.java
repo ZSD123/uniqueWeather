@@ -70,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.Friend;
+import model.Jubao;
 import model.UserModel;
 import myCustomView.EmoticonsEditText;
 
@@ -87,6 +88,7 @@ import cn.bmob.newim.bean.BmobIMFileMessage;
 import cn.bmob.newim.bean.BmobIMImageMessage;
 import cn.bmob.newim.bean.BmobIMLocationMessage;
 import cn.bmob.newim.bean.BmobIMMessage;
+import cn.bmob.newim.bean.BmobIMMessageType;
 import cn.bmob.newim.bean.BmobIMTextMessage;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.bean.BmobIMVideoMessage;
@@ -104,6 +106,8 @@ import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.QueryListener;
+import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 import db.FaceText;
 
@@ -165,9 +169,12 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     BmobIMConversation c;
     
     ImageView threeCircle;
+    ImageView user89;   
+    
     PopupWindow popupWindow;
     BmobIMUserInfo userInfo;
     
+    public static MyUser myUser;
     class VoiceTouchListener implements View.OnTouchListener {
         @Override   
         public boolean onTouch(View v, MotionEvent event) {
@@ -253,6 +260,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         emoPager=(ViewPager)findViewById(R.id.pager_emo);
         talkpartername=(TextView)findViewById(R.id.talkpartername);
         
+        user89=(ImageView)findViewById(R.id.user89);  //对方用户头标
         threeCircle=(ImageView)findViewById(R.id.threeCircle);
         
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
@@ -261,11 +269,42 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         
         tv_video=(TextView)findViewById(R.id.tv_video);
         
+        myUser=new MyUser();
+        myUser.setNick(userInfo.getName());
+        myUser.setTouXiangUrl(userInfo.getAvatar());
+        myUser.setObjectId(userInfo.getUserId());
+       
+        BmobQuery<MyUser> query=new BmobQuery<MyUser>();
+        query.getObject(userInfo.getUserId(), new QueryListener<MyUser>() {
+    		
+    		@Override
+    		public void done(MyUser user, BmobException e ) {
+    		      if(e==null){
+    		    
+    		    	  myUser.setNick(user.getNick());
+    		    	  myUser.setTouXiangUrl(user.getTouXiangUrl());
+    		    	  myUser.setSex(user.getSex());
+    		    	  myUser.setAge(user.getAge());
+    		    	  myUser.setShengri(user.getShengri());
+    		    	  myUser.setZhiye(user.getZhiye());
+    		    	  myUser.setSchool(user.getSchool());
+    		    	  myUser.setSuozaidi(user.getSuozaidi());
+    		    	  myUser.setGuxiang(user.getGuxiang());
+
+    		      }else{
+    		    	  Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+    		      }
+    			
+    		}
+    	});
+        
       // initNaviView();
         initEmoView();
         initSwipeLayout();
         initVoiceView();   
         initBottomView();
+        
+    
         edit_msg.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -403,6 +442,20 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			}
 		});
         
+        user89.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				   Bundle bundle=new Bundle();
+
+		    	   bundle.putSerializable("myUser", myUser);
+		    	   Intent intent=new Intent(ChatActivity.this,xiangxiDataAct.class);
+		    	   intent.putExtra("bundle", bundle);
+		    	   startActivity(intent);
+				
+			}
+		});
+        
        threeCircle.setOnClickListener(new OnClickListener() {
 		
 		@Override
@@ -426,13 +479,49 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     	popupWindow=new PopupWindow(customView,300, 400);
     	popupWindow.setAnimationStyle(R.style.AnimationFade);
     	
-    	Button buttonXiangXi=(Button)customView.findViewById(R.id.buttonXiangXi);
-    	Button buttonGuanLiao=(Button)customView.findViewById(R.id.buttonGuanLiao);
+    	Button buttonQingLiao=(Button)customView.findViewById(R.id.buttonQingLiao);
+    	Button buttonJuBao=(Button)customView.findViewById(R.id.buttonJuBao);
     	Button buttonDelete=(Button)customView.findViewById(R.id.buttonDelete);
-    	buttonXiangXi.setOnClickListener(new OnClickListener() {
+    	Button buttonLaHei=(Button)customView.findViewById(R.id.buttonLaHei);
+    	buttonQingLiao.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
+				
+				AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+				final AlertDialog alertdialog=builder.create();
+				builder.setTitle("删除提醒");
+				builder.setMessage("确定要删除该对话全部聊天记录吗?");
+				builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if(alertdialog.isShowing()){
+							alertdialog.dismiss();
+						}
+						
+					}
+				});
+				builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						c.deleteBatchMessage(adapter.getMessages());
+						adapter.getMessages().clear();
+						adapter.notifyDataSetChanged();
+						
+						fragmentChat.converdb.saveNewContentById(c.getConversationId(),"");
+						fragmentChat.converdb.clearUnReadNumById(c.getConversationId());
+						fragmentChat.converdb.saveTimeById(c.getConversationId(), 0);
+						
+						fragmentChat.refreshConversations(2,c.getConversationId());
+						
+					}
+
+				
+				});
+				builder.show();
+				
 				
 			}
 		});
@@ -514,8 +603,134 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				
 			}
 		});
+    	buttonJuBao.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				   AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+				   final AlertDialog dialog1=builder.create();
+				     final String[] xuanzeweizhi={"发布暴力色情","严重骚扰","违反政治和法规","取消"};
+				     builder.setTitle("请选择举报原因");
+				     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							 if(which!=3){
+						     juBao(which);
+							 }else if(which==3&&dialog1!=null&&dialog1.isShowing()){
+								   dialog1.dismiss();
+						   	}
+						}});
+				     builder.show();
+				
+			}
+		});
     }
-    
+    private void juBao(final int i){
+      	    BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
+		 	bmobQuery.addWhereEqualTo("myUser", myUser);
+			 bmobQuery.findObjects(new FindListener<Jubao>() {
+
+			@Override
+			public void done(List<Jubao> list,BmobException e) {
+	        if(e==null){
+	        	Integer t=0;
+			 if(list.size()>0){
+				   switch (i) {
+				case 0:
+					t=list.get(0).getSex();
+					break;
+				case 1:
+					t=list.get(0).getSaorao();
+					Log.d("Main", "t="+t);
+                    break;
+				case 2:
+					t=list.get(0).getAnticountry();
+					break;
+				default:
+					break;
+				}    
+				   
+				   if(t==null){
+					   t=0;
+				   }
+				   
+			  	     Integer sum=list.get(0).getSum();
+			  	     
+			  	     if(sum==null)
+			  	    	 sum=0;
+					 Jubao jubao=new Jubao();
+					 
+			     switch (i) {
+						case 0:
+							jubao.setSex(t+1);
+							break;
+						case 1:
+							jubao.setSaorao(t+1);
+		                    break;
+						case 2:
+							jubao.setAnticountry(t+1);
+							break;
+						default:
+							break;
+						}
+
+					 jubao.setSum(sum+1);
+					 jubao.update(list.get(0).getObjectId(),new UpdateListener() {
+															
+						@Override
+					public void done(BmobException e) {
+							if(e==null){
+							 Toast.makeText(ChatActivity.this,"举报成功", Toast.LENGTH_SHORT).show();
+							}else {
+							 Toast.makeText(ChatActivity.this,"举报失败,"+e.getMessage(), Toast.LENGTH_SHORT).show();
+								}
+																
+					}
+								});
+			}else {
+						Jubao jubao=new Jubao();
+						
+						   switch (i) {
+							case 0:
+								jubao.setSex(1);
+								break;
+							case 1:
+								jubao.setSaorao(1);
+			                    break;
+							case 2:
+								jubao.setAnticountry(1);
+								break;
+							default:
+								break;
+							}
+
+						jubao.setSum(1);
+						jubao.setMyUser(myUser);
+						jubao.save(new SaveListener<String>() {
+
+							@Override
+							public void done(String a,
+									BmobException e) {
+								if(e==null){
+									 Toast.makeText(ChatActivity.this,"举报成功", Toast.LENGTH_SHORT).show();
+								}else {
+									 Toast.makeText(ChatActivity.this,"举报失败,"+e.getMessage(), Toast.LENGTH_SHORT).show();
+							  	}
+								
+							}
+							
+							
+							
+						});
+					}
+												
+			}else {
+				 Toast.makeText(ChatActivity.this,"举报失败,"+e.getMessage(), Toast.LENGTH_SHORT).show();
+		    	}
+			}});
+				
+    }
     
     private void initEmoView() {
 		emoPager = (ViewPager) findViewById(R.id.pager_emo);  //emoPager实例化
@@ -615,18 +830,39 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
             }
         });
         //设置RecyclerView的点击事件
+        
         adapter.setOnRecyclerViewListener(new OnRecyclerViewListener() {
             @Override
             public void onItemClick(int position) {
-                Log.i("Main",""+position);
+                 
             }
 
             @Override
             public boolean onItemLongClick(int position) {
                 //这里省了个懒，直接长按就删除了该消息
-                c.deleteMessage(adapter.getItem(position));
+            	  if(position==adapter.getCount()-1){
+                 	 if(position==0){
+                 		 fragmentChat.converdb.saveNewContentById(userInfo.getUserId(), "");
+                 	 }else {
+                 		 String content="";
+ 	  		             String id=c.getConversationId();
+ 						    if(adapter.getItem(position-1).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
+ 							    content=adapter.getItem(position-1).getContent();
+ 							else if(adapter.getItem(position-1).getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
+ 			                        content="[图片]";
+ 							else if(adapter.getItem(position-1).getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
+ 								content="[视频]";
+ 							else if(adapter.getItem(position-1).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
+ 								content="[语音]";
+ 							fragmentChat.converdb.saveNewContentById(id, content);
+ 							fragmentChat.converdb.saveTimeById(id,adapter.getItem(position-1).getCreateTime());
+ 					    	fragmentChat.refreshConversations(1,c.getConversationId());
+ 					  }
+                 }
+            	 c.deleteMessage(adapter.getItem(position));
                 
                 adapter.remove(position);
+                
                 return true;
             }
         });
@@ -979,8 +1215,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         Log.i("Main","聊天页面接收到消息：" + list.size());
         //当注册页面消息监听时候，有消息（包含离线消息）到来时会回调该方法
         for (int i=0;i<list.size();i++){
-           Log.d("Main", "fromId="+list.get(i).getMessage().getFromId());
-           Log.d("Main", "toId="+list.get(i).getMessage().getToId());
            if(!(list.get(i).getMessage().getFromId()).equals(list.get(i).getMessage().getToId()))
                addMessage2Chat(list.get(i));
         }
@@ -1012,7 +1246,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
      * @param event
      */
     private void addMessage2Chat(MessageEvent event){
-    	Log.d("Main","进入这里");
         BmobIMMessage msg =event.getMessage();
         if(c!=null && event!=null && c.getConversationId().equals(event.getConversation().getConversationId()) //如果是当前会话的消息
                 && !msg.isTransient()){//并且不为暂态消息
@@ -1033,10 +1266,14 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (layout_more.getVisibility() == View.VISIBLE) {
                 layout_more.setVisibility(View.GONE);
+                popupWindow.dismiss();
                 return false;
-            } else {
-                return super.onKeyDown(keyCode, event);
-            }
+            }else if(popupWindow!=null&&popupWindow.isShowing()) {
+            	popupWindow.dismiss();
+                return false;	
+              }else {
+            	return super.onKeyDown(keyCode, event);
+			}
         } else {
             return super.onKeyDown(keyCode, event);
         }
