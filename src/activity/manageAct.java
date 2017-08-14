@@ -11,6 +11,7 @@ import com.uniqueweather.app.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.util.Pools.Pool;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -40,6 +41,7 @@ public class manageAct extends baseActivity {
 		ListView listView=(ListView)findViewById(R.id.listview);
 		final List<String> list=new ArrayList<String>();
 		list.add("ÐÞ¸ÄÃÜÂë");
+		list.add("ºÚÃûµ¥");
 		BaseAdapter baseAdapter=new BaseAdapter() {
 			
 			@Override
@@ -72,7 +74,7 @@ public class manageAct extends baseActivity {
 			@Override
 			public int getCount() {
 				// TODO Auto-generated method stub
-				return 1;
+				return list.size();
 			}
 		};
 		listView.setAdapter(baseAdapter);
@@ -83,6 +85,9 @@ public class manageAct extends baseActivity {
 					int position, long id) {
 				 if(position==0){
 					 Intent intent=new Intent(manageAct.this,modifypasswordAct.class);
+					 startActivity(intent);
+				 }else if(position==1){
+					 Intent intent=new Intent(manageAct.this,blackAct.class);
 					 startActivity(intent);
 				 }
 				

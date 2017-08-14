@@ -14,8 +14,10 @@ import javax.xml.parsers.DocumentBuilder;
 
 import message.myMessageHandler;
 import model.BmobIMApplication;
+import model.Friend;
 import model.Jubao;
 import model.UniversalImageLoader;
+import model.UserModel;
 
 import cn.bmob.newim.BmobIM;
 import cn.bmob.v3.Bmob;
@@ -26,6 +28,7 @@ import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
+import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
 
@@ -72,6 +75,7 @@ public class weather_info extends baseFragmentActivity {
 	 public static myUserDB myUserdb;
      public static String objectId;
      private AlertDialog dialog1;
+     
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{   MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
@@ -82,9 +86,12 @@ public class weather_info extends baseFragmentActivity {
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
-
-	    init();	
+		loginAct.application.add(weather_info.this);
+        init();	
 	    UniversalImageLoader.initImageLoader(this);
+
+
+	    
 	 }		
 	private void init() 
 	{
@@ -104,14 +111,15 @@ public class weather_info extends baseFragmentActivity {
 					   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
 					   newUser.update(bmobUser.getObjectId(), new UpdateListener() {
 						
-					@Override
+				    	@Override
 						public void done(BmobException e) {
 							if(e==null){
-                                 zhudongLogin=0;
+                                 zhudongLogin=1;
+                                 jiaKeFu();
                                  checkJuBao();
-							}else if(e.getErrorCode()==206){
+                            }else if(e.getErrorCode()==206){
 								Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
-							   MyUser.logOut();
+							    MyUser.logOut();
 								MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
 								Intent intent=new Intent(getApplicationContext(),loginAct.class);
 								startActivity(intent);
@@ -122,11 +130,15 @@ public class weather_info extends baseFragmentActivity {
 				}else if(myUser.getInstallationId().equals(loginAct.installationId)){    
 					zhudongLogin=0;
 					checkJuBao();
+					
 				  }else {
+					  Log.d("Main", "1");
 					   fragmentChat.refreshUserPicture(null, 1);  //为1的时候表示联网更新
+					   Log.d("Main", "2");
 					   fragmentChat.refreshNewFriend();
+					   Log.d("Main", "3");
 					   fragmentChat.refreshConversations(2, null);
-					   
+					   Log.d("Main", "4");
 					   MyUser newUser=new MyUser();
 					   newUser.setInstallationId(loginAct.installationId);
 					   MyUser bmobUser=BmobUser.getCurrentUser(MyUser.class);
@@ -137,6 +149,8 @@ public class weather_info extends baseFragmentActivity {
 							if(e==null){
 								zhudongLogin=1;
 								checkJuBao();
+								update();
+								
 							}else if(e.getErrorCode()==206){
 								Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
 								MyUser.logOut();
@@ -149,6 +163,7 @@ public class weather_info extends baseFragmentActivity {
 					    });
 				 }
 			}else {
+				Log.d("Main", "账户更新失败"+e.getMessage());
 				Toast.makeText(weather_info.this,"失败,"+e.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 			
@@ -159,7 +174,38 @@ public class weather_info extends baseFragmentActivity {
 	
 		
 	}
-	
+	private void jiaKeFu(){   //添加客服为好友
+		MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+		Friend friend=new Friend();
+		friend.setMyUser(currentUser);
+		MyUser kefuUser=new MyUser();
+		kefuUser.setObjectId("e5be088480");
+		friend.setFriendUser(kefuUser);
+		friend.save(new SaveListener<String>() {
+			
+			@Override
+			public void done(String a, BmobException e) {
+				
+				if(e!=null){
+					Toast.makeText(weather_info.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+		friend.setMyUser(kefuUser);
+		friend.setFriendUser(currentUser);
+        friend.save(new SaveListener<String>() {
+			
+			@Override
+			public void done(String a, BmobException e) {
+				
+				if(e!=null){
+					Toast.makeText(weather_info.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+				}else {
+					 fragmentChat.refreshNewFriend();
+				}
+			}
+		});
+	}
 	@Override
 	public void onBackPressed() {
 		if(fragmentChat.horizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
@@ -169,6 +215,11 @@ public class weather_info extends baseFragmentActivity {
 		}
 
 	}
+	private void update(){
+		fragmentChat.refreshBlack(0); //为0的时候都会查询
+		
+	}
+	
 	private void checkJuBao(){
 		BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
 		MyUser myUser=new MyUser();
@@ -178,33 +229,60 @@ public class weather_info extends baseFragmentActivity {
 
 			@Override
 			public void done(List<Jubao> list, BmobException e) {
-				if(list.size()>0){
-					int i=list.get(0).getSum();
-					if(i>1){
+				if(list!=null&&list.size()>0){
+					Integer i=list.get(0).getSex();
+					if(i==null)
+						i=0;
 					
-							AlertDialog.Builder builder=new AlertDialog.Builder(weather_info.this);
-							builder.setMessage("您当前账户被举报多次，暂时无法登陆，请联系客服");
-							builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-								
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									 Intent intent=new Intent(weather_info.this,loginAct.class);
-									 startActivity(intent);
-									 if(dialog1!=null){
-										 dialog1.dismiss();
-									 }
-									 MyUser.logOut();
-									 finish();
-								}
-							});
-							builder.setCancelable(false);
-							dialog1=builder.create();
-						    dialog1.show();
+					Integer j=list.get(0).getSaorao();
+					if(j==null)
+						j=0;
+					
+					Integer k=list.get(0).getAnticountry();
+					if(k==null)
+						k=0;
+					
+					Integer sum=list.get(0).getSum();
+					if(sum==null)
+						sum=0;
+					
+					if(sum>300){
+						showDialog1(null,1);
+					}else if(i>100){
+					   showDialog1("发布色情暴力",0);
+					}else if(j>100){
+						showDialog1("严重骚扰",0);
+					}else if(k>100){
+						showDialog1("违反政治和法规",0);
 					}
 				}
 				
 			}
 		});
+	}
+	private void showDialog1(String content,int i){
+		AlertDialog.Builder builder=new AlertDialog.Builder(weather_info.this);
+		if(i==0)
+	    	builder.setMessage("您当前账户被举报多次，原因:"+content+"，暂时无法登陆，十天后解封");
+		else if(i==1)
+			builder.setMessage("您当前账户被举报多次，将彻底查封");
+		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				 Intent intent=new Intent(weather_info.this,loginAct.class);
+				 startActivity(intent);
+				 if(dialog1!=null){
+					 dialog1.dismiss();
+				 }
+				 MyUser.logOut();
+				 finish();
+			}
+		});
+		builder.setCancelable(false);
+		dialog1=builder.create();
+		if(dialog1!=null&&!dialog1.isShowing())
+	       dialog1.show();
 	}
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent data)
@@ -433,5 +511,13 @@ public class weather_info extends baseFragmentActivity {
         Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);//把ByteArrayInputStream数据生成图片
         return bitmap;
     }
+	private int checkLocalAndWebFriend(List<Friend> Webfriends,Friend friend){   
+		  for (int i = 0; i < Webfriends.size(); i++) {
+			    if(Webfriends.get(i).getFriendUser().getObjectId().equals(friend.getFriendUser().getObjectId())){
+			    	  return 1;
+			     }
+	    	}
+		  return 2;
+	 }
 	
 }

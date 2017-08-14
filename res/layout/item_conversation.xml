@@ -32,7 +32,6 @@
             android:gravity="left|center"
             android:singleLine="true"
             android:textSize="20sp"
-            android:text="张扬"
             />
 
         <TextView
@@ -48,7 +47,6 @@
             android:paddingLeft="6.0dip"
             android:paddingRight="6.0dip"
             android:singleLine="true"
-            android:text="你好"
             android:textSize="15.0sp" />
 
         <TextView

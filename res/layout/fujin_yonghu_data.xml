@@ -5,11 +5,25 @@
     android:layout_height="wrap_content"
     
     >
-
+  <RelativeLayout 
+     android:id="@+id/re"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:background="#FFFFF0"
+     >
+     <ImageView 
+         android:id="@+id/cha"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:src="@drawable/icon_close"
+         android:layout_alignParentRight="true"
+         />
+ </RelativeLayout>
 <RelativeLayout
     android:id="@+id/fujin_sha"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_below="@id/re"
     android:background="#FFFFFF" >
 
   <myCustomView.CircleImageView
@@ -95,7 +109,13 @@
       />   
      </TableRow>
      </TableLayout>
+    
+ 
+  
   </RelativeLayout>
+  
+
+
   <LinearLayout 
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

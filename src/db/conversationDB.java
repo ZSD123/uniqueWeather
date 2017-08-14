@@ -3,6 +3,7 @@ package db;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Black;
 import model.Friend;
 
 import cn.bmob.newim.bean.BmobIMConversation;
@@ -48,15 +49,18 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
     	 ContentValues values=new ContentValues();
     	 values.put("id", id);
     	 values.put("fromId", weather_info.objectId);
-    	 if(j==1){
+    	 if(j==1&&getIsFriend(id)!=2&&getIsFriend(id)!=3){
      		values.put("isFriend", 1);
      	 }
+    	 
     	 int i= db.update("conversation",values, "id=? AND fromId=?",new String[]{id,weather_info.objectId});//这里就是为了判断是否有之前的，这里用update的原因在于用insert会提示错误的，当影响的行数等于0的时候表示之前没有就直接插入
     	  if(i==0){
         	values.put("unReadNum", 0);
         	if(j==1){
         		values.put("isFriend", 1);
-        	 }
+        	 }else {
+    			values.put("isFriend", 0);
+    	 	}
     	 	db.insert("conversation", null, values);
     	 	
      	  }
@@ -109,7 +113,7 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
   
      public List<BmobIMConversation> getConverByTime(){
     	 List<BmobIMConversation> list=new ArrayList<BmobIMConversation>();
-    	 Cursor cursor=db.rawQuery("select * from conversation where fromId=? order by newTime DESC ", new String []{weather_info.objectId});
+    	 Cursor cursor=db.rawQuery("select * from conversation where fromId=? AND isFriend !=? order by newTime DESC ", new String []{weather_info.objectId,"2"});//加入黑名单的不显示在会话列表中
     	 if(cursor.moveToFirst()){
     		 do {
 				BmobIMConversation conversation=new BmobIMConversation();
@@ -174,7 +178,7 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
      }
      public List<Friend> getFriends(){
     	 List<Friend> list=new ArrayList<Friend>();
-    	 Cursor cursor=db.query("conversation", null,"fromId=? AND isFriend=?",new String[]{weather_info.objectId,"1"}, null, null, null);
+    	 Cursor cursor=db.query("conversation", null,"(fromId=? AND isFriend=?) OR (fromId=? AND isFriend=?)",new String[]{weather_info.objectId,"1",weather_info.objectId,"3"}, null, null, null);
     	 if(cursor.moveToFirst()){
     		 do {
 				Friend friend=new Friend();
@@ -187,9 +191,9 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
     	 }
     	 return list; 
      }
-     public void updateIsFriend0(String objectId){
+     public void updateIsFriendI(String objectId,int i){
     	  ContentValues values=new ContentValues();
-    	  values.put("isFriend",0);
+    	  values.put("isFriend",i);
     	  db.update("conversation", values,"fromId=? AND id=?",new String []{weather_info.objectId,objectId});
      }
      public int getIsFriend(String objectId){
@@ -201,5 +205,20 @@ public class conversationDB {    //这就是一个每个登录用户的数据库，里面有convers
 			} while (cursor.moveToNext());
     	 }
     	 return isFriend;
+     }
+     public List<Black> getBlackFriends(){
+    	 List<Black> list=new ArrayList<Black>();
+    	 Cursor cursor=db.query("conversation", null,"fromId=? AND isFriend=?",new String[]{weather_info.objectId,"2"}, null, null, null);
+    	 if(cursor.moveToFirst()){
+    		 do {
+				Black black=new Black();
+				black.setBlackUser(new MyUser());
+				black.getBlackUser().setObjectId(cursor.getString(cursor.getColumnIndex("id")));
+				black.getBlackUser().setNick(cursor.getString(cursor.getColumnIndex("nickName")));
+				black.getBlackUser().setTouXiangUrl(cursor.getString(cursor.getColumnIndex("touXiang")));
+				list.add(black);
+			} while (cursor.moveToNext());
+    	 }
+    	 return list; 
      }
 }

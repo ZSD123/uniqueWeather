@@ -236,16 +236,15 @@ public class moblieLoginAct extends Activity {
 										user.setMobilePhoneNumber(input);
 										user.setMobilePhoneNumberVerified(false);
 										loginAct.installationId=MyBmobInstallation.getInstallationId(moblieLoginAct.this);
-										user.setInstallationId(loginAct.installationId);
 										user.signOrLogin(passwordString,new SaveListener<MyUser>() {
 
 											@Override
 											public void done(MyUser user,
 													BmobException e) {
 											if(e==null){
-												loginAct.installationId=MyBmobInstallation.getInstallationId(moblieLoginAct.this);
-												Toast.makeText(moblieLoginAct.this,"注册成功，初始密码为您的手机号，请牢记",Toast.LENGTH_LONG).show();
-												 Intent intent=new Intent(moblieLoginAct.this,weather_info.class);
+												  loginAct.installationId=MyBmobInstallation.getInstallationId(moblieLoginAct.this);
+												  Toast.makeText(moblieLoginAct.this,"注册成功，初始密码为您的手机号，请牢记",Toast.LENGTH_LONG).show();
+												  Intent intent=new Intent(moblieLoginAct.this,weather_info.class);
 												  startActivity(intent);
 												  loginAct.application.delete();
 												  finish();

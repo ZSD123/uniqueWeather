@@ -2,6 +2,7 @@ package activity;
 
 import Util.CommonUtils;
 import Util.FaceTextUtils;
+import Util.Utility;
 import adapter.ChatAdapter;
 import adapter.EmoViewPagerAdapter;
 import adapter.EmoteAdapter;
@@ -69,6 +70,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import model.Black;
 import model.Friend;
 import model.Jubao;
 import model.UserModel;
@@ -94,6 +96,7 @@ import cn.bmob.newim.bean.BmobIMUserInfo;
 import cn.bmob.newim.bean.BmobIMVideoMessage;
 import cn.bmob.newim.core.BmobIMClient;
 import cn.bmob.newim.core.BmobRecordManager;
+import cn.bmob.newim.core.a.b;
 import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.listener.MessageListHandler;
 import cn.bmob.newim.listener.MessageSendListener;
@@ -104,6 +107,7 @@ import cn.bmob.newim.notification.BmobNotificationManager;
 import cn.bmob.push.config.Constant;
 import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
@@ -116,7 +120,7 @@ import db.FaceText;
  * @project:ChatActivity
  * @date :2016-01-25-18:23
  */
-public class ChatActivity extends baseFragmentActivity implements ObseverListener,MessageListHandler{
+public class ChatActivity extends baseActivity implements ObseverListener,MessageListHandler{
 
 	LinearLayout ll_chat;
 
@@ -214,8 +218,13 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
                             int recordTime = recordManager.stopRecording();
                             if (recordTime > 1) {
                                 // 发送语音文件
-                                sendVoiceMessage(recordManager.getRecordFilePath(c.getConversationId()),recordTime);
-                            } else {// 录音时间过短，则提示录音过短的提示
+                            	  if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3)
+                            		  sendVoiceMessage(recordManager.getRecordFilePath(c.getConversationId()),recordTime);
+                    			  else {
+                    				 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
+                    			    }
+                    			
+                             } else {// 录音时间过短，则提示录音过短的提示
                                 layout_record.setVisibility(View.GONE);
                                 showShortToast().show();
                             }
@@ -265,7 +274,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
         userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
-        talkpartername.setText(userInfo.getName());
+        if(fragmentChat.converdb.getIsFriend(userInfo.getUserId())==0)
+             talkpartername.setText(userInfo.getName()+"  (陌生人)");
+        else {
+        	talkpartername.setText(userInfo.getName());
+		}
         
         tv_video=(TextView)findViewById(R.id.tv_video);
         
@@ -273,14 +286,19 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         myUser.setNick(userInfo.getName());
         myUser.setTouXiangUrl(userInfo.getAvatar());
         myUser.setObjectId(userInfo.getUserId());
-       
+        
+        if(myUser.getObjectId().equals("e5be088480")){
+            edit_msg.setHint("您有什么问题或需要，尽情写在这里吧");
+            tv_video.setVisibility(View.GONE);
+            threeCircle.setVisibility(View.INVISIBLE);
+        }
+            
         BmobQuery<MyUser> query=new BmobQuery<MyUser>();
         query.getObject(userInfo.getUserId(), new QueryListener<MyUser>() {
     		
     		@Override
     		public void done(MyUser user, BmobException e ) {
     		      if(e==null){
-    		    
     		    	  myUser.setNick(user.getNick());
     		    	  myUser.setTouXiangUrl(user.getTouXiangUrl());
     		    	  myUser.setSex(user.getSex());
@@ -297,6 +315,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
     			
     		}
     	});
+        fragmentChat.refreshBlack(1);  //只查询对方是否把自己加入黑名单
         
       // initNaviView();
         initEmoView();
@@ -361,7 +380,7 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-				   edit_msg.setVisibility(View.GONE);
+				    edit_msg.setVisibility(View.GONE);
 			        layout_more.setVisibility(View.GONE);
 			        btn_chat_voice.setVisibility(View.GONE);
 			        btn_chat_keyboard1.setVisibility(View.VISIBLE);
@@ -391,7 +410,11 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
+			  if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3)
 				 sendMessage();
+			  else {
+				 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
+			    }
 				
 			}
 		});
@@ -399,7 +422,12 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-				sendLocalImageMessage();
+				
+				 if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3)
+					 sendLocalImageMessage();
+				  else {
+					 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
+				    }
 				
 			}
 		});
@@ -407,7 +435,12 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-				openTakePhoto();
+				 if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3)
+					 openTakePhoto();
+				  else {
+					 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
+				    }
+				
 				
 			}
 		});
@@ -415,29 +448,37 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 			
 			@Override
 			public void onClick(View v) {
-				  AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
-				     final String[] xuanzeweizhi={"打开摄像头","本地视频"};
-				     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
-						
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							  if(which==0){
-								  Toast.makeText(ChatActivity.this,"请稍等", Toast.LENGTH_SHORT).show();
-							      Intent intent=new Intent();
-							      intent.setAction("android.media.action.VIDEO_CAPTURE");
-							      intent.addCategory("android.intent.category.DEFAULT");
-							   
-                                  startActivityForResult(intent, 4);
-						    	 
-							  }else if(which==1){
-									Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-							        intent.setType("video/*");
-							        startActivityForResult(intent,4);
-							        
-							   }
-						}  
-					});
-				     builder.show();
+				
+				 if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3){
+					  AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+			     final String[] xuanzeweizhi={"打开摄像头","本地视频"};
+			     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						  if(which==0){
+							  Toast.makeText(ChatActivity.this,"请稍等", Toast.LENGTH_SHORT).show();
+						      Intent intent=new Intent();
+						      intent.setAction("android.media.action.VIDEO_CAPTURE");
+						      intent.addCategory("android.intent.category.DEFAULT");
+						   
+                              startActivityForResult(intent, 4);
+					    	 
+						  }else if(which==1){
+								Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+						        intent.setType("video/*");
+						        startActivityForResult(intent,4);
+						        
+						   }
+					}  
+				});
+			     builder.show();
+				 }  
+				 else {
+					 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
+				    }
+				
+				
 				
 			}
 		});
@@ -476,12 +517,15 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 
     private void initmPopupWindowView(){
     	View customView=getLayoutInflater().inflate(R.layout.popview_item, null,false);
-    	popupWindow=new PopupWindow(customView,300, 400);
+    	popupWindow=new PopupWindow(customView,Utility.dip2px(ChatActivity.this,100), Utility.dip2px(ChatActivity.this,300));//dp转px
     	popupWindow.setAnimationStyle(R.style.AnimationFade);
     	
     	Button buttonQingLiao=(Button)customView.findViewById(R.id.buttonQingLiao);
     	Button buttonJuBao=(Button)customView.findViewById(R.id.buttonJuBao);
     	Button buttonDelete=(Button)customView.findViewById(R.id.buttonDelete);
+    	 if(fragmentChat.converdb.getIsFriend(userInfo.getUserId())==0)
+              buttonDelete.setVisibility(View.GONE);
+      
     	Button buttonLaHei=(Button)customView.findViewById(R.id.buttonLaHei);
     	buttonQingLiao.setOnClickListener(new OnClickListener() {
 			
@@ -506,13 +550,22 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						c.deleteBatchMessage(adapter.getMessages());
+						
+						for (int i = 0; i <adapter.getMessages().size(); i++) {
+							c.deleteMessage(adapter.getMessages().get(i));
+						}
+						
 						adapter.getMessages().clear();
 						adapter.notifyDataSetChanged();
 						
 						fragmentChat.converdb.saveNewContentById(c.getConversationId(),"");
 						fragmentChat.converdb.clearUnReadNumById(c.getConversationId());
 						fragmentChat.converdb.saveTimeById(c.getConversationId(), 0);
+						
+						if(fragmentChat.converdb.getIsFriend(c.getConversationId())==0){//如果是陌生人的话就直接删除
+					         fragmentChat.converdb.deleteCoversationById(c.getConversationId());
+				        }
+						
 						
 						fragmentChat.refreshConversations(2,c.getConversationId());
 						
@@ -625,7 +678,65 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 				
 			}
 		});
+    	buttonLaHei.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				AlertDialog.Builder builder=new AlertDialog.Builder(ChatActivity.this);
+				final AlertDialog alertdialog=builder.create();
+				builder.setTitle("拉黑提醒");
+				builder.setMessage("确定要拉黑对方吗?");
+				builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if(alertdialog.isShowing()){
+							alertdialog.dismiss();
+						}
+						
+					}
+				});
+				builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						
+						fragmentChat.converdb.clearUnReadNumById(c.getConversationId());
+					    fragmentChat.converdb.updateIsFriendI(c.getConversationId(), 2);
+						Black black=new Black();
+						MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+						black.setMyUser(currentUser);
+					    black.setBlackUser(myUser);
+						black.save(new SaveListener<String>() {
+
+							@Override
+							public void done(String a, BmobException e) {
+								if(e==null){
+									
+								}else {
+									Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+								}
+								
+							}
+						});
+                        fragmentChat.refreshNewFriend();
+					    fragmentChat.refreshConversations(2,c.getConversationId());
+					
+					}
+
+				
+				});
+				builder.show();
+				
+			}
+		});
     }
+    
+    
+    
+    
+    
     private void juBao(final int i){
       	    BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
 		 	bmobQuery.addWhereEqualTo("myUser", myUser);
@@ -642,7 +753,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
 					break;
 				case 1:
 					t=list.get(0).getSaorao();
-					Log.d("Main", "t="+t);
                     break;
 				case 2:
 					t=list.get(0).getAnticountry();
@@ -954,7 +1064,13 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
                     // 取消录音框
                     layout_record.setVisibility(View.INVISIBLE);
                     // 发送语音消息
-                    sendVoiceMessage(localPath, recordTime);
+                    if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3)
+                    	 sendVoiceMessage(localPath, recordTime);
+       			  else {
+       				 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
+       			    }
+       			
+                   
                     //是为了防止过了录音时间后，会多发一条语音出去的情况。
                     new Handler().postDelayed(new Runnable() {
 
@@ -1266,7 +1382,6 @@ public class ChatActivity extends baseFragmentActivity implements ObseverListene
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (layout_more.getVisibility() == View.VISIBLE) {
                 layout_more.setVisibility(View.GONE);
-                popupWindow.dismiss();
                 return false;
             }else if(popupWindow!=null&&popupWindow.isShowing()) {
             	popupWindow.dismiss();

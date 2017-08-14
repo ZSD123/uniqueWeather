@@ -214,74 +214,44 @@ public class loginAct extends Activity{
 					   relativeRoot.setAlpha(0.3f);
 					   textView.setVisibility(View.VISIBLE);
 					   
-					   bu.setUsername(input);			  
+					    bu.setUsername(input);			  
 					   
 					   if(isEmail(input)){
-				       bu.setPassword(passwordString);
-					   BmobQuery<MyUser> query=new BmobQuery<MyUser>("_User");
-					   query.addWhereEqualTo("username",input);
-				       query.findObjects(new FindListener<MyUser>() {
-						
-						@Override
-						public void done(List<MyUser> object, BmobException e) {
-						     if(e==null){
-						    	if(object.size()==0){
-						    		Toast.makeText(loginAct.this, "对不起，您当前账户并未注册，请再确认一遍", Toast.LENGTH_SHORT).show();
-						    		 if(relativeRoot.getAlpha()==0.3f){
-											progressBar.setVisibility(View.GONE);
-											relativeRoot.setAlpha(1);
-											relativeLayout.setVisibility(View.GONE);
-											textView.setVisibility(View.GONE);
-										}
-						    	}else{
-						    	 for(MyUser myUser : object){
-						    		 if(myUser.getEmailVerified()){
-						    			 bu.login(new SaveListener<MyUser>(){
-                                           @Override
-											public void done(MyUser user,BmobException e) {
+				         bu.setPassword(passwordString);
+					     bu.login(new SaveListener<MyUser>(){
+                                  @Override
+								public void done(MyUser user,BmobException e) {
 												
-                                        	   if(e==null){
-													  Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
-													  installationId=MyBmobInstallation.getInstallationId(loginAct.this);
-													  Intent intent=new Intent(loginAct.this,weather_info.class);
-													  intent.putExtra("login", 1);
-													  startActivity(intent);
-													  finish();
-												}else {
-													 if(e.getErrorCode()==101)
-												      	Toast.makeText(loginAct.this,"登录失败,账户名或密码错误，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
-													 else if(e.getErrorCode()==9016)
-													    Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
-													 else{
-														 Toast.makeText(loginAct.this,"登录失败,"+e.getMessage(),Toast.LENGTH_SHORT ).show();
-													 }
+                                       if(e==null){
+										 Toast.makeText(loginAct.this, "登录成功", Toast.LENGTH_SHORT).show();
+										 installationId=MyBmobInstallation.getInstallationId(loginAct.this);
+										 Intent intent=new Intent(loginAct.this,weather_info.class);
+										 intent.putExtra("login", 1);
+										 startActivity(intent);
+										 finish();
+									}else {
+										if(e.getErrorCode()==101)
+											Toast.makeText(loginAct.this,"登录失败,账户名或密码错误，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
+										 else if(e.getErrorCode()==9016)
+											Toast.makeText(loginAct.this,"登录失败，无网络连接，请检查您的手机网络，"+e.getMessage(),Toast.LENGTH_SHORT ).show();
+											 else{
+											 Toast.makeText(loginAct.this,"登录失败,"+e.getMessage(),Toast.LENGTH_SHORT ).show();
+										 }
 														 
-													 if(relativeRoot.getAlpha()==0.3f){
-															progressBar.setVisibility(View.GONE);
-															relativeRoot.setAlpha(1);
-															relativeLayout.setVisibility(View.GONE);
-															textView.setVisibility(View.GONE);
-														}
-												
-										      }
+										if(relativeRoot.getAlpha()==0.3f){
+												progressBar.setVisibility(View.GONE);
+												relativeRoot.setAlpha(1);
+												relativeLayout.setVisibility(View.GONE);
+												textView.setVisibility(View.GONE);
 											}
-						    				 
-						    			 });
-						    		 }else {
-						    			 Toast.makeText(loginAct.this,"请先验证您的邮箱，如果邮件被删，请在注册页面输入您的邮箱，点击发送验证",Toast.LENGTH_SHORT).show();
-									}
-						    	 }
-						    	}
-						     }else if(e.getErrorCode()==9016){
-						    	  Toast.makeText(loginAct.this,"连接失败，请稍后再试，无网络连接，请检查您的手机网络，"+e.getMessage(), Toast.LENGTH_SHORT).show();
-						     } else{
-								Toast.makeText(loginAct.this,"连接失败，请稍后再试，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+												
+								 }
 							}
-							
-						}
-						
-						 
-					});
+						    				 
+						  });
+						    	
+						    	 
+						    
 					   }else if(isMobileNO(input)){
 						   bu.setPassword(MD5Util.getMD5String(passwordString));
 						    bu.login(new SaveListener<MyUser>(){

@@ -27,7 +27,10 @@ import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.event.OfflineMessageEvent;
 import cn.bmob.newim.listener.BmobIMMessageHandler;
 import cn.bmob.newim.notification.BmobNotificationManager;
+import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 
 public class myMessageHandler extends BmobIMMessageHandler {
@@ -58,7 +61,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
 	        }
 		
 	}
-     private void processMessage(MessageEvent event,int i){
+     private void processMessage(final MessageEvent event,int i){
     	 newFriendManager=NewFriendManager.getInstance(mContext);
     	  BmobIMMessage bmobIMMessage=event.getMessage();
     	  if(bmobIMMessage.getMsgType().equals("add")){
@@ -93,7 +96,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
         	  fragmentChat.newFriendImage.setVisibility(View.VISIBLE);
     		  fragmentChat.newFriendImage1.setVisibility(View.VISIBLE);
     		} else {
-    			if(i==1){
+    			if(i==1&&fragmentChat.converdb.getIsFriend(event.getConversation().getConversationId())!=2){
     				
     				fragmentChat.converdb.saveId(event.getConversation().getConversationId(),0);
     				String content="";
@@ -105,8 +108,8 @@ public class myMessageHandler extends BmobIMMessageHandler {
 								content="[视频]";
 							else if(event.getMessage().getMsgType().equals(BmobIMMessageType.VOICE.getType()))
 								content="[语音]";
-    		     if(fragmentChat.converdb.getNickById(event.getConversation().getConversationId())==null)    //只有原来的为null才更新     
-    			     fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(), event.getConversation().getConversationTitle()) ;       
+    		      if(fragmentChat.converdb.getNickById(event.getConversation().getConversationId())==null||fragmentChat.converdb.getNickById(event.getConversation().getConversationId()).equals(""))
+    			      fragmentChat.converdb.saveNickById(event.getConversation().getConversationId(),event.getFromUserInfo().getName()) ;
     			  fragmentChat.converdb.saveNewContentById(event.getMessage().getConversationId(),content);
     			  fragmentChat.converdb.saveTimeById(event.getMessage().getConversationId(), event.getMessage().getCreateTime());
                   fragmentChat.refreshConversations(0,event.getConversation().getConversationId());

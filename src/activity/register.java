@@ -185,6 +185,7 @@ public class register extends Activity {
 						if(isEmail(input)){
 							MyUser bu=new MyUser();
 							bu.setUsername(input);
+							bu.setNick(input);
 							bu.setPassword(passwordString);
 							bu.setEmail(input);
 						    bu.setEmailVerified(false);
@@ -409,7 +410,7 @@ public class register extends Activity {
 										 	};
 										timer.schedule(task, 1000,1000);
 									}else if(e.getErrorCode()==205){
-										Toast.makeText(register.this,"失败，没有找到此邮件的用户，请先注册或者绑定邮箱", Toast.LENGTH_SHORT).show();
+										Toast.makeText(register.this,"失败，没有找到此邮件的用户，请先点击下面的注册按钮", Toast.LENGTH_SHORT).show();
 									}else {
 										Toast.makeText(register.this,"失败，"+e.getMessage(),Toast.LENGTH_SHORT).show();
 									}

@@ -3,6 +3,7 @@ package activity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import cn.bmob.newim.BmobIM;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobRealTimeData;
 import cn.bmob.v3.BmobUser;
@@ -32,7 +33,7 @@ public  class baseActivity extends Activity {
 		//自动登陆状态下检测是否在其他设备登陆
 		   bmobObjectId=weather_info.objectId;
 		   checkLogin();
-		
+		  
 		
 	}
 	@Override

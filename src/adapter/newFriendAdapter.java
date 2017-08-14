@@ -54,6 +54,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -187,6 +188,7 @@ public class newFriendAdapter extends BaseAdapter {
 			}
 
 		}else {
+		  if(newFriends.get(mPosition).getAvatar()!=null){
 		    new Thread(new Runnable() {
 				
 				@Override
@@ -199,11 +201,17 @@ public class newFriendAdapter extends BaseAdapter {
 							public void run() {
 								if(bitmap!=null)
 									viewHolder.image.setImageBitmap(bitmap);
+								else {
+									 loadimage(viewHolder.image);
+								}
 							}
 						});
 					
 				}
 			}).start();
+		  }else {
+			 loadimage(viewHolder.image);
+	    	}
 		}
 		
 	
@@ -271,7 +279,20 @@ public class newFriendAdapter extends BaseAdapter {
 	
 		return newFriends.size();
 	}
-	
+	private void loadimage(CircleImageView imageView){
+		  BitmapFactory.Options opts=new BitmapFactory.Options();
+			opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+			
+			opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+			opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+			
+			opts.inSampleSize=2;
+			opts.inInputShareable=true;//设置解码位图的尺寸信息
+			
+			Bitmap bitmap2=BitmapFactory.decodeResource(mContext.getResources(),R.drawable.userpicture, opts);
+			imageView.setImageBitmap(bitmap2);
+
+	}
 	
 	private void sendAgreeAddFriendMessage(final NewFriend add,final SaveListener listener){
     	BmobIMUserInfo info=new BmobIMUserInfo(add.getUid(), add.getName(),add.getAvatar());

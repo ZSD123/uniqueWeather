@@ -77,8 +77,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -92,7 +94,7 @@ import android.widget.Toast;
 
 public class fragmentMap extends Fragment implements AMapLocationListener,LocationSource, OnCameraChangeListener, OnMarkerClickListener, NearbyListener {
 	private volatile int zmarkNum=0;//直接添加用户头像的Marker个数
-    private RelativeLayout fuzhiMap;
+    public static RelativeLayout fuzhiMap;
     private ImageButton zujiBtn;
     
 	public static  yonghuDB yongbDb;  //周围用户数据表
@@ -133,7 +135,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
       private boolean zuji=true;
       public AMapLocationClient mLocationClient;
       private Marker mLoveMarker;    //当前Marker
-      private View  yonghuDataView;  //附近用户资料卡View
+      public static View  yonghuDataView;  //附近用户资料卡View
       private List<Marker> mFujinMarker=new ArrayList<Marker>(); //没有设置头像直接添加头像的附近用户Marker
       private Bitmap bitmap11;
   	  public fragmentMap(){
@@ -175,7 +177,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		
 		View mapView=LayoutInflater.from(context).inflate(R.layout.mapcircleimageview, null);
 		userPicture1=(MapCircleImageView)mapView.findViewById(R.id.mapCircle);
-		LayoutParams layoutParams=new LayoutParams(getPixelsFromDp(100),getPixelsFromDp(100));
+		LayoutParams layoutParams=new LayoutParams(Utility.dip2px(context,100),Utility.dip2px(context, 100));
 		userPicture1.setLayoutParams(layoutParams);
 		yongbDb=yonghuDB.getInstance(context);
 
@@ -326,17 +328,13 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			refreshBtn.startAnimation(animation);
 		}
 	});
-		
+	    
 	
 
 	return view;
 		
 	}
-	   private int getPixelsFromDp(int size){
-		   DisplayMetrics metrics=new DisplayMetrics();
-		   ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		   return (size*metrics.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
-	   }
+	  
 	@Override
 	public void activate(OnLocationChangedListener listener) {
 		mListener = listener;
@@ -383,6 +381,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	
 	@Override
 	public boolean onMarkerClick(Marker marker) {
+		
 		if(yonghuDataView==null){
 		    addYonghuDataView(marker);
 			}else {
@@ -545,18 +544,21 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		}
 	}
 	String nizhen;
+	
 	private void addYonghuDataView(final Marker marker){
-	     
+	      
 	      RelativeLayout fujinData;
           yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
 		  fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
 		  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 		  layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
 	      layoutParams.addRule(RelativeLayout.ABOVE, R.id.refreshbtn);
-	      layoutParams.setMarginStart(getPixelsFromDp(15));
-	      layoutParams.setMarginEnd(getPixelsFromDp(15));
+	      layoutParams.setMarginStart(Utility.dip2px(context, 15));
+	      layoutParams.setMarginEnd(Utility.dip2px(context, 15));
 	      fujinData.setLayoutParams(layoutParams);
 		  ImageView imageView=(ImageView)fujinData.findViewById(R.id.yonghu_data_image);
+		  ImageView imageCha=(ImageView)fujinData.findViewById(R.id.cha);
+		  
 		  BitmapDescriptor descriptor=marker.getIcons().get(0);
 		  imageView.setImageBitmap(descriptor.getBitmap());
 		  
@@ -576,6 +578,18 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
             zhiyeText.setText(zhiye);
 		  }
 		 // final BmobIMUserInfo bmobIMUserInfo=;
+		  imageCha.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(yonghuDataView!=null){
+					fuzhiMap.removeView(yonghuDataView);
+					yonghuDataView=null;
+				}
+				
+			}
+		  });
+		  
 		  ImageView jiaImage=(ImageView)fujinData.findViewById(R.id.jiatu);
 		  jiaImage.setOnClickListener(new OnClickListener() {
 			
@@ -596,6 +610,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 					Toast.makeText(context, "对方已经是您的好友，无需添加", Toast.LENGTH_SHORT).show();
 				}else if(i==2){
 					Toast.makeText(context, "对方已加入黑名单", Toast.LENGTH_SHORT).show();
+				}else if(i==3){
+					Toast.makeText(context, "对方拒绝了您的请求", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -714,7 +730,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	   
 		
 	}
-
+    
 	   private void checkJiaZai(String obString,String touxiangUrl){
 		   if(!markXianShi(obString)){
 			   JiaZai(obString, touxiangUrl);

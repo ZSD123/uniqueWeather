@@ -138,6 +138,9 @@
         <activity 
             android:name="activity.functionAct"
             ></activity>
+          <activity 
+            android:name="activity.blackAct"
+            ></activity>
         <service
             android:name="service.autoUqdateService"/>
         <service 

@@ -7,6 +7,8 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -21,6 +23,9 @@ public class MyHorizontalView extends HorizontalScrollView {
     private int mScreenRight=50;
     public static  int mMenuWidth;
     private boolean once=false;
+    
+
+
 	public MyHorizontalView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		WindowManager wm=(WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
@@ -68,6 +73,7 @@ public class MyHorizontalView extends HorizontalScrollView {
 	case MotionEvent.ACTION_DOWN:
 		   int x1=getScrollX();
 		   float x2=ev.getX();
+
 		   if(x1==0&&x2>mMenuWidth)
 		   {   
 			   this.smoothScrollTo(mMenuWidth, 0);
@@ -79,12 +85,17 @@ public class MyHorizontalView extends HorizontalScrollView {
 }
 @Override
 protected void onScrollChanged(int l, int t, int oldl, int oldt) 
-{   float scale=l*1.0f/mMenuWidth;    //1~0，当菜单在左边的时候，l是为0的，scale是为0的，
-                                      //当左侧菜单完整滑出的时候，l就为0  
+
+{   
+	
+	
+	float scale=l*1.0f/mMenuWidth;    //1~0，当菜单在左边的时候，l是为0的，scale是为0的，
+                                      //当左侧菜单完整滑出的时候，l就为0
+    
 	ViewHelper.setAlpha(mMenu,(1-scale)*0.7f+0.3f);  
     ViewHelper.setTranslationX(mMenu, l*((1-scale)*0.7f+0.3f));//当左侧菜单完全显示，偏移量就为0，这个就是使指定的控件在X方向移动多少的距离啊，你不设置，菜单会慢慢画出来，因为外层继承了HorizontalScrollView，默认menu会慢慢向右滑出，ViewHelper.setTranslationX（menu,L）L不断减小，它每次都是移动到相同的位置，就是正屏幕位置。
 	super.onScrollChanged(l, t, oldl, oldt);
+	
 }
-   
   
 }

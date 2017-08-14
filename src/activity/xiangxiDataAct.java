@@ -87,6 +87,7 @@ public class xiangxiDataAct extends baseActivity {
         
         final String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+myUser.getObjectId()+".jpg_";
         final File file=new File(path);
+        if(myUser.getTouXiangUrl()!=null)
         new Thread(new Runnable() {
 			
 			@Override
@@ -175,9 +176,10 @@ public class xiangxiDataAct extends baseActivity {
     	    
     	    spinner1.setEnabled(false);
   	        spinner2.setEnabled(false);
-    	    
-         textView.setText(myUser.getNick());
-         String sex=(String)myUser.getSex();
+    	 if(myUser.getNick()!=null)
+           textView.setText(myUser.getNick());
+    	
+            String sex=myUser.getSex();
  	     if(sex!=null)
  	       if(sex.equals("ÄÐ")){
  	    	  spinner1.setSelection(0);
@@ -188,10 +190,12 @@ public class xiangxiDataAct extends baseActivity {
  		   }else if(sex.equals("±£ÃÜ")){
  			  spinner1.setSelection(2);
  	    	}
- 	     
- 	     editText2.setText(myUser.getAge());
- 	     editText3.setText(myUser.getShengri());
- 	     editText4.setText(myUser.getConstellation());
+ 	     if(myUser.getAge()!=null)
+ 	       editText2.setText(myUser.getAge());
+ 	     if(myUser.getShengri()!=null)
+ 	       editText3.setText(myUser.getShengri());
+ 	     if(myUser.getConstellation()!=null)
+ 	        editText4.setText(myUser.getConstellation());
         
  	       int sel=0;
  	         for (int i = 0; i < arr1.length; i++) {
@@ -199,8 +203,11 @@ public class xiangxiDataAct extends baseActivity {
  	 				sel=i;
  	 		}
  	 	    spinner2.setSelection(sel);
+ 	 	  if(myUser.getSchool()!=null)
  	 	    editText5.setText(myUser.getSchool());
+ 	 	  if(myUser.getSuozaidi()!=null)
  	 	    editText6.setText(myUser.getSuozaidi());
+ 	 	  if(myUser.getGuxiang()!=null)
  	 	    editText7.setText(myUser.getGuxiang());
  	     
  	 	    circleImageView.setOnClickListener(new OnClickListener() {
@@ -238,6 +245,7 @@ public class xiangxiDataAct extends baseActivity {
 			 				
 			 			}
 			 		});
+			         
 			          ImageLoaderFactory.getLoader().load(imageView,TextUtils.isEmpty(myUser.getTouXiangUrl()) ? path:myUser.getTouXiangUrl(), R.drawable.no404, new ImageLoadingListener() {
 			 			
 			 			@Override

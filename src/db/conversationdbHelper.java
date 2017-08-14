@@ -17,7 +17,7 @@ public class conversationdbHelper extends SQLiteOpenHelper {
     		+ "unReadNum Integer,"
     		+ "newTime Integer,"
     		+ "newContent Text,"
-    		+ "isFriend Integer)";   //0的时候是陌生人，1的时候是朋友，2的时候是黑名单
+    		+ "isFriend Integer)";   //0的时候是陌生人，1的时候是朋友，2的时候是黑名单,3的时候被对方拉黑
 	public conversationdbHelper(Context context, String name,
 			CursorFactory factory, int version) {
 		super(context, name, factory, version);

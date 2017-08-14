@@ -267,8 +267,8 @@ public class UserModel extends BaseModel {
         BmobQuery<Friend> query = new BmobQuery<Friend>();
         MyUser user = BmobUser.getCurrentUser(MyUser.class);
         query.addWhereEqualTo("myUser", user);
-        query.include("friendUser");
         query.order("-updatedAt");
+        query.include("friendUser");
         query.findObjects(new FindListener<Friend>() {
             @Override
             public void done(List<Friend> list, BmobException e) {
@@ -318,7 +318,9 @@ public class UserModel extends BaseModel {
 					}
 					if(count==0){
 						Toast.makeText(context,"É¾³ý³É¹¦",Toast.LENGTH_SHORT).show();
-						c.deleteBatchMessage(adapter.getMessages());
+						for (int i = 0; i < adapter.getMessages().size(); i++) {
+							c.deleteMessage(adapter.getMessages().get(i));
+						}
 						adapter.notifyDataSetChanged();
 						
 						fragmentChat.converdb.deleteCoversationById(c.getConversationId());
