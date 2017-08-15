@@ -34,7 +34,7 @@ import cn.bmob.v3.listener.ValueEventListener;
 
 
 import com.amap.api.services.a.bu;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.MD5Util;
 import android.app.Activity;
@@ -116,10 +116,10 @@ public class loginAct extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
+        
+        application=BmobIMApplication.INSTANCE();
 		
-		application=BmobIMApplication.INSTANCE();
-		
-		TextView fuwu=(TextView)findViewById(R.id.fuwu);
+
 	 //   BmobIM.init(this);
 	  
 	    
@@ -135,7 +135,7 @@ public class loginAct extends Activity{
 			startActivity(intent);
 			finish();
 		}
-		
+		TextView fuwu=(TextView)findViewById(R.id.fuwu);
 		button1=(Button)findViewById(R.id.login);
 		button2=(Button)findViewById(R.id.shoujidenglu);
 		button3=(Button)findViewById(R.id.register);

@@ -27,7 +27,7 @@ import java.text.SimpleDateFormat;
 
 import myCustomView.CircleImageView;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMAudioMessage;
@@ -60,6 +60,7 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
 
   private String currentUid="";
 
+
   public ReceiveVoiceHolder(Context context, ViewGroup root,OnRecyclerViewListener onRecyclerViewListener,View view) {
     super(context, root,onRecyclerViewListener,view);
     try {
@@ -82,7 +83,7 @@ public class ReceiveVoiceHolder extends BaseViewHolder {
 
  
       
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar); 

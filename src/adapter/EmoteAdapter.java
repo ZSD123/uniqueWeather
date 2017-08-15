@@ -2,7 +2,7 @@ package adapter;
 
 import java.util.List;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import db.FaceText;
 

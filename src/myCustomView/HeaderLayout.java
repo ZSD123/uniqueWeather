@@ -1,7 +1,7 @@
 package myCustomView;
 
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import android.content.Context;
 import android.util.AttributeSet;

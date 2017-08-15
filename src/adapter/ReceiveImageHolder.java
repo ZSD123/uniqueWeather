@@ -36,7 +36,7 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -90,7 +90,7 @@ public class ReceiveImageHolder extends BaseViewHolder {
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
 
     
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+msg.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar); 

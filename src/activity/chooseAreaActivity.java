@@ -14,7 +14,7 @@ import model.City;
 import model.County;
 import model.Province;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import db.WeatherDB;
 

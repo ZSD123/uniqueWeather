@@ -17,7 +17,7 @@ import cn.bmob.v3.listener.UpdateListener;
 
 
 import com.amap.api.services.a.bu;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.MD5Util;
 import android.app.Activity;
@@ -236,6 +236,8 @@ public class register extends Activity {
 											   );
 											  bangzhufasongE=false;
 										  }
+									}else if(e.getErrorCode()==202||e.getErrorCode()==203){
+										Toast.makeText(register.this,"该用户已存在，请直接登录，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 									}else {
 										Toast.makeText(register.this,"注册失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
 									}

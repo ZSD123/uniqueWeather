@@ -4,6 +4,25 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/Amap_2DMap_V2.9.2_20161026.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/AMap_Location_V3.3.0_20170118.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/AMap_Search_V3.6.1_20161122.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/androidasync-2.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/android-support-v4.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/android-support-v7-recyclerview.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/Bmob_Push_V0.6beta_20150408.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/BmobNewIM_2.0.6_20170428.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/BmobSDK_3.5.6_20170705.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/butterknife-7.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/eventbus-3.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/nineoldandroids-2.4.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/okio-1.12.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/org.apache.http.legacy.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/rxandroid-1.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/rxjava-1.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/showapi_sdk.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/universal-image-loader-1.9.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/Volley.jar"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

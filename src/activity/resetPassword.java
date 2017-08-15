@@ -7,7 +7,7 @@ import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.update.BmobUpdateAgent;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;

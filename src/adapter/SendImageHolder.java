@@ -44,7 +44,7 @@ import myCustomView.TouchImageView;
 
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMConversation;
@@ -93,7 +93,7 @@ public class SendImageHolder extends BaseViewHolder {
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
 
     
-     String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+     String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"头像.png";
     File file=new File(path);
     if(file.exists()){
     	

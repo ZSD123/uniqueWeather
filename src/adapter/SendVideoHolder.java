@@ -32,7 +32,7 @@ import java.util.regex.Matcher;
 
 import myCustomView.CircleImageView;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMConversation;
@@ -79,7 +79,7 @@ public class SendVideoHolder extends BaseViewHolder implements View.OnClickListe
     final BmobIMMessage message = (BmobIMMessage)o;
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"Í·Ïñ.png";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"Í·Ïñ.png";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar); 

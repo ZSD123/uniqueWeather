@@ -150,7 +150,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
          Intent pendingIntent = new Intent(mContext, newFriendActivity.class);
          pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
          //这里可以是应用图标，也可以将聊天头像转成bitmap
-         Bitmap largetIcon = BitmapFactory.decodeResource(mContext.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
+         Bitmap largetIcon = BitmapFactory.decodeResource(mContext.getResources(), com.sharefriend.app.R.drawable.ic_launcher);
          BmobNotificationManager.getInstance(mContext).showNotification(largetIcon,
                  friend.getName(), friend.getMsg(), friend.getName() + "请求添加你为朋友", pendingIntent);
      }
@@ -164,7 +164,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
      private void showAgreeNotify(BmobIMUserInfo info, AgreeAddFriendMessage agree) {
          Intent pendingIntent = new Intent(mContext, weather_info.class);
          pendingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-         Bitmap largetIcon = BitmapFactory.decodeResource(mContext.getResources(), com.uniqueweather.app.R.drawable.ic_launcher);
+         Bitmap largetIcon = BitmapFactory.decodeResource(mContext.getResources(), com.sharefriend.app.R.drawable.ic_launcher);
          BmobNotificationManager.getInstance(mContext).showNotification(largetIcon, info.getName(), agree.getMsg(), agree.getMsg(), pendingIntent);
      }
 

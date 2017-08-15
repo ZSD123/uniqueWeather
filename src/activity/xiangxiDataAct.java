@@ -18,7 +18,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.Utility;
 import Util.download;
@@ -85,7 +85,7 @@ public class xiangxiDataAct extends baseActivity {
 
         final MyUser myUser=(MyUser) getIntent().getBundleExtra("bundle").getSerializable("myUser");        
         
-        final String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+myUser.getObjectId()+".jpg_";
+        final String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+myUser.getObjectId()+".jpg_";
         final File file=new File(path);
         if(myUser.getTouXiangUrl()!=null)
         new Thread(new Runnable() {

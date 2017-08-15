@@ -6,6 +6,7 @@ import Util.Utility;
 import adapter.ChatAdapter;
 import adapter.EmoViewPagerAdapter;
 import adapter.EmoteAdapter;
+import adapter.NewRecordPlayClickListener;
 import adapter.OnRecyclerViewListener;
 import android.R.integer;
 import android.app.Activity;
@@ -80,7 +81,7 @@ import myCustomView.EmoticonsEditText;
 import com.amap.api.mapcore2d.di;
 import com.amap.api.services.a.br;
 import com.koushikdutta.async.Util;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 
 import cn.bmob.newim.BmobIM;
@@ -908,7 +909,7 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     	  Date curDate=new Date(System.currentTimeMillis());
     	  String str=format.format(curDate);
     	  
-    	  path=Environment.getExternalStorageDirectory().getAbsoluteFile()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/picture/"+str+".jpg";
+    	  path=Environment.getExternalStorageDirectory().getAbsoluteFile()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/picture/"+str+".jpg";
     	  Uri uri=Uri.fromFile(new File(path));
     	  intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
     	  startActivityForResult(intent,3);
@@ -1438,6 +1439,9 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
             c.updateLocalCache();
         }
         hideSoftInputView();
+        
+        if(NewRecordPlayClickListener.currentPlayListener!=null)
+          NewRecordPlayClickListener.currentPlayListener.stopPlayRecord();
         
         fragmentChat.refreshConversations(1,c.getConversationId());
         

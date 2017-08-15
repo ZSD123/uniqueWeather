@@ -48,8 +48,7 @@ import com.amap.api.mapcore2d.p;
 import com.amap.api.services.a.bi;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.uniqueweather.app.R;
-import com.uniqueweather.app.R.drawable;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -97,7 +96,7 @@ public class ReceiveVideoHolder extends BaseViewHolder {
 
     
     
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+message.getFromId()+".jpg_";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+message.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar); 

@@ -12,7 +12,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import db.yonghuDB;
 import android.content.Context;

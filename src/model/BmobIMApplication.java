@@ -18,6 +18,8 @@ import message.myMessageHandler;
 
 
 import cn.bmob.newim.BmobIM;
+import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobConfig;
 
 /**
  * @author :smile
@@ -58,7 +60,10 @@ public class BmobIMApplication extends Application{
         //只有主进程运行的时候才需要初始化
         if (getApplicationInfo().packageName.equals(getMyProcessName())){
             //im初始化
+            Bmob.initialize(this,"f3065817051f7c298d2e49d9329a2a6b", "bmob");
+            
             BmobIM.init(this);
+
             //注册消息接收器
             BmobIM.registerDefaultMessageHandler(new myMessageHandler(getApplicationContext()));
         }

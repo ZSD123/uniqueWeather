@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 
 import myCustomView.CircleImageView;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import cn.bmob.newim.bean.BmobIMConversation;
 import cn.bmob.newim.bean.BmobIMMessage;
@@ -92,7 +92,7 @@ public class SendTextHolder extends BaseViewHolder implements View.OnClickListen
     
     //加载发送文本的自己的头像
     
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"头像.png";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar);  

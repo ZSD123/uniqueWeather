@@ -20,7 +20,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.services.a.bu;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.Http;
 import Util.HttpCallbackListener;

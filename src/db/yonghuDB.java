@@ -135,27 +135,32 @@ public class yonghuDB {
       public void deleteAll(){
 				db.delete("yonghu",null,null);
 	  }
-      public void saveData(String objectId,String nickName,String sex,String age,String zhiye){
+      public void saveData(String objectId,String nickName,String sex,String age,String zhiye,String username){
     		ContentValues values=new ContentValues();
 	    	values.put("nickName", nickName);
 	    	values.put("sex", sex);
 	    	values.put("age", age);
 	    	values.put("zhiye", zhiye);
+	    	values.put("userName", username);
 	    	db.update("yonghu", values,"objectId=?",new String[]{objectId});
       }
        public Bundle loadData(String objectId){
     	   Bundle bundle=new Bundle();
-    	   Cursor cursor=db.query("yonghu", new String []{"nickName","sex","age","zhiye"}, "objectId=?",new String[]{objectId}, null,null, null);
+    	   Cursor cursor=db.query("yonghu", new String []{"nickName","sex","age","zhiye","touxiangUrl","userName"}, "objectId=?",new String[]{objectId}, null,null, null);
     	   if(cursor.moveToFirst()){
     		   do {
 				  String nickName=cursor.getString(cursor.getColumnIndex("nickName"));
 				  String sex=cursor.getString(cursor.getColumnIndex("sex"));
 				  String age=cursor.getString(cursor.getColumnIndex("age"));
 				  String zhiye=cursor.getString(cursor.getColumnIndex("zhiye"));
+				  String touXiang=cursor.getString(cursor.getColumnIndex("touxiangUrl"));
+				  String userName=cursor.getString(cursor.getColumnIndex("userName"));
                   bundle.putString("nickName", nickName);
                   bundle.putString("sex", sex);
                   bundle.putString("age", age);
                   bundle.putString("zhiye", zhiye);
+                  bundle.putString("touxiangUrl",touXiang);
+                  bundle.putString("userName", userName);
 			} while (cursor.moveToNext());
     	   }
     	   return bundle;

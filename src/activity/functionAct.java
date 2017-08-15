@@ -1,6 +1,6 @@
 package activity;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.os.Bundle;

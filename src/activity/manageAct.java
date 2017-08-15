@@ -6,7 +6,10 @@ import java.util.List;
 
 import myCustomView.CircleImageView;
 
-import com.uniqueweather.app.R;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.BmobUser;
+
+import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -31,17 +34,21 @@ public class manageAct extends baseActivity {
     	
     }
     ViewHolder viewHolder;
-    
+    private MyUser currentUser;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.manage);
+		currentUser=BmobUser.getCurrentUser(MyUser.class);
 		RelativeLayout relativeLayout=(RelativeLayout)findViewById(R.id.relativeGuanyu);
 		ListView listView=(ListView)findViewById(R.id.listview);
 		final List<String> list=new ArrayList<String>();
 		list.add("修改密码");
 		list.add("黑名单");
+		 if(loginAct.isEmail(currentUser.getUsername())&&!currentUser.getEmailVerified()){
+			  list.add("邮箱认证");
+		 }
 		BaseAdapter baseAdapter=new BaseAdapter() {
 			
 			@Override
@@ -88,6 +95,9 @@ public class manageAct extends baseActivity {
 					 startActivity(intent);
 				 }else if(position==1){
 					 Intent intent=new Intent(manageAct.this,blackAct.class);
+					 startActivity(intent);
+				 }else if(position==2){
+					 Intent intent=new Intent(manageAct.this,emailVerifyAct.class);
 					 startActivity(intent);
 				 }
 				

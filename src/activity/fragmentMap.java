@@ -55,7 +55,7 @@ import com.amap.api.services.nearby.NearbySearchResult;
 import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
 import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import db.yonghuDB;
 import Util.Http;
@@ -66,10 +66,12 @@ import Util.download;
 import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -544,7 +546,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		}
 	}
 	String nizhen;
-	
+	String touXiang;
+	String userName;
 	private void addYonghuDataView(final Marker marker){
 	      
 	      RelativeLayout fujinData;
@@ -558,6 +561,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	      fujinData.setLayoutParams(layoutParams);
 		  ImageView imageView=(ImageView)fujinData.findViewById(R.id.yonghu_data_image);
 		  ImageView imageCha=(ImageView)fujinData.findViewById(R.id.cha);
+		  ImageView imageTalk=(ImageView)fujinData.findViewById(R.id.chattu);
+		  ImageView callTo=(ImageView)fujinData.findViewById(R.id.calltu);
 		  
 		  BitmapDescriptor descriptor=marker.getIcons().get(0);
 		  imageView.setImageBitmap(descriptor.getBitmap());
@@ -568,6 +573,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			  String sex=bundle.getString("sex");
 			  String age=bundle.getString("age");
 			  String zhiye=bundle.getString("zhiye");
+			  touXiang=bundle.getString("touxiangUrl");
+			  userName=bundle.getString("userName");
 			  TextView nizhenText=(TextView)fujinData.findViewById(R.id.yonghu_data_nick);
 			  TextView sexText=(TextView)fujinData.findViewById(R.id.yonghu_data_sex);
 			  TextView ageText=(TextView)fujinData.findViewById(R.id.yonghu_data_age);
@@ -589,7 +596,65 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 				
 			}
 		  });
+		  imageTalk.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int i=fragmentChat.converdb.getIsFriend((String) marker.getObject());
+				if(i==0||i==1){
+					final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+					bmobIMUserInfo.setUserId((String) marker.getObject());
+					bmobIMUserInfo.setName(nizhen);
+					bmobIMUserInfo.setAvatar(touXiang);
+			     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
+						
+						@Override
+						public void done(BmobIMConversation c, BmobException e) {
+							if(e==null){
+								Bundle bundle=new Bundle();
+								bundle.putSerializable("c",c);
+								bundle.putSerializable("userInfo",bmobIMUserInfo);
+								Intent intent=new Intent(getActivity(),ChatActivity.class);
+								intent.putExtra("bundle", bundle);
+								startActivity(intent);
+								
+							}else {
+                                   Toast.makeText(getActivity(), e.getMessage(),Toast.LENGTH_SHORT).show();
+							}
+							
+						}
+					});
+				
+			
+				}else if(i==2){
+					 Toast.makeText(getActivity(),"对方已加入黑名单",Toast.LENGTH_SHORT).show();
+				  }else if(i==3){
+					  Toast.makeText(getActivity(),"对方拒绝接收",Toast.LENGTH_SHORT).show();
+				  }
+				
+			}
+		  });
 		  
+		  callTo.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int i=fragmentChat.converdb.getIsFriend((String) marker.getObject());
+				if(i==0||i==1){
+					if(loginAct.isMobileNO(userName)){
+						Intent intent=new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+userName));
+						startActivity(intent);
+					}else {
+						  Toast.makeText(getActivity(),"对方未留手机号",Toast.LENGTH_SHORT).show();
+					}
+				}else if(i==2){
+					  Toast.makeText(getActivity(),"对方已加入黑名单",Toast.LENGTH_SHORT).show();
+				 }else if(i==3){
+					  Toast.makeText(getActivity(),"对方拒绝接收",Toast.LENGTH_SHORT).show();
+				 }
+				
+			}
+		  });
 		  ImageView jiaImage=(ImageView)fujinData.findViewById(R.id.jiatu);
 		  jiaImage.setOnClickListener(new OnClickListener() {
 			
@@ -680,7 +745,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 					public void done(MyUser object, BmobException e) {
 						if(e==null){
 							yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
-							yongbDb.saveData(object.getObjectId(),object.getNick(),object.getSex(), object.getAge(), object.getZhiye());
+							yongbDb.saveData(object.getObjectId(),object.getNick(),object.getSex(), object.getAge(), object.getZhiye(),object.getUsername());
 							if(object.getTouXiangUrl()!=null){      //当存在有相应的Url值
 							     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
 							}
@@ -781,9 +846,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	   }
 
 	   private void JiaZai(final String obString,final String touxiangUrl){ 
-	        File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
+	        File file=new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
 	        if(file.exists()){
-            bitmap11=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
+            bitmap11=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+obString+".jpg_");
             addSanMarkerDir(obString,bitmap11);     
             new Thread(new Runnable() {
  	            @Override
@@ -837,7 +902,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 
 
 		  public Bitmap getYonghuPic(String obj){
-			  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+			  Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
 			  return bitmap;
 		  }
 		  public void addSanMarkerRefresh(String objectId,Bitmap bitmap){

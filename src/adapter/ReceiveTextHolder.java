@@ -37,7 +37,7 @@ import myCustomView.CircleImageView;
 
 import com.amap.api.services.a.bu;
 import com.amap.api.services.a.m;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -75,7 +75,7 @@ public class ReceiveTextHolder extends BaseViewHolder {
     String time = dateFormat.format(message.getCreateTime());
     
     
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+message.getFromId()+".jpg_";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+message.getFromId()+".jpg_";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar); 

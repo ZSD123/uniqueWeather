@@ -13,7 +13,7 @@ import cn.bmob.v3.listener.LogInListener;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.MD5Util;
 import android.app.Activity;

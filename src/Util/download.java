@@ -25,7 +25,7 @@ import cn.bmob.v3.listener.DownloadFileListener;
 public class download {
      public static void downloadFile(final BmobFile file,final Context context){//刷新头像
 
-    	   final File saveFile=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/",file.getFilename());//文件路径
+    	   final File saveFile=new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)BmobUser.getObjectByKey("username")+"/",file.getFilename());//文件路径
     	   final String filename=file.getFilename();
     	 
     	 file.download(saveFile, new DownloadFileListener() {
@@ -49,7 +49,7 @@ public class download {
 						opts.inSampleSize=2;
 						opts.inInputShareable=true;//设置解码位图的尺寸信息
 						
-	                    Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,opts);
+	                    Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,opts);
 			    	    fragmentChat.userPicture.setImageBitmap(bitmap);
 			    	  
 			    	  
@@ -66,7 +66,7 @@ public class download {
      }
      public static void downloadFile1(final BmobFile file,final Context context){//下载图片
 
-  	   final File saveFile=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/downloadPicture/",file.getFilename());//文件路径
+  	   final File saveFile=new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)BmobUser.getObjectByKey("username")+"/downloadPicture/",file.getFilename());//文件路径
   	   final String filename=file.getFilename();
   	 
   	 file.download(saveFile, new DownloadFileListener() {
@@ -94,7 +94,7 @@ public class download {
 		});
    }
      public static void setBitmapWithoutWeb(String filename){
-    	 File file =new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
+    	 File file =new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)BmobUser.getObjectByKey("username")+"/"+filename);
 			if(file.exists()){
 				
 				   BitmapFactory.Options opts=new BitmapFactory.Options();
@@ -106,16 +106,16 @@ public class download {
 					opts.inSampleSize=2;
 					opts.inInputShareable=true;//设置解码位图的尺寸信息
 					
-                   Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,opts);
+                   Bitmap bitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)BmobUser.getObjectByKey("username")+"/"+filename,opts);
 		           fragmentChat.userPicture.setImageBitmap(bitmap);
 			}
      }
 	   public static  void saveYonghuPic(Bitmap bitmap,String obj){  //存储用户头像
-			  File file1=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head");
+			  File file1=new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head");
 	  
 			  if(!file1.exists())
 			    	file1.mkdirs();
-	           File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
+	           File file=new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+obj+".jpg_");
 
 				try{
 				FileOutputStream out=new FileOutputStream(file);

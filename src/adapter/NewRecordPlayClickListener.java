@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import java.io.File;
 import java.io.FileInputStream;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import cn.bmob.newim.bean.BmobIMAudioMessage;
 import cn.bmob.newim.core.BmobDownloadManager;
@@ -99,7 +99,9 @@ public class NewRecordPlayClickListener implements View.OnClickListener {
 		stopRecordAnimation();
 		if (mediaPlayer != null) {
 			mediaPlayer.stop();
+			mediaPlayer.reset();
 			mediaPlayer.release();
+			mediaPlayer=null;
 		}
 		isPlaying = false;
 	}

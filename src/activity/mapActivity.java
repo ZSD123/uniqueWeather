@@ -12,7 +12,7 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.ValueEventListener;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;

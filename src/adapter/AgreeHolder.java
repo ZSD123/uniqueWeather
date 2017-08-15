@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMMessage;

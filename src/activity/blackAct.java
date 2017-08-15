@@ -39,7 +39,7 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.UpdateListener;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 public class blackAct extends baseActivity {
 	//这是账户管理修改密码什么的
@@ -74,7 +74,7 @@ public class blackAct extends baseActivity {
 						}else {
 							viewHolder=(ViewHolder)convertView.getTag();
 						}
-				 	String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+blackUsers.get(position).getBlackUser().getObjectId()+".jpg_";
+				 	String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+blackUsers.get(position).getBlackUser().getObjectId()+".jpg_";
 			       
 			    	File file=new File(path);
 					if(file.exists()){

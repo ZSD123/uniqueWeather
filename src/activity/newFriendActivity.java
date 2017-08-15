@@ -40,7 +40,7 @@ import cn.bmob.v3.listener.SaveListener;
 
 import com.amap.api.services.a.bu;
 import com.amap.api.services.a.v;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.Utility;
 import adapter.newFriendAdapter;

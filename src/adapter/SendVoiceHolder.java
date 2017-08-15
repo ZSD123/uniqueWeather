@@ -27,7 +27,7 @@ import java.text.SimpleDateFormat;
 
 import myCustomView.CircleImageView;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.Bind;
 import cn.bmob.newim.bean.BmobIMAudioMessage;
@@ -81,7 +81,7 @@ public class SendVoiceHolder extends BaseViewHolder {
     BmobIMMessage msg = (BmobIMMessage)o;
     //用户信息的获取必须在buildFromDB之前，否则会报错'Entity is detached from DAO context'
    
-    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"头像.png";
     File file=new File(path);
     if(file.exists()){
     	setTouXiangImage(file, iv_avatar); 
@@ -115,7 +115,7 @@ public class SendVoiceHolder extends BaseViewHolder {
         progress_load.setVisibility(View.GONE);
         tv_send_status.setVisibility(View.GONE);
         tv_voice_length.setVisibility(View.VISIBLE);
-    }
+    }           
 
     voice_layout.setOnClickListener(new NewRecordPlayClickListener(getContext(),message,iv_voice));
 
@@ -128,7 +128,7 @@ public class SendVoiceHolder extends BaseViewHolder {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					 if(which==0){
+					if(which==0){
 						  if (onRecyclerViewListener != null) {
 					            onRecyclerViewListener.onItemLongClick(getPosition());
 					         }

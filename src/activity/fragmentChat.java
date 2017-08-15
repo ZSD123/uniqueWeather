@@ -84,7 +84,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import db.conversationDB;
 
@@ -379,13 +379,12 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
   							if(converList.get(position).getConversationTitle()!=null){  //禁止username为空
   				   
   					String nickName=converList.get(position).getConversationTitle();
-  					Log.d("Main","nick="+nickName);
   					if(nickName!=null){
  
   						viewHolder1.nameText.setText(nickName);
   					}
   					
-  					String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_";
+  					String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_";
   					File file=new File(path);
   						if(file.exists()){		
   						  try {
@@ -603,7 +602,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				    	    final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
 					    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
 					    	
-					    	String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_";
+					    	String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_";
 					       
 					    	File file=new File(path);
 							if(file.exists()){
@@ -759,7 +758,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		    
 		    Bitmap bitmap1;
 		    
-		    String path=Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/"+"头像.png";
+		    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"头像.png";
 		    
              File file=new File(path);
 		      if(file.exists()){
@@ -783,7 +782,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				}
 				   }else {
 					  refreshUserPicture(null, 1);
-				}
+				   }
             	
             	pic.setImageBitmap(getPicture());
 				weather.setText(pre.getString("weatherInfo", ""));
@@ -1004,15 +1003,16 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
           
         {  
         	
-        	if(bitmap!=null)
+        	if(bitmap!=null){
         	userPicture.setImageBitmap(bitmap);
         	
+        	}
         	if(i==1){     //这是当只有联网更新的时候才调用
         		 String touxiangUrl=(String)BmobUser.getObjectByKey("touxiangUrl");
              	
              	   if(touxiangUrl!=null)       //这里防止更新图片后另外一台客户端没有更新
       			{  
-      			   BmobFile bmobFile=new BmobFile("头像"+".png",null,touxiangUrl);//确定文件名字（头像.png）和网络地址
+      			   BmobFile bmobFile=new BmobFile((String)BmobUser.getObjectByKey("username")+"头像"+".png",null,touxiangUrl);//确定文件名字（头像.png）和网络地址
       			   download.downloadFile(bmobFile,context);//进行下载操作
       			   
       			}
@@ -1048,13 +1048,13 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 						  for (int i = 0; i <dbfriends.size(); i++) {
 							int k=checkLocalAndWebFriend(friends, dbfriends.get(i));
 							if(k==2){   //如果k==2表示没有这个朋友
-							   if(converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=2&&converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=3)//朋友系统和黑名单系统是分开的，互不触犯
+							   if(converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=2&&converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=3&&!dbfriends.get(i).getFriendUser().getObjectId().equals("e5be088480"))//朋友系统和黑名单系统是分开的，互不触犯
 								   converdb.updateIsFriendI(dbfriends.get(i).getFriendUser().getObjectId(),0);
 						    	}
 						  }
 						}else {     //也要考虑0的情况
 							for (int i = 0; i < dbfriends.size(); i++) {
-						       if(converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=2&&converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=3)
+						       if(converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=2&&converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=3&&!dbfriends.get(i).getFriendUser().getObjectId().equals("e5be088480"))
 								converdb.updateIsFriendI(dbfriends.get(i).getFriendUser().getObjectId(),0);
 							}
 						 }

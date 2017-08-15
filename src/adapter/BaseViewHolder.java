@@ -11,7 +11,7 @@ import java.util.HashMap;
 import myCustomView.CircleImageView;
 
 import com.amap.api.services.a.o;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import butterknife.ButterKnife;
 import activity.ChatActivity;
@@ -42,7 +42,6 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
   OnRecyclerViewListener onRecyclerViewListener;
   protected Context context;
   protected MyUser myUser;
-  
   public BaseViewHolder(Context context, ViewGroup root,OnRecyclerViewListener listener,View view) {
 	super(view);
     this.context=context;

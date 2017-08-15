@@ -3,7 +3,7 @@ package activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import activity.manageAct.ViewHolder;
 import android.app.Activity;
@@ -65,7 +65,7 @@ public class guanYuAct extends baseActivity {
 			@Override
 			public int getCount() {
 				// TODO Auto-generated method stub
-				return 1;
+				return list.size();
 			}
 		};
 		listView.setAdapter(baseAdapter);

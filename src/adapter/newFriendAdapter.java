@@ -23,7 +23,7 @@ import cn.bmob.v3.listener.SaveListener;
 
 import com.amap.api.mapcore2d.p;
 import com.amap.api.services.a.m;
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import message.AgreeAddFriendMessage;
 import message.Config;
@@ -164,7 +164,7 @@ public class newFriendAdapter extends BaseAdapter {
 		}
 	   
 	
-	    File file=new File(Environment.getExternalStorageDirectory()+"/EndRain/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_");
+	    File file=new File(Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+newFriends.get(position).getUid()+".jpg_");
 		if(file.exists()){
 			
              try {

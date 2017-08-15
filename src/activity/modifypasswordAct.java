@@ -5,7 +5,7 @@ import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.UpdateListener;
 
-import com.uniqueweather.app.R;
+import com.sharefriend.app.R;
 
 import Util.MD5Util;
 import android.app.Activity;
