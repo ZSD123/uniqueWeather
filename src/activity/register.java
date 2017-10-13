@@ -189,6 +189,7 @@ public class register extends Activity {
 							bu.setPassword(passwordString);
 							bu.setEmail(input);
 						    bu.setEmailVerified(false);
+						    bu.setCanCall(false);
 						    bu.signUp(new SaveListener<MyUser>() {
 
 								@Override
@@ -249,6 +250,7 @@ public class register extends Activity {
 							MyUser bu=new MyUser();
 							bu.setUsername(input);
 							bu.setNick(input);
+							bu.setCanCall(false);
 							bu.setPassword(MD5Util.getMD5String(passwordString));
 							bu.setMobilePhoneNumber(input);
 							bu.setMobilePhoneNumberVerified(false);

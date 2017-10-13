@@ -78,7 +78,7 @@ import android.widget.Toast;
 public class weather_info extends baseFragmentActivity {
 
 	 public static myUserDB myUserdb;
-     public static String objectId;
+     public static String objectId;      //统一调用的objectId
      private AlertDialog dialog1;
      private MyUser currentUser;
      private java.util.Date date;
@@ -216,7 +216,7 @@ public class weather_info extends baseFragmentActivity {
 	}
 	private void showDialog2(){
 		AlertDialog.Builder builder=new AlertDialog.Builder(weather_info.this);
-		builder.setMessage("您当前邮箱未被认证，无法登陆，请在注册页面输入邮箱号，发送验证进行验证，否则为了防止占用他人邮箱，此账号将被注销");
+		builder.setMessage("您当前邮箱未被认证，无法登陆，请在注册页面输入邮箱号，再点击发送验证进行验证，否则为了防止占用他人邮箱，此账号将被注销");
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 			
 			@Override
@@ -296,8 +296,10 @@ public class weather_info extends baseFragmentActivity {
 	public void onBackPressed() {
 		if(fragmentChat.horizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
 			fragmentChat.horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
-		}else {
-			super.onBackPressed();
+		}else if(fragmentChat.popupWindow!=null&&fragmentChat.popupWindow.isShowing()){  //撤销邀请好友和搜索下拉框
+			fragmentChat.popupWindow.dismiss();
+	    } else {
+	 		super.onBackPressed();
 		}
 
 	}

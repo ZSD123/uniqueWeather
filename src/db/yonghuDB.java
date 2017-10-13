@@ -135,18 +135,25 @@ public class yonghuDB {
       public void deleteAll(){
 				db.delete("yonghu",null,null);
 	  }
-      public void saveData(String objectId,String nickName,String sex,String age,String zhiye,String username){
+      public void saveData(String objectId,String nickName,String sex,String age,String zhiye,String username,boolean canCall){
     		ContentValues values=new ContentValues();
 	    	values.put("nickName", nickName);
 	    	values.put("sex", sex);
 	    	values.put("age", age);
 	    	values.put("zhiye", zhiye);
 	    	values.put("userName", username);
+	    	if(canCall){
+	         	values.put("canCall", 1);
+	
+	    	}else {
+	    		values.put("canCall", 0);
+	   
+	    	}
 	    	db.update("yonghu", values,"objectId=?",new String[]{objectId});
       }
        public Bundle loadData(String objectId){
     	   Bundle bundle=new Bundle();
-    	   Cursor cursor=db.query("yonghu", new String []{"nickName","sex","age","zhiye","touxiangUrl","userName"}, "objectId=?",new String[]{objectId}, null,null, null);
+    	   Cursor cursor=db.query("yonghu", new String []{"nickName","sex","age","zhiye","touxiangUrl","userName","canCall"}, "objectId=?",new String[]{objectId}, null,null, null);
     	   if(cursor.moveToFirst()){
     		   do {
 				  String nickName=cursor.getString(cursor.getColumnIndex("nickName"));
@@ -155,12 +162,20 @@ public class yonghuDB {
 				  String zhiye=cursor.getString(cursor.getColumnIndex("zhiye"));
 				  String touXiang=cursor.getString(cursor.getColumnIndex("touxiangUrl"));
 				  String userName=cursor.getString(cursor.getColumnIndex("userName"));
+				  int canCall=cursor.getInt(cursor.getColumnIndex("canCall"));
                   bundle.putString("nickName", nickName);
                   bundle.putString("sex", sex);
                   bundle.putString("age", age);
                   bundle.putString("zhiye", zhiye);
                   bundle.putString("touxiangUrl",touXiang);
                   bundle.putString("userName", userName);
+                  if(canCall==1){
+              
+                	  bundle.putBoolean("canCall", true);
+                  }else {
+            
+                	  bundle.putBoolean("canCall",false);
+				  }
 			} while (cursor.moveToNext());
     	   }
     	   return bundle;

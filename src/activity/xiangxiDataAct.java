@@ -87,6 +87,29 @@ public class xiangxiDataAct extends baseActivity {
         
         final String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+myUser.getObjectId()+".jpg_";
         final File file=new File(path);
+        
+        if(file.exists()){
+        	try {
+    			InputStream is=new FileInputStream(file);
+    			
+    			BitmapFactory.Options opts=new BitmapFactory.Options();
+    			opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
+    			
+    			opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
+    			opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
+    			
+    			opts.inSampleSize=2;
+    			opts.inInputShareable=true;//设置解码位图的尺寸信息
+    			
+    			Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
+    			circleImageView.setImageBitmap(bitmap2);
+    		} catch (FileNotFoundException e1) {
+    			// TODO Auto-generated catch block
+    			e1.printStackTrace();
+    		}
+
+        }
+        
         if(myUser.getTouXiangUrl()!=null)
         new Thread(new Runnable() {
 			

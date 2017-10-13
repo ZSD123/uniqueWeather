@@ -1,0 +1,67 @@
+package activity;
+
+import com.sharefriend.app.R;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.text.Html;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class fankuiAct extends Activity {
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+    	super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.fankui);
+		TextView textView1=(TextView)findViewById(R.id.text1);
+		textView1.setText("欢迎大家加群聊或者发邮箱及时反馈，谢谢大家的支持");
+		TextView textView2=(TextView)findViewById(R.id.text2);
+		textView2.setText("QQ群号：");
+		TextView textView3=(TextView)findViewById(R.id.text3);
+		textView3.setText(Html.fromHtml("<u>"+"594653155"+"</u>"));
+		TextView textView4=(TextView)findViewById(R.id.text4);
+		textView4.setText("邮箱号：");
+		TextView textView5=(TextView)findViewById(R.id.text5);
+		textView5.setText(Html.fromHtml("<u>"+"1833751104@qq.com"+"</u>"));
+		textView3.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(joinQQGroup("AM-jba03TOdMs1WGgkzW0YBucCkmkoJL")){
+					Toast.makeText(fankuiAct.this, "正在拉起手机QQ加群", Toast.LENGTH_SHORT).show();
+				}else {
+					Toast.makeText(fankuiAct.this, "未安装手QQ或安装的版本不支持", Toast.LENGTH_SHORT).show();
+				}
+				
+			}
+		});
+    }
+    /****************
+    *
+    * 发起添加群流程。群号：共享交友交流群(594653155) 的 key 为： AM-jba03TOdMs1WGgkzW0YBucCkmkoJL
+    * 调用 joinQQGroup(AM-jba03TOdMs1WGgkzW0YBucCkmkoJL) 即可发起手Q客户端申请加群 共享交友交流群(594653155)
+    *
+    * @param key 由官网生成的key
+    * @return 返回true表示呼起手Q成功，返回fals表示呼起失败
+    ******************/
+    public boolean joinQQGroup(String key) {
+        Intent intent = new Intent();
+        intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key));
+       // 此Flag可根据具体产品需要自定义，如设置，则在加群界面按返回，返回手Q主界面，不设置，按返回会返回到呼起产品界面    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            // 未安装手Q或安装的版本不支持
+            return false;
+        }
+    }
+
+	
+}

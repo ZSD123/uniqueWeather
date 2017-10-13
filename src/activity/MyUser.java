@@ -15,7 +15,14 @@ public class MyUser extends BmobUser {
 	private String guxiang;
 	private String touxiangUrl;
 	private String installationId;     //Éè±¸Âë
+	private boolean canCall;
 
+	public boolean isCanCall() {
+		return canCall;
+	}
+	public void setCanCall(boolean canCall) {
+		this.canCall = canCall;
+	}
 	public String getInstallationId(){
 		
 		return this.installationId;

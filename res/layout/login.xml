@@ -125,6 +125,7 @@
        android:layout_margin="10dp"
        android:clickable="true"
        />
+
    <activity.myCaihong
        android:id="@+id/caihong"
        android:layout_alignParentBottom="true"

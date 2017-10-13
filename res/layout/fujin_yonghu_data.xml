@@ -105,6 +105,7 @@
         android:id="@+id/yonghu_data_zhiye"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
         android:textSize="20sp"
       />   
      </TableRow>

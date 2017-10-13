@@ -26,7 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-public class conversationDB {    //这就是一个每个登录用户的数据库，里面有conversation数据表等等
+public class conversationDB {    //这就是一个每个登录用户的数据库，里面有conversation数据表等等,0的时候是陌生人，1的时候是朋友，2的时候是黑名单,3的时候被对方拉黑
      private int VERSION=1;
      private static SQLiteDatabase db;
      public  static conversationDB condb;

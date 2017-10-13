@@ -3,15 +3,13 @@
     android:id="@+id/weatherlinearlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6E6FA"
-    android:orientation="vertical" >
+    android:background="#E6E6FA" >
 
-<LinearLayout 
+<RelativeLayout 
     android:id="@+id/lin1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#8A2BE2"
-    android:orientation="horizontal"
     >
          <TextView 
             android:id="@+id/weather"
@@ -19,13 +17,15 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="#fff"
-            android:layout_gravity="center_vertical"
+            android:layout_centerVertical="true"
+            
             />
          <ImageView 
          android:id="@+id/weather_pic"
          android:layout_width="50dp"
          android:layout_height="50dp"
-         android:layout_gravity="center_vertical"
+         android:layout_centerVertical="true"
+         android:layout_toRightOf="@id/weather"
          />
 
         <TextView 
@@ -34,9 +34,21 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="#fff"
-            android:layout_gravity="center_vertical"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/weather_pic"
             />
-</LinearLayout>
+        <ImageView 
+            android:id="@+id/jia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/jia"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="10dp"
+            />
+      
+
+</RelativeLayout>
  <LinearLayout 
      android:id="@+id/lin2"
      android:layout_width="match_parent"

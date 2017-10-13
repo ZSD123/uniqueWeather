@@ -47,6 +47,7 @@ import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
+import com.amap.api.services.a.ca;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.nearby.NearbySearch;
 import com.amap.api.services.nearby.NearbySearch.NearbyListener;
@@ -493,8 +494,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			   }
 			else if(chucuoonce==0)
 		     	{
-			  	Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
-				chucuoonce=1;
+			     	Toast.makeText(context, "errorcode:"+amaplocation.getErrorCode()+",errorInfo:"+amaplocation.getErrorInfo(), Toast.LENGTH_LONG).show();
+				    chucuoonce=1;
+		     	    
 		     	}
 		  }
 		
@@ -548,6 +550,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	String nizhen;
 	String touXiang;
 	String userName;
+	boolean canCall;
 	private void addYonghuDataView(final Marker marker){
 	      
 	      RelativeLayout fujinData;
@@ -575,6 +578,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			  String zhiye=bundle.getString("zhiye");
 			  touXiang=bundle.getString("touxiangUrl");
 			  userName=bundle.getString("userName");
+			  canCall=bundle.getBoolean("canCall");
+			  Log.d("Main", "canCall="+canCall);
 			  TextView nizhenText=(TextView)fujinData.findViewById(R.id.yonghu_data_nick);
 			  TextView sexText=(TextView)fujinData.findViewById(R.id.yonghu_data_sex);
 			  TextView ageText=(TextView)fujinData.findViewById(R.id.yonghu_data_age);
@@ -640,6 +645,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			@Override
 			public void onClick(View v) {
 				int i=fragmentChat.converdb.getIsFriend((String) marker.getObject());
+				if(canCall){
 				if(i==0||i==1){
 					if(loginAct.isMobileNO(userName)){
 						Intent intent=new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+userName));
@@ -652,7 +658,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 				 }else if(i==3){
 					  Toast.makeText(getActivity(),"对方拒绝接收",Toast.LENGTH_SHORT).show();
 				 }
-				
+		    }else{
+		    	Toast.makeText(getActivity(),"对方拒绝打电话",Toast.LENGTH_SHORT).show();
+				}
 			}
 		  });
 		  ImageView jiaImage=(ImageView)fujinData.findViewById(R.id.jiatu);
@@ -745,7 +753,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 					public void done(MyUser object, BmobException e) {
 						if(e==null){
 							yongbDb.saveUserNameandTouxiangUrl(object.getObjectId(), object.getNick(),object.getTouXiangUrl());
-							yongbDb.saveData(object.getObjectId(),object.getNick(),object.getSex(), object.getAge(), object.getZhiye(),object.getUsername());
+							yongbDb.saveData(object.getObjectId(),object.getNick(),object.getSex(), object.getAge(), object.getZhiye(),object.getUsername(),object.isCanCall());
 							if(object.getTouXiangUrl()!=null){      //当存在有相应的Url值
 							     checkJiaZai(object.getObjectId(),object.getTouXiangUrl());
 							}
@@ -763,9 +771,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 								   }
 							 }
 						}else if(e.getErrorCode()!=9015){
-							Toast.makeText(context,"失败，"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
+							Toast.makeText(context,"失败，网络出错，请稍后尝试"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
 						}else {
-							Toast.makeText(context,"失败，"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
+							Toast.makeText(context,"失败，网络出错，请稍后尝试"+e.getErrorCode()+e.getMessage(),Toast.LENGTH_SHORT).show();
 						}
 						
 					}
@@ -939,6 +947,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	              timer.cancel();
 	           if(task!=null)
 	              task.cancel();
+	           if(objStrings!=null)
+	              objStrings.clear();
 	            Log.d("Main","onDestroy");
 		}
 		@Override

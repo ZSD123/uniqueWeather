@@ -556,6 +556,8 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
 							c.deleteMessage(adapter.getMessages().get(i));
 						}
 						
+						BmobIM.getInstance().deleteConversation(c.getConversationId());
+						
 						adapter.getMessages().clear();
 						adapter.notifyDataSetChanged();
 						
@@ -641,7 +643,13 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
 									   friends.add(friend);
 									   friends.add(friend2);
 									}
+								
+								if(popupWindow!=null&&popupWindow.isShowing())
+									popupWindow.dismiss();
+								
 								UserModel.getInstance().deleteFriends(ChatActivity.this, friends,c,adapter);
+								
+								
 								
 								}else {
 									Toast.makeText(ChatActivity.this,"É¾³ýÊ§°Ü,"+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -714,7 +722,9 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
 							@Override
 							public void done(String a, BmobException e) {
 								if(e==null){
-									
+									if(popupWindow!=null&&popupWindow.isShowing())
+										popupWindow.dismiss();
+									finish();
 								}else {
 									Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 								}

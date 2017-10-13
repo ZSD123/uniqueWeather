@@ -16,7 +16,8 @@ public class yonghudbHelper extends SQLiteOpenHelper {
     		+ "nickName Text,"
     		+ "sex Text,"
     		+ "age Text,"
-    		+ "zhiye Text)";
+    		+ "zhiye Text,"
+    		+ "canCall integer)";
 	public yonghudbHelper(Context context, String name, CursorFactory factory,
 			int version) {
 		super(context, name, factory, version);

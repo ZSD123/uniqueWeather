@@ -46,6 +46,7 @@ public class manageAct extends baseActivity {
 		final List<String> list=new ArrayList<String>();
 		list.add("修改密码");
 		list.add("黑名单");
+		list.add("设置附近人是否可以打电话");
 		 if(loginAct.isEmail(currentUser.getUsername())&&!currentUser.getEmailVerified()){
 			  list.add("邮箱认证");
 		 }
@@ -97,6 +98,9 @@ public class manageAct extends baseActivity {
 					 Intent intent=new Intent(manageAct.this,blackAct.class);
 					 startActivity(intent);
 				 }else if(position==2){
+					 Intent intent=new Intent(manageAct.this,setMoblieCall.class);
+					 startActivity(intent);
+				 }else if(position==3){
 					 Intent intent=new Intent(manageAct.this,emailVerifyAct.class);
 					 startActivity(intent);
 				 }

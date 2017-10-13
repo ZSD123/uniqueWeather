@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+  
+    <Button  
+        android:id="@+id/buttonInvite"  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:layout_alignParentLeft="true"  
+        android:background="#333333"
+        android:textColor="#FFFFFF"
+        android:text="邀请好友" />  
+   <Button  
+        android:id="@+id/buttonSearch"  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:layout_alignParentLeft="true"  
+        android:layout_below="@id/buttonInvite"  
+        android:gravity="center"
+        android:background="#333333"
+        android:textColor="#FFFFFF"
+        android:text="账号搜索" /> 
+ 
+ 
+</RelativeLayout>

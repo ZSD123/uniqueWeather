@@ -33,6 +33,7 @@ public class guanYuAct extends baseActivity {
 		listView=(ListView)findViewById(R.id.listview);
 		final List<String> list=new ArrayList<String>();
 		list.add("π¶ƒ‹ΩÈ…‹");
+		list.add("∑¥¿°");
 		BaseAdapter baseAdapter=new BaseAdapter() {
 			
 			@Override
@@ -76,6 +77,9 @@ public class guanYuAct extends baseActivity {
 					int position, long id) {
 				 if(position==0){
 				     Intent intent=new Intent(guanYuAct.this,functionAct.class);
+				     startActivity(intent);
+				 }else if(position==1){
+				     Intent intent=new Intent(guanYuAct.this,fankuiAct.class);
 				     startActivity(intent);
 				 }
 				

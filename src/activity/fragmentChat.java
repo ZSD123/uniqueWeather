@@ -51,8 +51,10 @@ import android.view.ViewGroup;
 
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
 import android.widget.ImageView;
@@ -134,13 +136,15 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	private List<BmobIMConversation> converList=new ArrayList<BmobIMConversation>();//这里是为了回应点击事件进行加载MyUser的信息资料
     private MyHorizontalView myHorizontalView;
 	private static Context context;
-
+     
+	public static PopupWindow popupWindow;
+	
 	public fragmentChat(){
 	}
 	
   
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	public View onCreateView(final LayoutInflater inflater, ViewGroup container,
 			 Bundle savedInstanceState) 
     { 
             View view = null;;
@@ -157,7 +161,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	        converdb=conversationDB.getInstance(getActivity());
 		
 	        MyUser user=MyUser.getCurrentUser(MyUser.class);
-            if(user.getObjectId()!=null)
+            if(user!=null&&user.getObjectId()!=null)
               BmobIM.connect(user.getObjectId(),new ConnectListener() {
 				
 				@Override
@@ -174,6 +178,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
             
             Button button1;
             Button button2;//logout Button
+            ImageView jia;  //加号按钮
+            
             TextView myAccount;     //我的名片TextView 
             TextView manage;     //账户管理
             View view3;    //消息界面View
@@ -185,6 +191,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
 			button2=(Button)view.findViewById(R.id.button1);
+			jia=(ImageView)view.findViewById(R.id.jia);
 			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
 			manage=(TextView)view.findViewById(R.id.manage);
@@ -220,13 +227,17 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
 			
-					if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP)
+					if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP){
 				    	if(myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
 						   myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
 						   return true;
 				     	}
+				    	if(popupWindow!=null&&popupWindow.isShowing()){
+				    		popupWindow.dismiss();
+				    		return true;
+				    	 }
+					}
 					return false;
-					
 				}
 			});
             conversationList.setOnItemClickListener(new OnItemClickListener() {
@@ -234,10 +245,14 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
-					
 						final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+											
 						bmobIMUserInfo.setUserId(converList.get(position).getConversationId());
-						bmobIMUserInfo.setName(converList.get(position).getConversationTitle());
+						if(converList.get(position).getConversationTitle()!=null&&!converList.get(position).getConversationTitle().equals(""))
+					    	bmobIMUserInfo.setName(converList.get(position).getConversationTitle());
+						else if(converList.get(position).getConversationId()!=null){
+							bmobIMUserInfo.setName(converList.get(position).getConversationId());
+						}
 						bmobIMUserInfo.setAvatar(converList.get(position).getConversationIcon());
 				     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
 							
@@ -263,7 +278,37 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					
 				}
 			});
-            
+            conversationList.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent,
+						View view, final int position, long id) {
+					 AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
+				     final String[] xuanzeweizhi={"删除该会话"};
+				     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							  if(which==0){
+								   bmobIM.deleteConversation(converList.get(position).getConversationId());
+									converdb.saveNewContentById(converList.get(position).getConversationId(),"");
+									converdb.clearUnReadNumById(converList.get(position).getConversationId());
+									converdb.saveTimeById(converList.get(position).getConversationId(), 0);
+									
+									if(converdb.getIsFriend(converList.get(position).getConversationId())==0){//如果是陌生人的话就直接删除
+								         converdb.deleteCoversationById(converList.get(position).getConversationId());
+							        }
+									
+									
+									fragmentChat.refreshConversations(2,converList.get(position).getConversationId());
+							
+							  }
+						}
+					});
+				     builder.show();
+					return true;
+				}
+			});
             bmobIM=BmobIM.getInstance();
             conversations=bmobIM.loadAllConversation();
             
@@ -287,6 +332,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 								else if(list.get(i).getMessage().getMsgType().equals(BmobIMMessageType.VOICE.getType()))
 									content="[语音]";
 							    
+						
 							    converdb.saveId(list.get(i).getConversation().getConversationId(), 0);
 							    converdb.saveNickById(list.get(i).getConversation().getConversationId(), list.get(i).getFromUserInfo().getName()) ;   
 								converdb.saveNewContentById(id, content);
@@ -479,8 +525,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 										   if(converdb.getIsFriend(conversations.get(i).getConversationId())!=2)  {
 								    
 											   count++;   //1、确定真正的有消息，2、确定的是该消息属于本账户，3、是防止自己和自己的对话加入，4、是防止拒绝信息加入，5、拉近黑名单的无需显示在会话列表中,
-								      
-										   }
+								          }
 								
 							 }
 						}
@@ -520,11 +565,16 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
 
-					if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP)
+					if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP){
 				    	if(myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
 						   myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
 						   return true;
 				     	}
+				    	if(popupWindow!=null&&popupWindow.isShowing()){
+				    		popupWindow.dismiss();
+				    		return true;
+				    	 }
+					}
 					return false;
 					
 				}
@@ -792,13 +842,19 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
-						if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP)
+						if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP){
 					    	if(myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
 							   myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
 							   return true;
 					     	}
+					    	if(popupWindow!=null&&popupWindow.isShowing()){
+					    		popupWindow.dismiss();
+					    		return true;
+					    	 }
+						}
 						return false;
 						
+					
 					}
 				});
 		        
@@ -806,14 +862,22 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					
 					@Override
 					public void onClick(View v) {
-						chatPager.setCurrentItem(0);
-					 	horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth,0);
-					 	
-						buttonMes.setBackgroundResource(R.drawable.danblue);
-						buttonMes.setTextColor(Color.parseColor("#FF68B4FF"));
 						
-						buttonCon.setBackgroundResource(R.drawable.white);
-						buttonCon.setTextColor(Color.parseColor("black"));
+					 	
+					 	if(popupWindow!=null&&popupWindow.isShowing())
+				    		popupWindow.dismiss();
+					 	else {
+					 		chatPager.setCurrentItem(0);
+						 	horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth,0);
+						 	
+						 	buttonMes.setBackgroundResource(R.drawable.danblue);
+							buttonMes.setTextColor(Color.parseColor("#FF68B4FF"));
+							
+							buttonCon.setBackgroundResource(R.drawable.white);
+							buttonCon.setTextColor(Color.parseColor("black"));
+						}
+					 	
+						
 						
 					}
 				});
@@ -822,13 +886,20 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					
 					@Override
 					public void onClick(View v) {
-						chatPager.setCurrentItem(1);
 						
-						buttonCon.setBackgroundResource(R.drawable.danblue);
-						buttonCon.setTextColor(Color.parseColor("#FF68B4FF"));
 						
-						buttonMes.setBackgroundResource(R.drawable.white);
-						buttonMes.setTextColor(Color.parseColor("black"));
+						if(popupWindow!=null&&popupWindow.isShowing())
+				    		popupWindow.dismiss();
+						else {
+							chatPager.setCurrentItem(1);
+							buttonCon.setBackgroundResource(R.drawable.danblue);
+							buttonCon.setTextColor(Color.parseColor("#FF68B4FF"));
+							
+							buttonMes.setBackgroundResource(R.drawable.white);
+							buttonMes.setTextColor(Color.parseColor("black"));
+						}
+						
+						
 						
 					}
 				});
@@ -874,6 +945,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 						startActivity(intent);
 					}
 				});
+			    
 			    button2.setOnClickListener(new OnClickListener() {
 					
 					@Override
@@ -915,6 +987,50 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					  
 					}
 				});
+			    
+			    jia.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						if(popupWindow!=null&&popupWindow.isShowing()){
+							popupWindow.dismiss();
+							
+						}else {
+					    	View customView=inflater.inflate(R.layout.popview_item1, null,false);
+					    	popupWindow=new PopupWindow(customView,Utility.dip2px(context,100), Utility.dip2px(context,300));//dp转px
+					    	popupWindow.setAnimationStyle(R.style.AnimationFade);
+					    	
+					    	Button buttonInvite=(Button)customView.findViewById(R.id.buttonInvite);
+					    	Button buttonSearch=(Button)customView.findViewById(R.id.buttonSearch);
+					    	buttonInvite.setOnClickListener(new OnClickListener() {
+								
+								@Override
+								public void onClick(View v) {
+									Intent sendIntent = new Intent();
+									sendIntent.setAction(Intent.ACTION_SEND);
+									sendIntent.putExtra(Intent.EXTRA_TEXT, "这里有个好玩的app，一起来玩吧。http://shouji.baidu.com/software/22466614.html");
+									sendIntent.setType("text/plain");
+									startActivity(sendIntent);
+									
+								}
+							});
+					    	buttonSearch.setOnClickListener(new OnClickListener() {
+								
+								@Override
+								public void onClick(View v) {
+									Intent intent=new Intent(context,searchAct.class);
+									startActivity(intent);
+									
+								}
+							});
+					    	
+							popupWindow.showAsDropDown(v,0,5);
+						}
+						
+						
+					}
+				});
+			    
 			    userName.setOnClickListener(new OnClickListener() {
 					
 					@Override
@@ -930,6 +1046,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			
 		return view;
 	}
+	
+
 	
 	  public Bitmap getPicture()
 	    {   String ALBUM_PATH=Environment.getExternalStorageDirectory()+"/download/"+"weather"+".png";
@@ -1063,6 +1181,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					  friends=converdb.getFriends();
 					  
                       baseAdapter2.notifyDataSetChanged();
+                      
 					}else if(e.getErrorCode()==9015){
 						Toast.makeText(context,"查询朋友有误,请稍后再尝试"+e.getMessage(),Toast.LENGTH_SHORT).show();
 					}else {

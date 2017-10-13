@@ -122,6 +122,9 @@
         <activity 
             android:name="activity.manageAct"
             ></activity>
+        <activity
+            android:name="activity.fankuiAct"
+            ></activity>
         <activity 
             android:name="activity.modifypasswordAct"
             ></activity>
@@ -144,6 +147,15 @@
           <activity 
               android:name="activity.emailVerifyAct"
               ></activity>
+          <activity 
+              android:name="activity.setMoblieCall"
+              ></activity>
+           <activity 
+            android:name="activity.searchAct"
+            ></activity>
+             <activity 
+            android:name="activity.searchResultAct"
+            ></activity>
         <service
             android:name="service.autoUqdateService"/>
         <service 

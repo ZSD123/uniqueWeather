@@ -1,8 +1,10 @@
 package activity;
 
 //一定要精益求精，努力做到最好，为社会创造价值！
+//@author 张圣德大帝
 
 import java.util.List;
+
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -71,6 +73,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 public class loginAct extends Activity{
 
     private CustomFontTextView customFont;
@@ -81,11 +84,13 @@ public class loginAct extends Activity{
     private int heightPixels;
     
     
+    
     private Button button1;  //登录按钮
     private Button button2;  //手机验证登录
     private Button button3;  //快速注册
     
-    private TextView text1;  //先体验
+    private TextView text1;  //忘记密码
+
     private TextView account;       //帐号
     private TextView password;       //密码
     
@@ -109,7 +114,7 @@ public class loginAct extends Activity{
     public static String installationId;
     
     public static BmobIMApplication application;
-
+    
     @Override
 	public void onCreate(Bundle savedInstanceState)
      {
@@ -144,6 +149,7 @@ public class loginAct extends Activity{
 	    caihong=(myCaihong)findViewById(R.id.caihong);
 	    text1=(TextView)findViewById(R.id.wangjimima);
 	    text1.setText(Html.fromHtml("<u>"+"忘记密码"+"</u>"));
+
 	    account=(TextView)findViewById(R.id.account);
 	    password=(TextView)findViewById(R.id.password);
 	    
@@ -186,7 +192,7 @@ public class loginAct extends Activity{
 			
 			}
 		});
-	    
+	   
 	      button1.setOnTouchListener(new OnTouchListener() {
 			
 			@Override
