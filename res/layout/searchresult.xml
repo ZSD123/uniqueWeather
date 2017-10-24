@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6E6FA">
+    android:background="#E4EDF5">
   <activity.CustomFontTextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -39,8 +39,18 @@
       />
   </LinearLayout>
   <TextView 
-      android:id="@+id/text1"
+      android:id="@+id/textCity"
       android:layout_below="@id/lin"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textSize="20sp"
+      android:layout_centerHorizontal="true"
+      android:layout_margin="10dp"
+      android:visibility="gone"
+      />
+  <TextView 
+      android:id="@+id/text1"
+      android:layout_below="@id/textCity"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textSize="20sp"

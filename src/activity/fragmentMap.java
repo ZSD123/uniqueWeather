@@ -10,6 +10,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import message.AddFriendMessage;
+import model.Jubao;
+import model.location;
 import myCustomView.MapCircleImageView;
 
 import cn.bmob.newim.BmobIM;
@@ -21,8 +23,12 @@ import cn.bmob.newim.listener.ConversationListener;
 import cn.bmob.newim.listener.MessageSendListener;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.datatype.BmobGeoPoint;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListener;
+import cn.bmob.v3.listener.SaveListener;
+import cn.bmob.v3.listener.UpdateListener;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -47,6 +53,7 @@ import com.amap.api.maps2d.model.CircleOptions;
 import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.maps2d.model.Marker;
 import com.amap.api.maps2d.model.MarkerOptions;
+import com.amap.api.services.a.am;
 import com.amap.api.services.a.ca;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.nearby.NearbySearch;
@@ -66,7 +73,10 @@ import Util.Utility;
 import Util.download;
 import android.R.integer;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -89,6 +99,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -124,6 +137,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
     
 	  private static Context context;
 	  private LatLonPoint latlng;
+	  
+	  private BmobGeoPoint point;
+	  
 	  public static CameraUpdate cameraUpdate;
 	  public NearbyQuery query;  
       
@@ -141,6 +157,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
       public static View  yonghuDataView;  //附近用户资料卡View
       private List<Marker> mFujinMarker=new ArrayList<Marker>(); //没有设置头像直接添加头像的附近用户Marker
       private Bitmap bitmap11;
+      private boolean flag;
+      private AlertDialog.Builder builder;
+      private AlertDialog dialog;
   	  public fragmentMap(){
 	 	 context=getContext();
 	  }
@@ -152,6 +171,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		
 		view=inflater.inflate(R.layout.map,container,false);
 		ImageButton locButton;
+		ImageButton renButton;
 		
 		fuzhiMap=(RelativeLayout)view;
 		
@@ -162,16 +182,105 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
 		pre=PreferenceManager.getDefaultSharedPreferences(context);
 		
+		flag=pre.getBoolean("flag", true);    //表示要弹出提示窗口
+		if(flag){
+			builder=new AlertDialog.Builder(context);
+			
+			builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface d, int which) {
+					 editor.putBoolean("flag",flag);
+					 editor.commit();
+					 
+					 if(dialog.isShowing())
+					    	dialog.dismiss();
+				}
+			});
+			View view2=LayoutInflater.from(context).inflate(R.layout.mapdialog,null);
+			builder.setView(view2);
+			
+			CheckBox checkBox =(CheckBox)view2.findViewById(R.id.checkbox);
+			checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					 flag=!isChecked;
+				}
+			});
+
+	        dialog=builder.create();
+	        if(!dialog.isShowing())
+		    	dialog.show();
+		}
+		
 		
 		lat=pre.getFloat("lat", 39);
 		lon=pre.getFloat("lon",116);
 		
 		
 		zoom=pre.getFloat("zoom", 18);
+		
+		latlng=new LatLonPoint(lat, lon);
+		
 		latLng1=new LatLng(lat, lon);
+			
+		point=new BmobGeoPoint(lon, lat);
+		
+		BmobQuery<location> bmobQuery=new BmobQuery<location>();
+	 	bmobQuery.addWhereEqualTo("myUser", weather_info.currentUser);
+		bmobQuery.findObjects(new FindListener<location>() {
+
+		  @Override
+		  public void done(List<location> list,BmobException e) {
+              if(e==null){
+            	if(list.size()>0){
+            	 location lo=new location();
+            	 lo.setMyLocation(point);
+				 lo.update(list.get(0).getObjectId(),new UpdateListener() {
+														
+					@Override
+				public void done(BmobException e) {
+						if(e==null){
+							
+						}else {
+						 Toast.makeText(context,e.getMessage(), Toast.LENGTH_SHORT).show();
+							}
+															
+			         	}
+							});
+            	}else{
+					location lo1=new location();
+					
+					lo1.setMyLocation(point);
+					lo1.setMyUser(weather_info.currentUser);
+					lo1.save(new SaveListener<String>() {
+
+						@Override
+						public void done(String a,
+								BmobException e) {
+							if(e==null){
+
+							}else {
+								 Toast.makeText(context,e.getMessage(), Toast.LENGTH_SHORT).show();
+						  	}
+							
+						}
+						
+						
+						
+					});
+				}
+											
+		}else {
+			 Toast.makeText(context,e.getMessage(), Toast.LENGTH_SHORT).show();
+	    	}
+		}});
+		
 		mMapView=(MapView)view.findViewById(R.id.map);
 		mMapView.onCreate(savedInstanceState);
 		locButton=(ImageButton)view.findViewById(R.id.locationButton);
+		renButton=(ImageButton)view.findViewById(R.id.renren);
 		yonghuString=(TextView)view.findViewById(R.id.yonghuString);
 		refreshBtn=(ImageButton)view.findViewById(R.id.refreshbtn);
 		
@@ -200,11 +309,13 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	    aMap.setMyLocationEnabled(true); 
 	    aMap.setOnCameraChangeListener(this);
 	    aMap.setOnMarkerClickListener(this);
+	   
 	    
 	    UiSettings uiSettings;     //AMap的设置
 	    
 	    uiSettings=aMap.getUiSettings();
 	    uiSettings.setAllGesturesEnabled(true);
+	    
 	    if(context==null)
 	        context=(Context)getActivity();
 	    mSensorEventHelper = new SensorEventHelper(context);
@@ -240,7 +351,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
         //设置搜索的坐标体系
         query.setCoordType(NearbySearch.AMAP);
         //设置搜索半径
-        query.setRadius(500);
+        query.setRadius(5000);
         //设置查询的时间
         query.setTimeRange(10000);
         //调用异步查询接口
@@ -282,6 +393,36 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 						NearbySearch.getInstance(context).clearUserInfoAsyn();
 						Toast.makeText(context, "当前状态:去掉地理位置信息，停止上传地理位置信息", Toast.LENGTH_LONG).show();
                       }
+					
+					BmobQuery<location> query=new BmobQuery<location>();   //删除表格当中的
+					query.addWhereEqualTo("myUser", weather_info.currentUser);
+					query.findObjects(new FindListener<location>() {
+
+						@Override
+						public void done(List<location> list, BmobException e) {
+							if(e==null){
+								if(list!=null&&list.size()>0){
+									location loc=new location();
+									loc.setObjectId(list.get(0).getObjectId());
+									loc.delete(new UpdateListener() {
+										
+										@Override
+										public void done(BmobException e) {
+											if(e==null){
+												
+											}else {
+												Toast.makeText(context, "出错，"+e.getMessage(), Toast.LENGTH_LONG).show();
+											}
+											
+										}
+									});
+								}
+							}else {
+								Toast.makeText(context, "出错，"+e.getMessage(), Toast.LENGTH_LONG).show();
+							}
+							
+						}
+					});
 				}else if(zuji==false){
 					zuji=true;
 					zujiBtn.setBackgroundResource(R.drawable.shoeprints);
@@ -307,13 +448,28 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			}
 		});
 		
+	    renButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent=new Intent(context,fujinlieAct.class);
+				startActivity(intent);
+				
+			}
+		});
+	    
 	    locButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) 
 			{    lat=pre.getFloat("lat", 39);
 				 lon=pre.getFloat("lon", 116);
-				 zoom=pre.getFloat("zoom",18);
+				 
+				 editor.putFloat("zoom", aMap.getCameraPosition().zoom);
+				 editor.commit();
+				 
+				 zoom=aMap.getCameraPosition().zoom;
+				 
 				 latLng1=new LatLng(lat, lon);
 				 cameraUpdate=CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng1,zoom,0,0));
                  aMap.animateCamera(cameraUpdate);
@@ -329,6 +485,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			RotateAnimation animation=new RotateAnimation(0, 360,Animation.RELATIVE_TO_SELF,0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 			animation.setDuration(1000);
 			refreshBtn.startAnimation(animation);
+			
+			
 		}
 	});
 	    
@@ -373,7 +531,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	        	  yuanLatLng=cameraPosition.target;
 	          }
 	          searchLatLng=cameraPosition.target;
-	          if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>1000)
+	          if(AMapUtils.calculateLineDistance(yuanLatLng, searchLatLng)>100)
 	          {   yuanLatLng=searchLatLng;
 	        	  query.setCenterPoint(new LatLonPoint(searchLatLng.latitude, searchLatLng.longitude));
 			      mNearbySearch.searchNearbyInfoAsyn(query);
@@ -448,9 +606,14 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			              }
 			}
 			     else if(chucuoonce==0){
-			             Toast.makeText(context,"周边搜索出现异常，异常码为："+resultCode ,Toast.LENGTH_LONG).show();
-			             chucuoonce=1;
-			         }
+			    	     if(resultCode==1802){
+			               Toast.makeText(context,"周边搜索出现异常，请先检查网络状况是否良好" ,Toast.LENGTH_LONG).show();
+			               chucuoonce=1;
+			    	     }else {
+			    	    	 Toast.makeText(context,"周边搜索出现异常，异常码为："+resultCode ,Toast.LENGTH_LONG).show();
+				               chucuoonce=1;
+				        	}
+			          }
 
 		
 		
@@ -465,6 +628,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
+	
 	@Override
 	public void onLocationChanged(AMapLocation amaplocation) {
 		if(amaplocation!=null)
@@ -478,8 +644,12 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 				editor.putFloat("lon", (float)lon);
 				editor.putFloat("zoom", aMap.getCameraPosition().zoom);
 				editor.commit();
-				latlng=new LatLonPoint(lat, lon);
+				
+				latlng.setLatitude(lat);
+				latlng.setLongitude(lon);
+				
 				latLng1=new LatLng(lat, lon);
+				
 				if (!mFirstFix) {
 					mFirstFix = true;
 					addCircle(latLng1, amaplocation.getAccuracy());//添加定位精度圆

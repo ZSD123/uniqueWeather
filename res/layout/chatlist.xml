@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<myCustomView.messageSwipe xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sw_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-<ListView 
+<android.support.v7.widget.RecyclerView 
     android:id="@+id/chatList"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-   
-</ListView>
-</android.support.v4.widget.SwipeRefreshLayout>
+</android.support.v7.widget.RecyclerView>
+</myCustomView.messageSwipe>

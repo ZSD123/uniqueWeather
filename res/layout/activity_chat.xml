@@ -81,10 +81,10 @@
     android:id="@+id/tv_voice_tips" 
     android:layout_centerHorizontal="true" 
     android:textSize="14sp"
-     android:text="@string/voice_up_tips"
-      android:layout_marginTop="10dp"
+    android:text="@string/voice_up_tips"
+    android:layout_marginTop="10dp"
     android:layout_below="@id/iv_record"
-     style="@style/style_text_white"/>
+    style="@style/style_text_white"/>
 
 </RelativeLayout>
 

@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#E4EDF5"
     android:orientation="vertical" >
  <activity.CustomFontTextView
     android:id="@+id/text_EndRain"
@@ -16,7 +17,7 @@
     <TextView 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="V 1.0"
+        android:text="V 1.1"
         android:layout_gravity="center_horizontal"
         />
     <ListView 

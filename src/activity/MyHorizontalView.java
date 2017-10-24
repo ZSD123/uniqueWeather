@@ -44,7 +44,7 @@ public class MyHorizontalView extends HorizontalScrollView {
 		mContent.getLayoutParams().width=mScreenWidth;
 		once=true;
 		}
-	super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
    @Override
    public void onLayout(boolean changed,int l,int t,int r,int b)
@@ -97,5 +97,14 @@ protected void onScrollChanged(int l, int t, int oldl, int oldt)
 	super.onScrollChanged(l, t, oldl, oldt);
 	
 }
+      @Override
+      public boolean onInterceptTouchEvent(MotionEvent ev) {
+	  if(!fragmentChat.canScroll){
+		  return false;
+	  }else {
+		  return super.onInterceptTouchEvent(ev);
+	   }
+     }
+
   
-}
+  }

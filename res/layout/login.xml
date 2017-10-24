@@ -7,7 +7,7 @@
     android:id="@+id/relativeRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6E6FA" >
+    android:background="#ECEDF1" >
  
  <activity.CustomFontTextView
     android:id="@+id/text_EndRain"
@@ -98,7 +98,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/linear2"
         android:layout_centerHorizontal="true"
-        android:background="#00FF00"
+        android:background="#1FBAF3"
         android:text="登录"
         />
       <Button 
@@ -170,7 +170,6 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:text="登录中"
-         
          android:layout_below="@id/progressBar"
          />
   </RelativeLayout>

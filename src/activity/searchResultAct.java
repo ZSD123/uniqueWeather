@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import message.AddFriendMessage;
 import model.Black;
 import model.Jubao;
@@ -28,6 +30,8 @@ import cn.bmob.v3.listener.UpdateListener;
 
 import com.sharefriend.app.R;
 
+import Util.Http;
+import Util.HttpCallbackListener;
 import Util.Utility;
 import Util.download;
 import android.app.Activity;
@@ -50,6 +54,8 @@ public class searchResultAct extends Activity {
     private Button button;
     private TextView textView2;
     private boolean flag=false;  //判断是否有问题
+    
+    private String city;
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -61,11 +67,43 @@ public class searchResultAct extends Activity {
 		button=(Button)findViewById(R.id.button);
 		textView2=(TextView)findViewById(R.id.text1);
 		
+		final TextView textCity=(TextView)findViewById(R.id.textCity);
+	
 		
 		final String nick=getIntent().getExtras().getString("nick");
 		final String url=getIntent().getExtras().getString("touxiang");
 		final String objectId=getIntent().getExtras().getString("objectId");
 		
+		final double lat=getIntent().getExtras().getDouble("lat");
+		final double lon=getIntent().getExtras().getDouble("lon");
+		
+		if(lat!=0&&lon!=0){
+			Http.queryAreaByXY(lat,lon,"http://route.showapi.com/238-2", new HttpCallbackListener() {
+				
+				@Override
+				public void onFinish(String response) {
+					try{
+					 JSONObject jsonObject=new JSONObject(response);
+		    		 JSONObject jsonObject2=jsonObject.getJSONObject("showapi_res_body");
+		    		 JSONObject jsonObject3=jsonObject2.getJSONObject("addressComponent");
+		    		 String locProvince=jsonObject3.getString("province");
+		    		 String locCity=jsonObject3.getString("city");
+		    		 
+		    		 city=locProvince+locCity;
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					
+					runOnUiThread(new Runnable() {
+						public void run() {
+							textCity.setVisibility(View.VISIBLE);
+							textCity.setText(city);
+						}
+					});
+					
+				}
+			});
+		}
 		
 		BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
 		MyUser myUser=new MyUser();

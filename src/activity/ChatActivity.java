@@ -749,8 +749,8 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     
     
     private void juBao(final int i){
-      	    BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
-		 	bmobQuery.addWhereEqualTo("myUser", myUser);
+      	     BmobQuery<Jubao> bmobQuery=new BmobQuery<Jubao>();
+		 	 bmobQuery.addWhereEqualTo("myUser", myUser);
 			 bmobQuery.findObjects(new FindListener<Jubao>() {
 
 			@Override

@@ -12,6 +12,8 @@ import model.Black;
 import model.Friend;
 import model.UserModel;
 import myCustomView.CircleImageView;
+import myCustomView.DividerItemDecoration;
+import myCustomView.messageSwipe;
 
 import myCustomView.myChatPager;
 import service.autoUqdateService;
@@ -22,6 +24,9 @@ import Util.TimeUtil;
 import Util.Utility;
 import Util.download;
 
+import adapter.OnRecyclerViewListener;
+import adapter.friendAdapter;
+import adapter.messageAdapter;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -40,12 +45,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.OnScrollListener;
 
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnDragListener;
+import android.view.View.OnScrollChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
@@ -107,7 +119,6 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
     
     private static Bitmap bitmap;  //天气bitmap
     
-    public static MyHorizontalView horizontalView;
 
     private AMapLocationClientOption mLocationOption=null;
     private AMapLocationClient mLocationClient;
@@ -117,10 +128,12 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	 private View view4;     //联系人界面view
 	private List<View> views;    //装载消息界面view和联系人界面view的views
 	
-	private static BaseAdapter baseAdapter1;
-	private static BaseAdapter baseAdapter2;//朋友列表
-	
+	private static messageAdapter messageadapter;  //消息列表适配器
 
+	private static friendAdapter friendadapter;    //朋友列表适配器
+	
+	
+	
 	public static conversationDB converdb;  //对话数据表
 	private boolean once=false;
 	private String username;
@@ -133,8 +146,11 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	
 	public static BmobIM bmobIM;
     public static  List<BmobIMConversation>  conversations;
-	private List<BmobIMConversation> converList=new ArrayList<BmobIMConversation>();//这里是为了回应点击事件进行加载MyUser的信息资料
-    private MyHorizontalView myHorizontalView;
+
+    public static  MyHorizontalView myHorizontalView;
+    private LinearLayoutManager mLinearLayoutManager;
+    public static boolean canScroll=true;  //设置是否可以滑动
+    
 	private static Context context;
      
 	public static PopupWindow popupWindow;
@@ -182,19 +198,25 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
             
             TextView myAccount;     //我的名片TextView 
             TextView manage;     //账户管理
+            TextView design;    //设计界面
+            
             View view3;    //消息界面View
-            final SwipeRefreshLayout sw_refresh1;   //消息界面的refresh
+            final messageSwipe sw_refresh1;   //消息界面的refresh
             final SwipeRefreshLayout sw_refresh2;  //联系人列表的refresh
             
 			weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
-			button2=(Button)view.findViewById(R.id.button1);
+			button2=(Button)view.findViewById(R.id.buttonlogout);
+			
 			jia=(ImageView)view.findViewById(R.id.jia);
-			horizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
+
 			myAccount=(TextView)view.findViewById(R.id.myAccount);
 			manage=(TextView)view.findViewById(R.id.manage);
+			design=(TextView)view.findViewById(R.id.design);
+			
+			
 		    final Button  buttonMes=(Button)view.findViewById(R.id.chat_mes);
 		    final Button buttonCon=(Button)view.findViewById(R.id.chat_con);
 			newFriendImage=(ImageView)view.findViewById(R.id.newfriend_image);
@@ -204,29 +226,115 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			view3=layoutInflater.inflate(R.layout.chatlist,null);
 			view4=layoutInflater.inflate(R.layout.contactslist,null);
 			
+
+	          
+            bmobIM=BmobIM.getInstance();
+            conversations=bmobIM.loadAllConversation();
 			
-            ListView conversationList=(ListView)view3.findViewById(R.id.chatList);
-            sw_refresh1=(SwipeRefreshLayout)view3.findViewById(R.id.sw_refresh);
+            int num=getCount();
+            
+			RecyclerView messageRecyclerView=(RecyclerView)view3.findViewById(R.id.chatList);
+			mLinearLayoutManager=new LinearLayoutManager(context);
+			
+			messageRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+			messageRecyclerView.setItemAnimator(new DefaultItemAnimator());
+			messageRecyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL_LIST));
+			messageadapter=new messageAdapter(context,num);
+			
+            messageadapter.setOnRecyclerViewListener(new OnRecyclerViewListener() {
+				
+				@Override
+				public boolean onItemLongClick(final int position) {
+					 AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
+				     final String[] xuanzeweizhi={"删除该会话"};
+				     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							  if(which==0){
+								   bmobIM.deleteConversation(conversations.get(position).getConversationId());
+									converdb.saveNewContentById(conversations.get(position).getConversationId(),"");
+									converdb.clearUnReadNumById(conversations.get(position).getConversationId());
+									converdb.saveTimeById(conversations.get(position).getConversationId(), 0);
+									
+									if(converdb.getIsFriend(conversations.get(position).getConversationId())==0){//如果是陌生人的话就直接删除
+								         converdb.deleteCoversationById(conversations.get(position).getConversationId());
+							        }
+									
+									
+									fragmentChat.refreshConversations(2,conversations.get(position).getConversationId());
+							
+							  }
+						}
+					});
+				     builder.show();
+					return true;
+			
+				}
+				
+				@Override
+				public void onItemClick(int position) {
+					   if(myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
+						   myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
+						  
+				     	}else if(popupWindow!=null&&popupWindow.isShowing()){
+				    		popupWindow.dismiss();
+				    		
+				       }else{
+				    	   final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+							
+							bmobIMUserInfo.setUserId(conversations.get(position).getConversationId());
+							if(conversations.get(position).getConversationTitle()!=null&&!conversations.get(position).getConversationTitle().equals(""))
+						    	bmobIMUserInfo.setName(conversations.get(position).getConversationTitle());
+							else if(conversations.get(position).getConversationId()!=null){
+								bmobIMUserInfo.setName(conversations.get(position).getConversationId());
+							}
+							bmobIMUserInfo.setAvatar(conversations.get(position).getConversationIcon());
+					     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
+								
+								@Override
+								public void done(BmobIMConversation c, BmobException e) {
+									if(e==null){
+										Bundle bundle=new Bundle();
+										bundle.putSerializable("c",c);
+										bundle.putSerializable("userInfo",bmobIMUserInfo);
+										Intent intent=new Intent(getActivity(),ChatActivity.class);
+										intent.putExtra("bundle", bundle);
+										startActivity(intent);
+										
+									}else {
+		                                   Toast.makeText(getActivity(), e.getMessage(),Toast.LENGTH_SHORT).show();
+									}
+									
+								}
+							});
+						
+							
+				       }
+					
+                   
+				}
+			});
+			
+			
+            sw_refresh1=(messageSwipe)view3.findViewById(R.id.sw_refresh);
             //会话列表下拉刷新事件
             sw_refresh1.setOnRefreshListener(new OnRefreshListener() {
 				
 				@Override
 				public void onRefresh() {
-					conversations=bmobIM.loadAllConversation();
-					baseAdapter1.notifyDataSetChanged();
+					refreshConversations(-1, null);
 					sw_refresh1.setRefreshing(false);
-		
+				
+					
 				}
 			});
             
-        
-         
-          //会话列表点击事件
-            conversationList.setOnTouchListener(new OnTouchListener() {
+             //会话列表点击事件
+            messageRecyclerView.setOnTouchListener(new OnTouchListener() {
 				
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-			
 					if(event.getAction()==MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_UP){
 				    	if(myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
 						   myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
@@ -240,78 +348,6 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					return false;
 				}
 			});
-            conversationList.setOnItemClickListener(new OnItemClickListener() {
-
-				@Override
-				public void onItemClick(AdapterView<?> parent, View view,
-						int position, long id) {
-						final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
-											
-						bmobIMUserInfo.setUserId(converList.get(position).getConversationId());
-						if(converList.get(position).getConversationTitle()!=null&&!converList.get(position).getConversationTitle().equals(""))
-					    	bmobIMUserInfo.setName(converList.get(position).getConversationTitle());
-						else if(converList.get(position).getConversationId()!=null){
-							bmobIMUserInfo.setName(converList.get(position).getConversationId());
-						}
-						bmobIMUserInfo.setAvatar(converList.get(position).getConversationIcon());
-				     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
-							
-							@Override
-							public void done(BmobIMConversation c, BmobException e) {
-								if(e==null){
-									Bundle bundle=new Bundle();
-									bundle.putSerializable("c",c);
-									bundle.putSerializable("userInfo",bmobIMUserInfo);
-									Intent intent=new Intent(getActivity(),ChatActivity.class);
-									intent.putExtra("bundle", bundle);
-									startActivity(intent);
-									
-								}else {
-	                                   Toast.makeText(getActivity(), e.getMessage(),Toast.LENGTH_SHORT).show();
-								}
-								
-							}
-						});
-					
-				
-					
-					
-				}
-			});
-            conversationList.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-				@Override
-				public boolean onItemLongClick(AdapterView<?> parent,
-						View view, final int position, long id) {
-					 AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
-				     final String[] xuanzeweizhi={"删除该会话"};
-				     builder.setItems(xuanzeweizhi, new DialogInterface.OnClickListener() {
-						
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							  if(which==0){
-								   bmobIM.deleteConversation(converList.get(position).getConversationId());
-									converdb.saveNewContentById(converList.get(position).getConversationId(),"");
-									converdb.clearUnReadNumById(converList.get(position).getConversationId());
-									converdb.saveTimeById(converList.get(position).getConversationId(), 0);
-									
-									if(converdb.getIsFriend(converList.get(position).getConversationId())==0){//如果是陌生人的话就直接删除
-								         converdb.deleteCoversationById(converList.get(position).getConversationId());
-							        }
-									
-									
-									fragmentChat.refreshConversations(2,converList.get(position).getConversationId());
-							
-							  }
-						}
-					});
-				     builder.show();
-					return true;
-				}
-			});
-            bmobIM=BmobIM.getInstance();
-            conversations=bmobIM.loadAllConversation();
-            
             
             messageListHandler=new MessageListHandler() {
 				
@@ -346,221 +382,75 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					
 				}
 			};
+			
+
             bmobIM.addMessageListHandler(messageListHandler);
             //会话列表适配器
             //会话列表的ViewHolder
-            class ViewHolder1{
-            	CircleImageView imageView;
-            	TextView nameText;
-            	TextView contentText;
-            	TextView timeText;
-            	TextView unReadText;
-            	
-            }
-          
-  			 baseAdapter1=new BaseAdapter() {
-  				
-  				@Override
-  				public View getView(final int position, View convertView, ViewGroup parent) {
-  					
-  				  	if(converList.size()==0){
-  				     	int count=getCount();   //获得不为0的数目
-  				     	
-  				        int count1=0;
-  						for (int i = 0; count1 < count&&i<conversations.size();i++ ) {
-  						   if(conversations.get(i).getMessages().size()>0){
-  							if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId)){
-  						     if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId())){
-  						      if(!conversations.get(i).getMessages().get(0).getMsgType().equals("decline")){
-  							count1++;   
-  							String id=conversations.get(i).getConversationId();
-       
-							converdb.saveId(id,0);
-							String content="";
-				
-							if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.TEXT.getType()))
-								content=conversations.get(i).getMessages().get(0).getContent();
-	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.IMAGE.getType()))
-	  		                        content="[图片]";
-	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VIDEO.getType()))
-	  							content="[视频]";
-	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals(BmobIMMessageType.VOICE.getType()))
-	  							content="[语音]";
-	  						else if(conversations.get(i).getMessages().get(0).getMsgType().equals("agree"))
-	  							content="我已经通过了你的好友请求，一起来聊天吧";
+            messageRecyclerView.setAdapter(messageadapter);
 
-							converdb.saveNewContentById(id, content);
-							converdb.saveTimeById(id,conversations.get(i).getMessages().get(0).getCreateTime());
-							converdb.saveTouXiangById(id, conversations.get(i).getConversationIcon());
-  							}
-  						   }
-						}
-  					   }	
-  					}
-  						converList=converdb.getConverByTime();
-  					}else {
-  						converList.clear();
-  						converList=converdb.getConverByTime();  //如果不为0就按照时间排序获取会话
-					}
-  				   
-  				  
-  				  	
-  				  	final ViewHolder1 viewHolder1;
-
-  					if(convertView==null){
-  						convertView=layoutInflater.inflate(R.layout.item_conversation, null);
-  						viewHolder1=new ViewHolder1();
-  						viewHolder1.imageView=(CircleImageView)convertView.findViewById(R.id.iv_recent_avatar);
-  						viewHolder1.nameText=(TextView)convertView.findViewById(R.id.tv_recent_name);
-  						viewHolder1.contentText=(TextView)convertView.findViewById(R.id.tv_recent_msg);
-  						viewHolder1.unReadText=(TextView)convertView.findViewById(R.id.tv_recent_unread);
-  						viewHolder1.timeText=(TextView)convertView.findViewById(R.id.tv_recent_time);
-  						convertView.setTag(viewHolder1);
-  						}else {
-  							viewHolder1=(ViewHolder1)convertView.getTag();
-  						}
-  	                 
-  					if(converList.size()>0&&position<converList.size()&&!converList.get(position).getConversationId().equals(weather_info.objectId)){   //禁止和自己发生对话
-  						if(converdb.getNewContentById(converList.get(position).getConversationId())!=null){  //禁止读取信息为空的消息
-  							if(converList.get(position).getConversationTitle()!=null){  //禁止username为空
-  				   
-  					String nickName=converList.get(position).getConversationTitle();
-  					if(nickName!=null){
- 
-  						viewHolder1.nameText.setText(nickName);
-  					}
-  					
-  					String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+converList.get(position).getConversationId()+".jpg_";
-  					File file=new File(path);
-  						if(file.exists()){		
-  						  try {
-  							InputStream is=new FileInputStream(file);
-  							
-  							BitmapFactory.Options opts=new BitmapFactory.Options();
-  							opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
-  							
-  							opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
-  							opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
-  							
-  							opts.inSampleSize=2;
-  							opts.inInputShareable=true;//设置解码位图的尺寸信息
-  							
-  							Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
-  							viewHolder1.imageView.setImageBitmap(bitmap2);
-  						} catch (FileNotFoundException e1) {
-  							// TODO Auto-generated catch block
-  							e1.printStackTrace();
-  						}
-  							path=null;
-  				    }else {
-  				   
-                              if(converList.get(position).getConversationIcon()!=null&&!converList.get(position).getConversationIcon().equals("")){
-                            	 
-      								  new Thread(new Runnable() {
-      										
-      										@Override
-      										public void run() {
-      										    final Bitmap bitmap=Utility.getPicture(converList.get(position).getConversationIcon());
-      											if(bitmap!=null){
-      											
-      												download.saveYonghuPic(bitmap,converList.get(position).getConversationId());
-      												getActivity().runOnUiThread(new Runnable() {
-														
-														@Override
-														public void run() {
-		      												viewHolder1.imageView.setImageBitmap(bitmap);
-															
-														}
-													});
-
-      											}
-      										}
-      									}).start();
-  			                 }else {
-                     
-								viewHolder1.imageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.userpicture));
-							   }
-  						}
-  			                     
-
-				    viewHolder1.contentText.setText(converdb.getNewContentById(converList.get(position).getConversationId()));
-  					
-  					long time=converList.get(position).getUpdateTime();
-  					
-  					viewHolder1.timeText.setText(""+TimeUtil.getChatTime(false,time));
-  					
-  					  if(converdb.getUnReadNumById(converList.get(position).getConversationId())!=0){
-  				    	viewHolder1.unReadText.setVisibility(View.VISIBLE);
-  				    	viewHolder1.unReadText.setText(""+converdb.getUnReadNumById(converList.get(position).getConversationId()));
-  				     	}
-  					  else {
-						viewHolder1.unReadText.setVisibility(View.INVISIBLE);
-				    	}
-  						}
-  					}
-  				}
-  					return convertView;
-  				}
-  				
-  				@Override
-  				public long getItemId(int position) {
-  					return position;
-  				}
-  				
-  				@Override
-  				public Object getItem(int position) {
-  					 return converList.get(position);
-  				}
-  				
-  				@Override
-  				public int getCount() {
-  					int count=0;
-                 if(conversations!=null&&conversations.size()>0){
-                    	 for (int i = 0; i < conversations.size(); i++) {
-                                
-							 if(conversations.get(i).getMessages().size()>0){
-								 if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
-									 if(!conversations.get(i).getMessages().get(0).getFromId().equals(conversations.get(i).getMessages().get(0).getToId()))
-									   if(!conversations.get(i).getMessages().get(0).getMsgType().equals("decline"))
-										   if(converdb.getIsFriend(conversations.get(i).getConversationId())!=2)  {
-								    
-											   count++;   //1、确定真正的有消息，2、确定的是该消息属于本账户，3、是防止自己和自己的对话加入，4、是防止拒绝信息加入，5、拉近黑名单的无需显示在会话列表中,
-								          }
-								
-							 }
-						}
-                
-                    	 return count;
-                    }else {
-                   
-  						return 0;
-  					}
-
-  				}
-  			};
-  			
-  			
-  			
-  			conversationList.setAdapter(baseAdapter1);
-  			
-  			
-		  
-			final ListView contactsList=(ListView)view4.findViewById(R.id.contactslist);
-			sw_refresh2=(SwipeRefreshLayout)view4.findViewById(R.id.sw_refresh);
+  		     //联系人列表加载适配器
+			friends.clear();
+			friends=fragmentChat.converdb.getFriends();
+		    
+			final RecyclerView mRecyclerView=(RecyclerView)view4.findViewById(R.id.rc_view);
 			
-			//联系人刷新列表事件
-			sw_refresh2.setOnRefreshListener(new OnRefreshListener() {
+		    mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+			mRecyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL_LIST));
+			friendadapter=new friendAdapter(context, friends);
+			friendadapter.setOnRecyclerViewListener(new OnRecyclerViewListener() {
 				
 				@Override
-				public void onRefresh() {
-					refreshNewFriend();
-					sw_refresh2.setRefreshing(false);
+				public boolean onItemLongClick(int position) {
+				    
+					return true;
+				}
 				
+				@Override
+				public void onItemClick(int position) {
+				    	if(myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
+						   myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
+						}else if(popupWindow!=null&&popupWindow.isShowing()){
+				    		popupWindow.dismiss();
+				    	}else{
+					    
+				    	if(position==0){
+							Intent intent=new Intent(getActivity(),newFriendActivity.class);
+							startActivity(intent);
+						
+						}else if(position>0){
+							final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+							bmobIMUserInfo.setUserId((friendadapter.getItem(position)).getFriendUser().getObjectId());
+							bmobIMUserInfo.setName((friendadapter.getItem(position)).getFriendUser().getNick());
+							bmobIMUserInfo.setAvatar((friendadapter.getItem(position)).getFriendUser().getTouXiangUrl());
+					     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
+								
+								@Override
+								public void done(BmobIMConversation c, BmobException e) {
+									if(e==null){
+										Bundle bundle=new Bundle();
+										bundle.putSerializable("c",c);
+										bundle.putSerializable("userInfo",bmobIMUserInfo);
+										Intent intent=new Intent(getActivity(),ChatActivity.class);
+										intent.putExtra("bundle", bundle);
+										startActivity(intent);
+										
+									}else {
+		                                   Toast.makeText(getActivity(), e.getMessage(),Toast.LENGTH_SHORT).show();
+									}
+									
+								}
+							});
+						}
+						
+				    }
 				}
 			});
-		
+			
+			mRecyclerView.setAdapter(friendadapter);					
 			//点击联系人列表horizontalview滑回原来的地方
-			contactsList.setOnTouchListener(new OnTouchListener() {
+			mRecyclerView.setOnTouchListener(new OnTouchListener() {
 				
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
@@ -580,160 +470,19 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				}
 			});
 			
-			 //联系人列表点击事件
-		    contactsList.setOnItemClickListener(new OnItemClickListener() {
-
+			sw_refresh2=(SwipeRefreshLayout)view4.findViewById(R.id.sw_refresh);
+			
+			//联系人刷新列表事件
+			sw_refresh2.setOnRefreshListener(new OnRefreshListener() {
+				
 				@Override
-				public void onItemClick(AdapterView<?> parent, View view,
-						int position, long id) {
-				    
-					if(position==0){
-						Intent intent=new Intent(getActivity(),newFriendActivity.class);
-						startActivity(intent);
-					
-					}else if(position>0){
-						final BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
-						bmobIMUserInfo.setUserId(((Friend)baseAdapter2.getItem(position)).getFriendUser().getObjectId());
-						bmobIMUserInfo.setName(((Friend)baseAdapter2.getItem(position)).getFriendUser().getNick());
-						bmobIMUserInfo.setAvatar(((Friend)baseAdapter2.getItem(position)).getFriendUser().getTouXiangUrl());
-				     	BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo ,new ConversationListener() {
-							
-							@Override
-							public void done(BmobIMConversation c, BmobException e) {
-								if(e==null){
-									Bundle bundle=new Bundle();
-									bundle.putSerializable("c",c);
-									bundle.putSerializable("userInfo",bmobIMUserInfo);
-									Intent intent=new Intent(getActivity(),ChatActivity.class);
-									intent.putExtra("bundle", bundle);
-									startActivity(intent);
-									
-								}else {
-	                                   Toast.makeText(getActivity(), e.getMessage(),Toast.LENGTH_SHORT).show();
-								}
-								
-							}
-						});
-					}
-					
+				public void onRefresh() {
+					refreshNewFriend();
+					sw_refresh2.setRefreshing(false);
+				
 				}
 			});
-		    //联系人列表加载适配器
-			 friends.clear();
-			 friends=fragmentChat.converdb.getFriends();
-			 
-			
-			 
-		    baseAdapter2=new BaseAdapter() {
-				
-				@Override
-				public View getView(final int position, View convertView, ViewGroup parent) {
-					 View view6 = null;
-				    if(position==0){
-					if(convertView==null){
-						view6=layoutInflater.inflate(R.layout.new_friend, null);
-						}else {
-							view6=convertView;
-					       
-						}
-				    
-					newFriendImage1=(ImageView)view6.findViewById(R.id.newfriend_image);
-					return view6;
-				    }
-				   else if(position>0) {
-					    
-				    	if(convertView==null||position==1){
-				    	 	view6=layoutInflater.inflate(R.layout.item_user_friend, null);
-				    	}else if(convertView!=null&&position!=1){
-				    		view6=convertView;
-				    	} 
-
-                          
-				    	    final CircleImageView circleImageView=(CircleImageView)view6.findViewById(R.id.user_friend_image);
-					    	TextView textView=(TextView)view6.findViewById(R.id.user_friend_name);
-					    	
-					    	String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+friends.get(position-1).getFriendUser().getObjectId()+".jpg_";
-					       
-					    	File file=new File(path);
-							if(file.exists()){
-								
-								  try {
-			  							InputStream is=new FileInputStream(file);
-			  							
-			  							BitmapFactory.Options opts=new BitmapFactory.Options();
-			  							opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
-			  							
-			  							opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
-			  							opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
-			  							
-			  							opts.inSampleSize=2;
-			  							opts.inInputShareable=true;//设置解码位图的尺寸信息
-			  							
-			  							Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
-			  							circleImageView.setImageBitmap(bitmap2);
-			  						} catch (FileNotFoundException e1) {
-			  							// TODO Auto-generated catch block
-			  							e1.printStackTrace();
-			  						}
-							
-							}else {
-
-									if(friends.get(position-1).getFriendUser().getTouXiangUrl()!=null){
-								    new Thread(new Runnable() {
-										
-										@Override
-										public void run() {
-											final Bitmap bitmap=Utility.getPicture(friends.get(position-1).getFriendUser().getTouXiangUrl());
-                                             getActivity().runOnUiThread(new Runnable() {
-										 		
-												@Override
-												public void run() {
-													if(bitmap!=null){
-												     	circleImageView.setImageBitmap(bitmap);
-												     	download.saveYonghuPic(bitmap, friends.get(position-1).getFriendUser().getObjectId());
-												
-													}
-													
-												}
-											});
-										
-										}
-									}).start();
-									}else {
-										circleImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.userpicture));
-									}
-							}
-							
-							textView.setText(friends.get(position-1).getFriendUser().getNick());
-                     
-							return view6;
-				    	}
-				    
-				 return view6;
-				}
-				
-				@Override
-				public long getItemId(int position) {
-					return position;
-				}
-				
-				@Override
-				public Object getItem(int position) {
-					return friends.get(position-1);
-				}
-				
-				@Override
-				public int getCount() {
-					if(friends==null){
-						return 1;
-					}else {
-						return (friends.size()+1);
-					
-					}
-				
-				}
-			};
-			contactsList.setAdapter(baseAdapter2);
+		    
 			
 			views=new ArrayList<View>();
 			views.add(view3);
@@ -768,7 +517,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			
 			chatPager.setAdapter(pagerAdapter);
 			
-		
+		    
 			 
 			
 			String nick=(String)BmobUser.getObjectByKey("nick");
@@ -868,7 +617,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				    		popupWindow.dismiss();
 					 	else {
 					 		chatPager.setCurrentItem(0);
-						 	horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth,0);
+						 	myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth,0);
+						 	
+						 	canScroll=true;
 						 	
 						 	buttonMes.setBackgroundResource(R.drawable.danblue);
 							buttonMes.setTextColor(Color.parseColor("#FF68B4FF"));
@@ -892,6 +643,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				    		popupWindow.dismiss();
 						else {
 							chatPager.setCurrentItem(1);
+							
+							canScroll=false;
+							
 							buttonCon.setBackgroundResource(R.drawable.danblue);
 							buttonCon.setTextColor(Color.parseColor("#FF68B4FF"));
 							
@@ -946,6 +700,16 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					}
 				});
 			    
+			    design.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						 Intent intent=new Intent(getActivity(),designAct.class);
+					     startActivity(intent);
+						
+					}
+				});
+			    
 			    button2.setOnClickListener(new OnClickListener() {
 					
 					@Override
@@ -964,7 +728,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 									Intent intent=new Intent(getActivity(),loginAct.class);
 									startActivity(intent);
 									bmobIM.removeMessageListHandler(messageListHandler);
-									converList.clear();
+									conversations.clear();
 									friends.clear();
 									conversations.clear();
 									getActivity().finish();
@@ -1180,7 +944,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					  
 					  friends=converdb.getFriends();
 					  
-                      baseAdapter2.notifyDataSetChanged();
+					  friendadapter.refresh(friends);
+                      friendadapter.notifyDataSetChanged();
                       
 					}else if(e.getErrorCode()==9015){
 						Toast.makeText(context,"查询朋友有误,请稍后再尝试"+e.getMessage(),Toast.LENGTH_SHORT).show();
@@ -1218,7 +983,10 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		    }
 		    conversations=bmobIM.loadAllConversation();
 		    
-		    baseAdapter1.notifyDataSetChanged();
+		    int count=getCount();
+		    
+		    messageadapter.refreshCount(count);
+		    messageadapter.notifyDataSetChanged();
 		   
 	  }
      public static void refreshBlack(int i){
@@ -1315,6 +1083,30 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	    	}
 		  return 2;
 	 }
+    private static int getCount(){
+    	int count=0;
+		
+        if(fragmentChat.conversations!=null&&fragmentChat.conversations.size()>0){
+           	 for (int i = 0; i < fragmentChat.conversations.size(); i++) {
 
+					 if(fragmentChat.conversations.get(i).getMessages().size()>0){
+						 if(fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||fragmentChat.conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
+							 if(!fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(fragmentChat.conversations.get(i).getMessages().get(0).getToId()))
+							   if(!fragmentChat.conversations.get(i).getMessages().get(0).getMsgType().equals("decline"))
+								   if(fragmentChat.converdb.getIsFriend(fragmentChat.conversations.get(i).getConversationId())!=2)  {
+						    
+									   count++;   //1、确定真正的有消息，2、确定的是该消息属于本账户，3、是防止自己和自己的对话加入，4、是防止拒绝信息加入，5、拉近黑名单的无需显示在会话列表中,
+						          }
+						
+					 }
+				}
+        
+           	 return count;
+           }else {
+          
+					return 0;
+				}
+
+    }
 	
 }

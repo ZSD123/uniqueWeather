@@ -80,7 +80,7 @@ public class weather_info extends baseFragmentActivity {
 	 public static myUserDB myUserdb;
      public static String objectId;      //统一调用的objectId
      private AlertDialog dialog1;
-     private MyUser currentUser;
+     public static MyUser currentUser;
      private java.util.Date date;
      private AlertDialog dialog2;
 	@Override
@@ -93,7 +93,8 @@ public class weather_info extends baseFragmentActivity {
 		super.onCreate(savedInstance);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
-		loginAct.application.add(weather_info.this);
+		if(weather_info.this!=null)
+	    	loginAct.application.add(weather_info.this);
         init();	
 	    
 	 }		
@@ -294,8 +295,8 @@ public class weather_info extends baseFragmentActivity {
 	
 	@Override
 	public void onBackPressed() {
-		if(fragmentChat.horizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
-			fragmentChat.horizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
+		if(fragmentChat.myHorizontalView.getScrollX()!=MyHorizontalView.mMenuWidth){
+			fragmentChat.myHorizontalView.smoothScrollTo(MyHorizontalView.mMenuWidth, 0);
 		}else if(fragmentChat.popupWindow!=null&&fragmentChat.popupWindow.isShowing()){  //撤销邀请好友和搜索下拉框
 			fragmentChat.popupWindow.dismiss();
 	    } else {

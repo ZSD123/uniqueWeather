@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+  <TextView 
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="您当前界面会留下地理位置信息，如果需要清除，可以点击左下角第三个按钮，上面有足迹的圆形按钮，即可清除您的位置信息"
+      android:textSize="20sp"
+      />  
+   <CheckBox 
+       android:id="@+id/checkbox"
+       android:text="下次不再出现"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       />
+
+</LinearLayout>

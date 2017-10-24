@@ -3,13 +3,13 @@
     android:id="@+id/weatherlinearlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6E6FA" >
+    android:background="#E4EDF5" >
 
 <RelativeLayout 
     android:id="@+id/lin1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#8A2BE2"
+    android:background="#2B5EA4"
     >
          <TextView 
             android:id="@+id/weather"
@@ -55,8 +55,10 @@
      android:layout_height="40dp"
      android:orientation="horizontal"
      android:layout_below="@id/lin1"
+
      >
      <Button
+
          android:id="@+id/chat_mes"
          android:layout_width="0dp"
          android:layout_height="40dp"
@@ -69,6 +71,7 @@
          />
 
      <Button
+
          android:id="@+id/chat_con"       
          android:layout_width="0dp"
          android:layout_height="40dp"

@@ -13,7 +13,7 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class fankuiAct extends Activity {
+public class fankuiAct extends baseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState){
     	super.onCreate(savedInstanceState);
@@ -41,6 +41,23 @@ public class fankuiAct extends Activity {
 				
 			}
 		});
+		TextView textView6=(TextView)findViewById(R.id.text6);
+		textView6.setText("app¹ÙÍø:");
+		TextView textView7=(TextView)findViewById(R.id.text7);
+		textView7.setText(Html.fromHtml("<u>"+"http://sharefriend.bmob.site/"+"</u>"));
+		textView7.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();        
+				intent.setAction("android.intent.action.VIEW");    
+				Uri content_url = Uri.parse("http://sharefriend.bmob.site/");   
+				intent.setData(content_url);  
+				startActivity(intent);
+				
+			}  
+		});
+		
     }
     /****************
     *
