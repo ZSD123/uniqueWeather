@@ -38,6 +38,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -45,6 +46,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,13 +64,25 @@ public class searchResultAct extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.searchresult);
 		
+		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
+		CustomFontTextView textView1=(CustomFontTextView)findViewById(R.id.account);
+		
 		circleImageView=(CircleImageView)findViewById(R.id.userPicture);
 		textView=(TextView)findViewById(R.id.text);
 		button=(Button)findViewById(R.id.button);
 		textView2=(TextView)findViewById(R.id.text1);
 		
 		final TextView textCity=(TextView)findViewById(R.id.textCity);
-	
+	    
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			relative.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView1.setTextColor(Color.parseColor("#A2C0DE"));
+			textView.setTextColor(Color.parseColor("#A2C0DE"));
+			button.setTextColor(Color.parseColor("#A2C0DE"));
+			textView2.setTextColor(Color.parseColor("#A2C0DE"));
+			textCity.setTextColor(Color.parseColor("#A2C0DE"));
+		}
 		
 		final String nick=getIntent().getExtras().getString("nick");
 		final String url=getIntent().getExtras().getString("touxiang");

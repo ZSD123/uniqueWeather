@@ -19,6 +19,7 @@ import cn.bmob.v3.listener.FindListener;
 import Util.Utility;
 import Util.download;
 import activity.MyUser;
+import activity.fragmentChat;
 import activity.fujinlieAct;
 import adapter.friendAdapter.friendViewHolder;
 import android.R.integer;
@@ -26,6 +27,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -142,6 +144,12 @@ public class fujinAdapter extends Adapter<RecyclerView.ViewHolder> {
 				}
 		}
 
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			((fujinrenViewHolder)holder).tv_name.setTextColor(Color.parseColor("#A2C0DE"));
+			((fujinrenViewHolder)holder).tv_distance.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
 		
 		if(list.get(position).getNick()!=null){
 		  ((fujinrenViewHolder)holder).tv_name.setText(list.get(position).getNick());

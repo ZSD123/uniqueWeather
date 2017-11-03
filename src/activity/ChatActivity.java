@@ -273,7 +273,16 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
         user89=(ImageView)findViewById(R.id.user89);  //对方用户头标
         threeCircle=(ImageView)findViewById(R.id.threeCircle);
         
+        int designNum=fragmentChat.pre.getInt("design", 0);
+		
+		if(designNum==4){
+			ll_chat.setBackgroundColor(Color.parseColor("#051C3D"));
+		    talkpartername.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+        
+        
         c= BmobIMConversation.obtain(BmobIMClient.getInstance(), (BmobIMConversation) getIntent().getBundleExtra("bundle").getSerializable("c"));
+        
         userInfo=(BmobIMUserInfo)getIntent().getBundleExtra("bundle").getSerializable("userInfo");   
         if(fragmentChat.converdb.getIsFriend(userInfo.getUserId())==0)
              talkpartername.setText(userInfo.getName()+"  (陌生人)");

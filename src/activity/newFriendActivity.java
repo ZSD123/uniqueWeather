@@ -66,12 +66,13 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class newFriendActivity extends baseActivity {
-   public static TextView newFriendBeizhu;
    private Button buttonGuan;
    private ListView listView;
    private NewFriendManager newFriendManager;
@@ -83,6 +84,10 @@ public class newFriendActivity extends baseActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.new_friend_list);
 	
+		TextView newfriendtext=(TextView)findViewById(R.id.newfriendtext);
+		LinearLayout lin=(LinearLayout)findViewById(R.id.lin);
+		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
+		
 		newFriendManager=NewFriendManager.getInstance(newFriendActivity.this);
 		fragmentChat.newFriendImage.setVisibility(View.GONE);//这是为了进入这个页面之后相应的红点会消失
 		fragmentChat.newFriendImage1.setVisibility(View.GONE);
@@ -91,6 +96,16 @@ public class newFriendActivity extends baseActivity {
 	
 	    listView=(ListView)findViewById(R.id.new_friend_list);
 	    buttonGuan=(Button)findViewById(R.id.btnGuan);
+	    
+	    
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			relative.setBackgroundColor(Color.parseColor("#122950"));
+			lin.setBackgroundColor(Color.parseColor("#051C3D"));
+			newfriendtext.setTextColor(Color.parseColor("#A2C0DE"));
+			buttonGuan.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+	    
 		listView.setAdapter(bAdapter);
 		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
 

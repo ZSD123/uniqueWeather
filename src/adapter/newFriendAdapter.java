@@ -42,6 +42,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -102,6 +103,10 @@ public class newFriendAdapter extends BaseAdapter {
     
 	@Override
 	public View getView(  final int position, View convertView, ViewGroup parent) {
+		
+		int designNum=fragmentChat.pre.getInt("design", 0);
+
+		
         final ViewHolder viewHolder;
 		final int mPosition=position;
 		if(convertView==null){
@@ -118,7 +123,14 @@ public class newFriendAdapter extends BaseAdapter {
 		}else {
 			viewHolder=(ViewHolder)convertView.getTag();
 		}
-	
+	   
+		if(designNum==4){
+			viewHolder.newFriendBeizhu.setTextColor(Color.parseColor("#A2C0DE"));
+			viewHolder.button.setTextColor(Color.parseColor("#A2C0DE"));
+			viewHolder.button2.setTextColor(Color.parseColor("#A2C0DE"));
+			viewHolder.textView.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
 		if(state==8){
 			viewHolder.checkBox.setVisibility(View.GONE);
 		}else if(state==0){

@@ -84,83 +84,109 @@
         <activity 
             android:name="activity.weather_info"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.myAccountAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.mapActivity"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.chooseAreaActivity"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.register"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.myCityAction"
+            android:screenOrientation="portrait"
             ></activity>
         <activity
             android:name="activity.newFriendActivity"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.ChatActivity"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.videoAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.resetPassword"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.resetPassword1"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.fuwuAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.manageAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity
             android:name="activity.fankuiAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.modifypasswordAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.xiangxiDataAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.moblieLoginAct"
+            android:screenOrientation="portrait"
              android:launchMode="singleTask"
             ></activity>
         <activity
             android:name="activity.guanYuAct"
+            android:screenOrientation="portrait"
             ></activity>
         <activity 
             android:name="activity.functionAct"
+            android:screenOrientation="portrait"
             ></activity>
           <activity 
             android:name="activity.blackAct"
+            android:screenOrientation="portrait"
             ></activity>
           <activity 
               android:name="activity.emailVerifyAct"
+              android:screenOrientation="portrait"
               ></activity>
           <activity 
               android:name="activity.setMoblieCall"
+              android:screenOrientation="portrait"
               ></activity>
            <activity 
             android:name="activity.searchAct"
+            android:screenOrientation="portrait"
             ></activity>
              <activity 
-            android:name="activity.searchResultAct"
+            android:name="activity.searchResultAct"  
+            android:screenOrientation="portrait"
             ></activity>
               <activity 
             android:name="activity.fujinlieAct"
+            android:screenOrientation="portrait"
             ></activity>
               <activity 
             android:name="activity.designAct"
+            android:screenOrientation="portrait"
             ></activity>
         <service
             android:name="service.autoUqdateService"/>

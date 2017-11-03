@@ -13,6 +13,7 @@ import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.util.Pools.Pool;
 import android.view.View;
@@ -27,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class manageAct extends baseActivity {
+
 	
 	//这是账户管理修改密码什么的
     class ViewHolder{
@@ -40,6 +42,19 @@ public class manageAct extends baseActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.manage);
+		
+		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.account);
+		TextView tView=(TextView)findViewById(R.id.text);
+		
+		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
+		
+		final int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			relative.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView.setTextColor(Color.parseColor("#A2C0DE"));
+			tView.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
 		currentUser=BmobUser.getCurrentUser(MyUser.class);
 		RelativeLayout relativeLayout=(RelativeLayout)findViewById(R.id.relativeGuanyu);
 		ListView listView=(ListView)findViewById(R.id.listview);
@@ -62,7 +77,10 @@ public class manageAct extends baseActivity {
 						}else {
 							viewHolder=(ViewHolder)convertView.getTag();
 						}
-				      
+				      if(designNum==4){
+				    	  viewHolder.textView.setTextColor(Color.parseColor("#A2C0DE"));
+				    	  
+				      }
 	                  viewHolder.textView.setText(list.get(position));
 				return convertView;
 			}

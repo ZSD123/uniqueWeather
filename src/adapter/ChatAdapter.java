@@ -1,7 +1,9 @@
 package adapter;
 
 
+import activity.fragmentChat;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -134,7 +136,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == TYPE_SEND_TXT) {
+ 		
+    	if (viewType == TYPE_SEND_TXT) {
             return new SendTextHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_message,parent,false));//这里是发送文本适配器
         } else if (viewType == TYPE_SEND_IMAGE) {
             return new SendImageHolder(parent.getContext(), parent,c,onRecyclerViewListener,LayoutInflater.from(mContext).inflate(R.layout.item_chat_sent_image,parent,false));

@@ -9,6 +9,7 @@ import com.sharefriend.app.R;
 
 import Util.MD5Util;
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -18,6 +19,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class modifypasswordAct extends baseActivity {
@@ -36,13 +39,36 @@ public class modifypasswordAct extends baseActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.modifypassword);
-		imageView1=(ImageView)findViewById(R.id.kekanmima1);
-		imageView2=(ImageView)findViewById(R.id.kekanmima2);
-		imageView3=(ImageView)findViewById(R.id.kekanmima3);
+		
+		LinearLayout lin=(LinearLayout)findViewById(R.id.lin);
+		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.text_resetpassword);
+		TextView oldpassword=(TextView)findViewById(R.id.oldpassword);
+		TextView newpassword=(TextView)findViewById(R.id.newpassword);
+		TextView newpassword1=(TextView)findViewById(R.id.newpassword1);
 		button=(Button)findViewById(R.id.ensure);
 		password1=(EditText)findViewById(R.id.password1);
 		password2=(EditText)findViewById(R.id.password2);
 		password3=(EditText)findViewById(R.id.password3);
+		
+		
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			lin.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView.setTextColor(Color.parseColor("#A2C0DE"));
+			oldpassword.setTextColor(Color.parseColor("#A2C0DE"));
+			newpassword.setTextColor(Color.parseColor("#A2C0DE"));
+			newpassword1.setTextColor(Color.parseColor("#A2C0DE"));
+			button.setTextColor(Color.parseColor("#A2C0DE"));
+			password1.setTextColor(Color.parseColor("#A2C0DE"));
+			password2.setTextColor(Color.parseColor("#A2C0DE"));
+			password3.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
+		imageView1=(ImageView)findViewById(R.id.kekanmima1);
+		imageView2=(ImageView)findViewById(R.id.kekanmima2);
+		imageView3=(ImageView)findViewById(R.id.kekanmima3);
+		
+		
 		button.setOnClickListener(new OnClickListener() {
 			
 			@Override

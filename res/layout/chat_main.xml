@@ -65,7 +65,7 @@
           android:gravity="center_horizontal"
          android:text="消息"
          android:textSize="20sp"
-         android:textColor="#FF68B4FF"
+         android:textColor="#68B4FF"
          android:background="@drawable/danblue"
          android:layout_weight="1"
          />
@@ -78,7 +78,7 @@
          android:gravity="center_horizontal"
          android:layout_weight="1"
          android:textSize="20sp"
-         android:background="@drawable/white"
+         android:background="@drawable/white0"
           android:text="联系人"/>
     <ImageView
         android:id="@+id/newfriend_image"

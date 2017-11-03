@@ -62,6 +62,7 @@ public class myMessageHandler extends BmobIMMessageHandler {
 		
 	}
      private void processMessage(final MessageEvent event,int i){
+
     	 newFriendManager=NewFriendManager.getInstance(mContext);
     	  BmobIMMessage bmobIMMessage=event.getMessage();
     	  if(bmobIMMessage.getMsgType().equals("add")){

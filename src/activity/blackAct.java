@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -57,6 +58,15 @@ public class blackAct extends baseActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.black);
+		RelativeLayout relativeLayout=(RelativeLayout)findViewById(R.id.relative);
+		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.account);
+		
+		final int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			relativeLayout.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
 		fragmentChat.refreshBlack(2);  //为2的时候只刷新自己拉黑的人
 	    blackUsers=new ArrayList<Black>();
 		blackUsers=fragmentChat.converdb.getBlackFriends();
@@ -123,6 +133,9 @@ public class blackAct extends baseActivity {
 							}else {
 								viewHolder.circleImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.userpicture));
 							}
+					}
+					if(designNum==4){
+						viewHolder.textView.setTextColor(Color.parseColor("#A2C0DE"));
 					}
 					
 					viewHolder.textView.setText(blackUsers.get(position).getBlackUser().getNick());

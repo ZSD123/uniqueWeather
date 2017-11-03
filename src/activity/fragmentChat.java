@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import model.Black;
@@ -27,12 +28,14 @@ import Util.download;
 import adapter.OnRecyclerViewListener;
 import adapter.friendAdapter;
 import adapter.messageAdapter;
+import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -78,9 +81,13 @@ import android.widget.Toast;
 import cn.bmob.newim.BmobIM;
 import cn.bmob.newim.bean.BmobIMConversation;
 
+import cn.bmob.newim.bean.BmobIMMessage;
 import cn.bmob.newim.bean.BmobIMMessageType;
+import cn.bmob.newim.bean.BmobIMReceiveStatus;
+import cn.bmob.newim.bean.BmobIMSendStatus;
 import cn.bmob.newim.bean.BmobIMUserInfo;
 
+import cn.bmob.newim.db.BmobIMDBManager;
 import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.listener.ConnectListener;
 import cn.bmob.newim.listener.ConversationListener;
@@ -106,13 +113,13 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 {   
     
 
-	private static TextView weather;
+	public  static TextView weather;
 
-	private static TextView temper;
+	public  static TextView temper;
 	public static CircleImageView userPicture;
     private MessageListHandler messageListHandler;
    
-  private static ImageView pic;
+    private static ImageView pic;
     public  static TextView userName;
     public static SharedPreferences.Editor editor;
     public static SharedPreferences pre;
@@ -155,6 +162,23 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
      
 	public static PopupWindow popupWindow;
 	
+	  //这下面都是要变色的，放在一起
+	private static int [] buttonResource;
+	private static String buttonColor;   //点亮的按钮的颜色
+	private static String buttonColor1;  //没有点亮的按钮的颜色
+	
+	private static Button buttonMes;
+	private static Button buttonCon;
+	
+	private static TextView myAccount;  //我的名片TextView 
+	private static TextView manage;     //账户管理
+	private static  TextView design;    //设计界面
+	
+	
+	public static RelativeLayout leftmenuBack;
+	public static RelativeLayout lin1;
+	public static RelativeLayout weatherLinearLayout;
+	
 	public fragmentChat(){
 	}
 	
@@ -165,12 +189,11 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
     { 
             View view = null;;
 		    context=getActivity();
-		    
+		    	    
 			view=inflater.inflate(R.layout.connection,container,false);
 		    userName=(TextView)view.findViewById(R.id.userName);
 	        userPicture=(CircleImageView)view.findViewById(R.id.userPicture);
             
-	        RelativeLayout weatherLayout=(RelativeLayout)view.findViewById(R.id.weatherlinearlayout);     
 	        myHorizontalView=(MyHorizontalView)view.findViewById(R.id.horiView);
 	        username=(String)MyUser.getObjectByKey("username");
 	        	
@@ -191,20 +214,27 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				}
 			});
        
+            buttonResource=new int[2];
             
             Button button1;
             Button button2;//logout Button
             ImageView jia;  //加号按钮
             
-            TextView myAccount;     //我的名片TextView 
-            TextView manage;     //账户管理
-            TextView design;    //设计界面
+            
+           
+            
+            
             
             View view3;    //消息界面View
             final messageSwipe sw_refresh1;   //消息界面的refresh
             final SwipeRefreshLayout sw_refresh2;  //联系人列表的refresh
             
-			weather=(TextView)view.findViewById(R.id.weather);
+            
+            leftmenuBack=(RelativeLayout)view.findViewById(R.id.leftmenuBack);
+            lin1=(RelativeLayout)view.findViewById(R.id.lin1);
+            weatherLinearLayout=(RelativeLayout)view.findViewById(R.id.weatherlinearlayout);
+            
+            weather=(TextView)view.findViewById(R.id.weather);
 			temper=(TextView)view.findViewById(R.id.temper);
 			pic=(ImageView)view.findViewById(R.id.weather_pic);
 			button1=(Button)view.findViewById(R.id.button_map);
@@ -217,8 +247,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			design=(TextView)view.findViewById(R.id.design);
 			
 			
-		    final Button  buttonMes=(Button)view.findViewById(R.id.chat_mes);
-		    final Button buttonCon=(Button)view.findViewById(R.id.chat_con);
+		    buttonMes=(Button)view.findViewById(R.id.chat_mes);
+		    buttonCon=(Button)view.findViewById(R.id.chat_con);
 			newFriendImage=(ImageView)view.findViewById(R.id.newfriend_image);
 			
 			chatPager=(myChatPager)view.findViewById(R.id.chatPager);
@@ -229,6 +259,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 
 	          
             bmobIM=BmobIM.getInstance();
+            conversations=new ArrayList<BmobIMConversation>();
+            
             conversations=bmobIM.loadAllConversation();
 			
             int num=getCount();
@@ -252,7 +284,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							  if(which==0){
-								   bmobIM.deleteConversation(conversations.get(position).getConversationId());
+								    bmobIM.deleteConversation(conversations.get(position).getConversationId());
 									converdb.saveNewContentById(conversations.get(position).getConversationId(),"");
 									converdb.clearUnReadNumById(conversations.get(position).getConversationId());
 									converdb.saveTimeById(conversations.get(position).getConversationId(), 0);
@@ -546,6 +578,64 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			editor=PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
 			pre=PreferenceManager.getDefaultSharedPreferences(getActivity());
 			
+			int designNum=pre.getInt("design", 0);
+			
+			switch (designNum) {
+				case 0 :
+					setButtonResource(new int []{R.drawable.danblue,R.drawable.white0});
+					setButtonColor("#68B4FF","#000000");
+					break;
+				case 1:
+					leftmenuBack.setBackgroundResource(R.drawable.sun);
+					lin1.setBackgroundColor(Color.parseColor("#F2CC4D"));
+					weatherLinearLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+					
+					
+					setButtonResource(new int []{R.drawable.danyellow,R.drawable.white1});
+		 			setButtonColor("#F2CC4D","#000000");
+		 			
+		 			setTextColorBlack();
+					break;
+				case 2:
+					fragmentChat.leftmenuBack.setBackgroundResource(R.drawable.flower);
+					fragmentChat.lin1.setBackgroundColor(Color.parseColor("#FCBC1D"));
+					fragmentChat.weatherLinearLayout.setBackgroundColor(Color.parseColor("#F5D4D9"));
+					
+					fragmentChat.setButtonResource(new int []{R.drawable.danflower,R.drawable.pink});
+					fragmentChat.setButtonColor("#FFFFFF","#000000");
+					
+					setTextColorBlack();
+					break;
+				case 3:
+					leftmenuBack.setBackgroundResource(R.drawable.coldmount);
+					lin1.setBackgroundColor(Color.parseColor("#FFFFFF"));
+					weatherLinearLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+					
+					
+					setButtonResource(new int []{R.drawable.danblack,R.drawable.white1});
+					setButtonColor("#000000","#000000");
+					
+					weather.setTextColor(Color.parseColor("#000000"));
+					temper.setTextColor(Color.parseColor("#000000"));
+					
+					setTextColorBlack();
+					break;
+				case 4:
+					leftmenuBack.setBackgroundResource(R.drawable.night1);
+					lin1.setBackgroundColor(Color.parseColor("#122950"));
+					weatherLinearLayout.setBackgroundColor(Color.parseColor("#0A182D"));
+					
+					setButtonResource(new int []{R.drawable.dannight,R.drawable.white2});
+					setButtonColor("#6A82A5","#A2C0DE");
+					
+					setNightMode();  //设置夜间模式的一系列程序代码打包
+					break;
+				default :
+					break;
+			}
+				
+			
+			  
 		    mLocationClient=new AMapLocationClient(getActivity());
 		    mLocationOption=new AMapLocationClientOption();
 		    mLocationClient.setLocationListener(this);
@@ -587,7 +677,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				weather.setText(pre.getString("weatherInfo", ""));
 				temper.setText(pre.getString("temperature", ""));
 				
-		        weatherLayout.setOnTouchListener(new OnTouchListener() {
+		        weatherLinearLayout.setOnTouchListener(new OnTouchListener() {
 					
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
@@ -621,11 +711,11 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 						 	
 						 	canScroll=true;
 						 	
-						 	buttonMes.setBackgroundResource(R.drawable.danblue);
-							buttonMes.setTextColor(Color.parseColor("#FF68B4FF"));
+						 	buttonMes.setBackgroundResource(getButtonResource()[0]);
+							buttonMes.setTextColor(Color.parseColor(getButtonColor()));
 							
-							buttonCon.setBackgroundResource(R.drawable.white);
-							buttonCon.setTextColor(Color.parseColor("black"));
+							buttonCon.setBackgroundResource(getButtonResource()[1]);
+							buttonCon.setTextColor(Color.parseColor(getButtonColor1()));
 						}
 					 	
 						
@@ -646,11 +736,11 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 							
 							canScroll=false;
 							
-							buttonCon.setBackgroundResource(R.drawable.danblue);
-							buttonCon.setTextColor(Color.parseColor("#FF68B4FF"));
+							buttonCon.setBackgroundResource(getButtonResource()[0]);
+							buttonCon.setTextColor(Color.parseColor(getButtonColor()));
 							
-							buttonMes.setBackgroundResource(R.drawable.white);
-							buttonMes.setTextColor(Color.parseColor("black"));
+							buttonMes.setBackgroundResource(getButtonResource()[1]);
+							buttonMes.setTextColor(Color.parseColor(getButtonColor1()));
 						}
 						
 						
@@ -730,7 +820,6 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 									bmobIM.removeMessageListHandler(messageListHandler);
 									conversations.clear();
 									friends.clear();
-									conversations.clear();
 									getActivity().finish();
 								
 								  
@@ -782,8 +871,43 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 								
 								@Override
 								public void onClick(View v) {
-									Intent intent=new Intent(context,searchAct.class);
-									startActivity(intent);
+									BmobIMDBManager dbManager=BmobIMDBManager.getInstance(weather_info.objectId);
+									
+									BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+									bmobIMUserInfo.setUserId("e5be088480");
+									bmobIMUserInfo.setName("客服小秘书");
+									
+									BmobIMConversation conversation=bmobIM.startPrivateConversation(bmobIMUserInfo, null);
+									conversation.setConversationId("e5be088480");
+									conversation.setIsTransient(false);
+									conversation.setUpdateTime(System.currentTimeMillis());
+									
+									
+									BmobIMMessage message=new BmobIMMessage();
+									message.setFromId("e5be088480");
+									message.setContent("您好，欢迎回家，我是共享交友的客服，有什么问题就和我联系哦，我会尽量在第一时间回复您，祝您玩得愉快");
+									message.setCreateTime(System.currentTimeMillis());
+									message.setUpdateTime(System.currentTimeMillis());
+									message.setConversationId("e5be088480");
+									message.setIsTransient(false);
+									message.setMsgType(BmobIMMessageType.TEXT.getType());
+								    message.setSendStatus(4);
+								    message.setReceiveStatus(0);
+								    message.setToId(weather_info.objectId);
+								    message.setConversationType(0);
+							        message.setBmobIMConversation(conversation);
+						           
+                                    dbManager.insertOrReplaceConversation(conversation);
+								    
+		  							dbManager.insertOrUpdateMessage(message);
+									
+									 fragmentChat.converdb.saveNewContentById("e5be088480",message.getContent());
+				    			     fragmentChat.converdb.saveTimeById("e5be088480", message.getCreateTime());
+				    			  
+				    			   
+				                     fragmentChat.refreshConversations(0,"e5be088480");
+				                      
+
 									
 								}
 							});
@@ -1084,18 +1208,22 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		  return 2;
 	 }
     private static int getCount(){
-    	int count=0;
+    	
+    	int count=0;     
 		
-        if(fragmentChat.conversations!=null&&fragmentChat.conversations.size()>0){
-           	 for (int i = 0; i < fragmentChat.conversations.size(); i++) {
-
-					 if(fragmentChat.conversations.get(i).getMessages().size()>0){
-						 if(fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||fragmentChat.conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
+        if(conversations!=null&&conversations.size()>0){
+    
+           	 for (int i = 0; i < conversations.size(); i++) {
+                     
+					 if(conversations.get(i).getMessages().size()>0){
+						 Log.d("Main", "i="+i+"message.size="+conversations.get(i).getMessages().size()+"message="+conversations.get(i).getMessages().get(0).getContent());
+						 if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||fragmentChat.conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
 							 if(!fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(fragmentChat.conversations.get(i).getMessages().get(0).getToId()))
 							   if(!fragmentChat.conversations.get(i).getMessages().get(0).getMsgType().equals("decline"))
 								   if(fragmentChat.converdb.getIsFriend(fragmentChat.conversations.get(i).getConversationId())!=2)  {
-						    
+						             
 									   count++;   //1、确定真正的有消息，2、确定的是该消息属于本账户，3、是防止自己和自己的对话加入，4、是防止拒绝信息加入，5、拉近黑名单的无需显示在会话列表中,
+								
 						          }
 						
 					 }
@@ -1107,6 +1235,75 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					return 0;
 				}
 
+    }
+    
+    
+    
+    
+    
+    public static void setButtonColor(String Color0,String Color1){ //Color0是设置点亮的时候颜色，Color1是设置点暗的时候颜色
+    	buttonColor=Color0;
+    	buttonColor1=Color1;
+    	
+    	buttonMes.setBackgroundResource(getButtonResource()[0]);
+		buttonMes.setTextColor(Color.parseColor(Color0));  
+		
+		buttonCon.setBackgroundResource(getButtonResource()[1]);
+		buttonCon.setTextColor(Color.parseColor(Color1));
+    }
+    
+    private String getButtonColor(){
+
+    	return buttonColor;
+    }
+    private String getButtonColor1(){
+    	return buttonColor1;
+    }
+    public static void setButtonResource(int [] Resource){  //这个就是设置button的背景色
+    	buttonResource[0]=Resource[0];
+    	buttonResource[1]=Resource[1];
+    }
+    
+    private static int [] getButtonResource(){
+          return buttonResource;
+    }
+    public static void setNightMode(){
+    	userName.setTextColor(Color.parseColor("#A2C0DE"));
+		myAccount.setTextColor(Color.parseColor("#A2C0DE"));
+		manage.setTextColor(Color.parseColor("#A2C0DE"));
+		design.setTextColor(Color.parseColor("#A2C0DE"));
+		
+		weather.setTextColor(Color.parseColor("#A2C0DE"));
+		temper.setTextColor(Color.parseColor("#A2C0DE"));
+		
+		messageadapter.refreshTextColor(1);
+		friendadapter.refreshTextColor(1);
+		
+    }
+    public static void setTextColorBlack(){
+    	userName.setTextColor(Color.parseColor("#000000"));
+		myAccount.setTextColor(Color.parseColor("#000000"));
+		manage.setTextColor(Color.parseColor("#000000"));
+		design.setTextColor(Color.parseColor("#000000"));
+    }
+    public static void setTextColorWhite(){
+    	userName.setTextColor(Color.parseColor("#FFFFFF"));
+		myAccount.setTextColor(Color.parseColor("#FFFFFF"));
+		manage.setTextColor(Color.parseColor("#FFFFFF"));
+		design.setTextColor(Color.parseColor("#FFFFFF"));
+    }
+    
+    public static void setFromNightModeToOthers(){   //表示从夜间模式转换其他模式
+    	userName.setTextColor(Color.parseColor("#FFFFFF"));
+		myAccount.setTextColor(Color.parseColor("#FFFFFF"));
+		manage.setTextColor(Color.parseColor("#FFFFFF"));
+		design.setTextColor(Color.parseColor("#FFFFFF"));
+		
+		weather.setTextColor(Color.parseColor("#FFFFFF"));
+		temper.setTextColor(Color.parseColor("#FFFFFF"));
+		
+    	messageadapter.refreshTextColor(0);
+    	friendadapter.refreshTextColor(0);
     }
 	
 }

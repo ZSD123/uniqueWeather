@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -43,9 +44,11 @@ import android.widget.TextView;
 public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 	    private Context mContext;
 	    private int mCount;
+	    private int colorNum=0;
 		public messageAdapter(Context mContext,int count) {
 			this.mContext=mContext;
 			this.mCount=count;
+			
 		}
 		@Override
 		public int getItemCount() {
@@ -89,6 +92,7 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 					     if(!fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(fragmentChat.conversations.get(i).getMessages().get(0).getToId())){
 					      if(!fragmentChat.conversations.get(i).getMessages().get(0).getMsgType().equals("decline")){
 						count1++;   
+						Log.d("Main", "count1="+count1);
 						String id=fragmentChat.conversations.get(i).getConversationId();
 
 					fragmentChat.converdb.saveId(id,0);
@@ -146,7 +150,12 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
     
 				String nickName=fragmentChat.conversations.get(position).getConversationTitle();
 				if(nickName!=null){
-
+                    if(colorNum==1){
+                    	((conversationViewHolder)holder).tv_name.setTextColor(Color.parseColor("#A2C0DE"));
+                    }else if(colorNum==0){
+                    	((conversationViewHolder)holder).tv_name.setTextColor(Color.parseColor("#000000"));
+                    }
+                    
 					((conversationViewHolder)holder).tv_name.setText(nickName);
 				}
 				
@@ -201,14 +210,28 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 		                	 ((conversationViewHolder)holder).imageView.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.userpicture));
 					   }
 					}
-		      
+		            if(colorNum==1){
+		            	((conversationViewHolder)holder).tv_message.setTextColor(Color.parseColor("#A2C0DE"));
+		            }else if(colorNum==0){
+		            	((conversationViewHolder)holder).tv_message.setTextColor(Color.parseColor("#000000"));
+		            }
 					((conversationViewHolder)holder).tv_message.setText(fragmentChat.converdb.getNewContentById(fragmentChat.conversations.get(position).getConversationId()));
 		
-				long time=fragmentChat.conversations.get(position).getUpdateTime();
+				   long time=fragmentChat.conversations.get(position).getUpdateTime();
+				   if(colorNum==1){
+		            	((conversationViewHolder)holder).tv_time.setTextColor(Color.parseColor("#A2C0DE"));
+		            }else if(colorNum==0){
+		            	((conversationViewHolder)holder).tv_time.setTextColor(Color.parseColor("#000000"));
+		            }
 					((conversationViewHolder)holder).tv_time.setText(""+TimeUtil.getChatTime(false,time));
-	
+	              
 				  if(fragmentChat.converdb.getUnReadNumById(fragmentChat.conversations.get(position).getConversationId())!=0){
 					  ((conversationViewHolder)holder).tv_unread.setVisibility(View.VISIBLE);
+					  if(colorNum==1){
+			            	((conversationViewHolder)holder).tv_unread.setTextColor(Color.parseColor("#A2C0DE"));
+			            }else if(colorNum==0){
+			            	((conversationViewHolder)holder).tv_unread.setTextColor(Color.parseColor("#000000"));
+			            }
 					  ((conversationViewHolder)holder).tv_unread.setText(""+fragmentChat.converdb.getUnReadNumById(fragmentChat.conversations.get(position).getConversationId()));
 			     	} else {
 					  ((conversationViewHolder)holder).tv_unread.setVisibility(View.INVISIBLE);
@@ -254,6 +277,14 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 			}
 		
 			
+		}
+		public void refreshTextColor(int i){
+			if(i==0)   {   //当它为0的时候为黑色
+				colorNum=0;
+			}else if(i==1){
+				colorNum=1;
+			}
+			notifyDataSetChanged();
 		}
 	
 

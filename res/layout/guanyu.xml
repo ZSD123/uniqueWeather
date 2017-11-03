@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E4EDF5"
+    android:id="@+id/lin"
     android:orientation="vertical" >
  <activity.CustomFontTextView
     android:id="@+id/text_EndRain"
@@ -15,6 +16,7 @@
     android:textColor="#00BFFF"
     />    
     <TextView 
+        android:id="@+id/v1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="V 1.1"

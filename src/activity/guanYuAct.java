@@ -8,18 +8,21 @@ import com.sharefriend.app.R;
 import activity.manageAct.ViewHolder;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class guanYuAct extends baseActivity {
     private ListView listView;
+    
     class ViewHolder{
     	TextView textView;
     	
@@ -30,6 +33,18 @@ public class guanYuAct extends baseActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.guanyu);
+		
+		LinearLayout lin=(LinearLayout)findViewById(R.id.lin);
+		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.text_EndRain);
+		TextView v1=(TextView)findViewById(R.id.v1);
+		
+		final int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			lin.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView.setTextColor(Color.parseColor("#A2C0DE"));
+			v1.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
 		listView=(ListView)findViewById(R.id.listview);
 		final List<String> list=new ArrayList<String>();
 		list.add("π¶ƒ‹ΩÈ…‹");
@@ -47,6 +62,9 @@ public class guanYuAct extends baseActivity {
 							viewHolder=(ViewHolder)convertView.getTag();
 						}
 				      
+				      if(designNum==4){
+				    	  viewHolder.textView.setTextColor(Color.parseColor("#A2C0DE"));
+				      }
 	                  viewHolder.textView.setText(list.get(position));
 				return convertView;
 			}

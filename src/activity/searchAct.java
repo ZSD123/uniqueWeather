@@ -11,6 +11,7 @@ import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -37,13 +38,27 @@ public class searchAct extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.search);
+		
+		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
+		CustomFontTextView textView1=(CustomFontTextView)findViewById(R.id.account);
 		final EditText editText=(EditText)findViewById(R.id.edittext);
+		final Button button=(Button)findViewById(R.id.button);
+		
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			relative.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView1.setTextColor(Color.parseColor("#A2C0DE"));
+			editText.setTextColor(Color.parseColor("#A2C0DE"));
+			button.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
+		
 		
 	    progressBar=(ProgressBar)findViewById(R.id.progressBar);
 		progressBar.setVisibility(View.GONE);
 		relativeLayout=(RelativeLayout)findViewById(R.id.relativelayout1);
 		relativeLayout.setVisibility(View.GONE);
-		final Button button=(Button)findViewById(R.id.button);
+		
 		
 		textView=(TextView)findViewById(R.id.noresult);
 		

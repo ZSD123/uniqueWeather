@@ -71,7 +71,7 @@ public class SendTextHolder extends BaseViewHolder implements View.OnClickListen
 	  @Bind(R.id.progress_load)
 	  protected ProgressBar progress_load;
       BmobIMConversation c;
-
+  
   public SendTextHolder(Context context, ViewGroup root,BmobIMConversation c,OnRecyclerViewListener listener,View view) {
     super(context, root, listener,view);
     this.c =c;

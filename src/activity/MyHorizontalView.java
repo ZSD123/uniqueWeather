@@ -17,13 +17,13 @@ import android.widget.LinearLayout;
 
 public class MyHorizontalView extends HorizontalScrollView {
     private int mScreenWidth;
-    private ViewGroup mMenu;
+    private ViewGroup mMenu; 
     private ViewGroup mContent;
-    private LinearLayout mWapper;
+    private LinearLayout mWapper;  
     private int mScreenRight=50;
     public static  int mMenuWidth;
     private boolean once=false;
-    
+      
 
 
 	public MyHorizontalView(Context context, AttributeSet attrs) {
@@ -43,7 +43,7 @@ public class MyHorizontalView extends HorizontalScrollView {
 		mMenuWidth=mMenu.getLayoutParams().width=mScreenWidth-mScreenRight;
 		mContent.getLayoutParams().width=mScreenWidth;
 		once=true;
-		}
+		}  
 	    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
    @Override
@@ -88,7 +88,7 @@ protected void onScrollChanged(int l, int t, int oldl, int oldt)
 
 {   
 	
-	
+
 	float scale=l*1.0f/mMenuWidth;    //1~0，当菜单在左边的时候，l是为0的，scale是为0的，
                                       //当左侧菜单完整滑出的时候，l就为0
     

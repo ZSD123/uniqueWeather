@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E4EDF5"
+    android:id="@+id/lin"
     android:orientation="vertical" >
  <ScrollView 
     android:layout_width="match_parent"
@@ -20,12 +21,14 @@
      android:layout_height="wrap_content"
      android:layout_margin="10dp"
      android:textSize="20sp"
+     android:id="@+id/text1"
      />
  <TextView 
      android:layout_width="wrap_content"
      android:layout_height="wrap_content"
      android:layout_margin="10dp"
      android:text="1、可以邀请好友和搜索其他账号"
+      android:id="@+id/text2"
      />
  <ImageView 
      android:layout_width="wrap_content"
@@ -38,7 +41,7 @@
      android:layout_height="wrap_content"
      android:layout_margin="10dp"
      android:text="2、点击地图上左下角第一个按钮，可以直接查看最近登录的附近的人"
-    
+     android:id="@+id/text3"
      />
  <ImageView 
      android:layout_width="wrap_content"
@@ -51,7 +54,7 @@
      android:layout_height="wrap_content"
      android:layout_margin="10dp"
      android:text="3、搜索完账号可以进行加好友和发消息等操作"
-    
+     android:id="@+id/text4"
      />
    <ImageView 
      android:layout_width="wrap_content"
@@ -64,7 +67,7 @@
      android:layout_height="wrap_content"
      android:layout_margin="10dp"
      android:text="4、从附近人列表加好友和聊天"
-    
+     android:id="@+id/text5"
      />
      <ImageView 
      android:layout_width="wrap_content"

@@ -4,12 +4,14 @@ import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,15 +21,36 @@ public class fankuiAct extends baseActivity {
     	super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.fankui);
+		RelativeLayout relativeLayout=(RelativeLayout)findViewById(R.id.relative);
 		TextView textView1=(TextView)findViewById(R.id.text1);
-		textView1.setText("欢迎大家加群聊或者发邮箱及时反馈，谢谢大家的支持");
 		TextView textView2=(TextView)findViewById(R.id.text2);
-		textView2.setText("QQ群号：");
 		TextView textView3=(TextView)findViewById(R.id.text3);
-		textView3.setText(Html.fromHtml("<u>"+"594653155"+"</u>"));
 		TextView textView4=(TextView)findViewById(R.id.text4);
-		textView4.setText("邮箱号：");
 		TextView textView5=(TextView)findViewById(R.id.text5);
+		TextView textView6=(TextView)findViewById(R.id.text6);
+		TextView textView7=(TextView)findViewById(R.id.text7);
+		
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			relativeLayout.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView1.setTextColor(Color.parseColor("#A2C0DE"));
+			textView2.setTextColor(Color.parseColor("#A2C0DE"));
+			textView3.setTextColor(Color.parseColor("#A2C0DE"));
+			textView4.setTextColor(Color.parseColor("#A2C0DE"));
+			textView5.setTextColor(Color.parseColor("#A2C0DE"));
+			textView6.setTextColor(Color.parseColor("#A2C0DE"));
+			textView7.setTextColor(Color.parseColor("#A2C0DE"));
+		}
+		
+		
+		textView1.setText("欢迎大家加群聊或者发邮箱及时反馈，谢谢大家的支持");
+		
+		textView2.setText("QQ群号：");
+		
+		textView3.setText(Html.fromHtml("<u>"+"594653155"+"</u>"));
+		
+		textView4.setText("邮箱号：");
+		
 		textView5.setText(Html.fromHtml("<u>"+"1833751104@qq.com"+"</u>"));
 		textView3.setOnClickListener(new OnClickListener() {
 			
@@ -41,9 +64,9 @@ public class fankuiAct extends baseActivity {
 				
 			}
 		});
-		TextView textView6=(TextView)findViewById(R.id.text6);
+		
 		textView6.setText("app官网:");
-		TextView textView7=(TextView)findViewById(R.id.text7);
+	
 		textView7.setText(Html.fromHtml("<u>"+"http://sharefriend.bmob.site/"+"</u>"));
 		textView7.setOnClickListener(new OnClickListener() {
 			

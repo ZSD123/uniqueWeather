@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.app.ActionBar.LayoutParams;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,10 +72,22 @@ public class xiangxiDataAct extends baseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		View view=getLayoutInflater().inflate(R.layout.xiangxidata, null);
-		setContentView(view);
+		setContentView(R.layout.xiangxidata);
+		
+		ScrollView scrollView=(ScrollView)findViewById(R.id.scrollview);
+		
+		
 		circleImageView=(CircleImageView)findViewById(R.id.userPicture);
 		textView=(TextView)findViewById(R.id.userName);
+		 TextView textView1=(TextView)findViewById(R.id.text1);
+		 TextView textView2=(TextView)findViewById(R.id.text2);
+		 TextView textView3=(TextView)findViewById(R.id.text3);
+		 TextView textView4=(TextView)findViewById(R.id.text4);
+		 TextView textView5=(TextView)findViewById(R.id.text5);
+		 TextView textView6=(TextView)findViewById(R.id.text6);
+		 TextView textView7=(TextView)findViewById(R.id.text7);
+		 TextView textView8=(TextView)findViewById(R.id.text8);
+		
 		spinner1=(Spinner)findViewById(R.id.spinner1);
 		spinner2=(Spinner)findViewById(R.id.spinner2);
 		editText2=(EditText)findViewById(R.id.nianling);
@@ -82,6 +96,36 @@ public class xiangxiDataAct extends baseActivity {
 		editText5=(EditText)findViewById(R.id.xuexiao);
 		editText6=(EditText)findViewById(R.id.suozaidi);
 		editText7=(EditText)findViewById(R.id.guxiang);
+		
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		if(designNum==4){
+			scrollView.setBackgroundColor(Color.parseColor("#051C3D"));
+			editText2.setTextColor(Color.parseColor("#A2C0DE"));
+  			editText3.setTextColor(Color.parseColor("#A2C0DE"));
+  			editText4.setTextColor(Color.parseColor("#A2C0DE"));
+  			editText5.setTextColor(Color.parseColor("#A2C0DE"));
+  			editText6.setTextColor(Color.parseColor("#A2C0DE"));
+  			editText7.setTextColor(Color.parseColor("#A2C0DE"));
+  			
+  			editText2.setBackgroundColor(Color.parseColor("#051C3D"));
+  			editText3.setBackgroundColor(Color.parseColor("#051C3D"));
+  			editText4.setBackgroundColor(Color.parseColor("#051C3D"));
+  			editText5.setBackgroundColor(Color.parseColor("#051C3D"));
+  			editText6.setBackgroundColor(Color.parseColor("#051C3D"));
+  			editText7.setBackgroundColor(Color.parseColor("#051C3D"));
+  			
+  			textView.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView1.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView2.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView3.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView4.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView5.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView6.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView7.setTextColor(Color.parseColor("#A2C0DE"));
+  			textView8.setTextColor(Color.parseColor("#A2C0DE"));
+  			spinner1.setBackgroundColor(Color.parseColor("#278CCE"));
+  			spinner2.setBackgroundColor(Color.parseColor("#278CCE"));
+		}
 
         final MyUser myUser=(MyUser) getIntent().getBundleExtra("bundle").getSerializable("myUser");        
         

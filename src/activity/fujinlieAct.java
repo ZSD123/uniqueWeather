@@ -34,8 +34,12 @@ import adapter.fujinAdapter;
 import android.R.integer;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.icu.math.BigDecimal;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -70,6 +74,9 @@ public class fujinlieAct extends baseActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.fujin_yonghu_lie);
 		
+		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
+		CustomFontTextView textView1=(CustomFontTextView)findViewById(R.id.text);
+		
 		fujinliedb=fujinlieDB.getInstance(fujinlieAct.this);
 		
 		recyclerView=(RecyclerView)findViewById(R.id.recyclerview);
@@ -82,6 +89,14 @@ public class fujinlieAct extends baseActivity {
 	    relativeLayout=(RelativeLayout)findViewById(R.id.relativelayout1);
 	    textView=(TextView)findViewById(R.id.textDeng);
 	    
+	    SharedPreferences pre=PreferenceManager.getDefaultSharedPreferences(fujinlieAct.this);
+	    
+	    int designNum=pre.getInt("design", 0);
+		if(designNum==4){
+			relative.setBackgroundColor(Color.parseColor("#051C3D"));
+			textView1.setTextColor(Color.parseColor("#A2C0DE"));
+			
+		}
 	    
 		lat=fragmentMap.pre.getFloat("lat", 39);
 		lon=fragmentMap.pre.getFloat("lon",116);

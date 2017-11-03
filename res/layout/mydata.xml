@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+     android:id="@+id/scrollview"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
      android:background="#E4EDF5"
-    android:scrollbars="vertical">
+     android:scrollbars="vertical">
 <LinearLayout 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,6 +15,7 @@
     android:orientation="horizontal"
     >
     <TextView 
+    android:id="@+id/zunchenText"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textSize="20sp"
@@ -37,6 +39,7 @@
     android:orientation="horizontal"
     >
    <TextView 
+    android:id="@+id/sexText"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textSize="20sp"
@@ -58,6 +61,7 @@
     android:orientation="horizontal"
     >
     <TextView 
+    android:id="@+id/ageText"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textSize="20sp"
@@ -82,6 +86,7 @@
       android:orientation="horizontal"
        >
      <TextView 
+         android:id="@+id/birthText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -106,6 +111,7 @@
       android:orientation="horizontal"
        >
         <TextView 
+            android:id="@+id/xingzuoText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -130,6 +136,7 @@
       android:orientation="horizontal"
        >
     <TextView 
+        android:id="@+id/zhiyeText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -151,6 +158,7 @@
       android:orientation="horizontal"
        >
         <TextView 
+            android:id="@+id/mobileText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -175,6 +183,7 @@
       android:orientation="horizontal"
        >
         <TextView 
+            android:id="@+id/emailText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -199,6 +208,7 @@
       android:orientation="horizontal"
        >
         <TextView 
+            android:id="@+id/schoolText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -224,6 +234,7 @@
       android:orientation="horizontal"
        >
         <TextView 
+            android:id="@+id/suozaidiText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"
@@ -249,6 +260,7 @@
       android:orientation="horizontal"
        >
           <TextView 
+              android:id="@+id/guxiangText"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textSize="20sp"

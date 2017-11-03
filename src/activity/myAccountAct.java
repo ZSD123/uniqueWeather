@@ -38,6 +38,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
@@ -62,7 +63,9 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class myAccountAct extends baseActivity implements AMapLocationListener,OnTouchListener {
@@ -97,6 +100,10 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 		setContentView(R.layout.mydata);  
 		
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		int designNum=fragmentChat.pre.getInt("design", 0);
+		
+		ScrollView scrollView=(ScrollView)findViewById(R.id.scrollview);
+	
 		
 	    spinner1=(Spinner)findViewById(R.id.spinner1);
 	    spinner2=(Spinner)findViewById(R.id.spinner2);
@@ -110,8 +117,63 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	    editText8=(EditText)findViewById(R.id.shoujihao);
 	    editText9=(EditText)findViewById(R.id.youxiang);
 	    
+	    TextView textView1=(TextView)findViewById(R.id.zunchenText);
+	    TextView textView2=(TextView)findViewById(R.id.sexText);
+	    TextView textView3=(TextView)findViewById(R.id.ageText);
+	    TextView textView4=(TextView)findViewById(R.id.birthText);
+	    TextView textView5=(TextView)findViewById(R.id.xingzuoText);
+	    TextView textView6=(TextView)findViewById(R.id.zhiyeText);
+	    TextView textView7=(TextView)findViewById(R.id.mobileText);
+	    TextView textView8=(TextView)findViewById(R.id.emailText);
+	    TextView textView9=(TextView)findViewById(R.id.schoolText);
+	    TextView textView10=(TextView)findViewById(R.id.suozaidiText);
+	    TextView textView11=(TextView)findViewById(R.id.guxiangText);
+	  
+	    
 	    button=(Button)findViewById(R.id.button);
 	    button1=(Button)findViewById(R.id.button1);
+	    
+	    
+	  		if(designNum==4){
+	  			scrollView.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText1.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText2.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText3.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText4.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText5.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText6.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText7.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText8.setTextColor(Color.parseColor("#A2C0DE"));
+	  			editText9.setTextColor(Color.parseColor("#A2C0DE"));
+ 			
+	  			editText1.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText2.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText3.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText4.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText5.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText6.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText7.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText8.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			editText9.setBackgroundColor(Color.parseColor("#051C3D"));
+	  			
+	  			textView1.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView2.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView3.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView4.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView5.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView6.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView7.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView8.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView9.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView10.setTextColor(Color.parseColor("#A2C0DE"));
+	  			textView11.setTextColor(Color.parseColor("#A2C0DE"));
+	  			
+	  			button.setTextColor(Color.parseColor("#A2C0DE"));
+	  			button1.setTextColor(Color.parseColor("#A2C0DE"));
+	  			
+	  			spinner1.setBackgroundColor(Color.parseColor("#278CCE"));
+	  			spinner2.setBackgroundColor(Color.parseColor("#278CCE"));
+	  		}
 	    
 	    mLocationClient=new AMapLocationClient(myAccountAct.this);
 	    mLocationClient.setLocationListener(this);

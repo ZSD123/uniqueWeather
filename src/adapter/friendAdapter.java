@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -38,6 +39,7 @@ public class friendAdapter extends Adapter<RecyclerView.ViewHolder> {
     private Context mContext;
     private final int TYPE_0=0;
     private final int TYPE_FRIEND=1;
+    private int colorNum=0;
     
 	public friendAdapter(Context mContext,List<Friend> mList) {
 		this.mContext=mContext;
@@ -88,6 +90,11 @@ public class friendAdapter extends Adapter<RecyclerView.ViewHolder> {
 	@Override
 	public void onBindViewHolder(final ViewHolder holder, final int position) {
 		if(position==0){
+			if(colorNum==1){
+				((zeroViewHolder)holder).textView.setTextColor(Color.parseColor("#A2C0DE"));
+			}else if(colorNum==0){
+				((zeroViewHolder)holder).textView.setTextColor(Color.parseColor("#000000"));
+			}
 			((zeroViewHolder)holder).itemView.setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -160,10 +167,14 @@ public class friendAdapter extends Adapter<RecyclerView.ViewHolder> {
 					((friendViewHolder)holder).imageView.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.userpicture));
 				}
 		}
-		
+		if(colorNum==1){
+			((friendViewHolder)holder).tv.setTextColor(Color.parseColor("#A2C0DE"));
+		}else if(colorNum==0){
+			((friendViewHolder)holder).tv.setTextColor(Color.parseColor("#000000"));
+		}
 		((friendViewHolder)holder).tv.setText(friends.get(position-1).getFriendUser().getNick());
  
-	    }
+	   }
 	}
 	@Override
 	public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -200,10 +211,11 @@ public class friendAdapter extends Adapter<RecyclerView.ViewHolder> {
 		
 	}
 	class zeroViewHolder extends ViewHolder implements View.OnClickListener,View.OnLongClickListener{
-        
+        TextView textView;
 		public zeroViewHolder(View view) {
 			super(view);
 			fragmentChat.newFriendImage1=(ImageView)view.findViewById(R.id.newfriend_image);
+			textView=(TextView)view.findViewById(R.id.newfriend);
 		}
 
 		@Override
@@ -218,6 +230,14 @@ public class friendAdapter extends Adapter<RecyclerView.ViewHolder> {
 			
 		}
 		
+	}
+	public void refreshTextColor(int i){
+		if(i==0)   {   //当它为0的时候为黑色
+			colorNum=0;
+		}else if(i==1){
+			colorNum=1;
+		}
+		notifyDataSetChanged();
 	}
 
 }

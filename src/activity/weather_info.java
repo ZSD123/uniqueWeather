@@ -121,11 +121,11 @@ public class weather_info extends baseFragmentActivity {
                                  zhudongLogin=1;
                                  jiaKeFu();
                                  checkJuBao();
-                                 checkEmailVerify(myUser);
+                                   checkEmailVerify(myUser);
                             }else if(e.getErrorCode()==206){
 								Toast.makeText(weather_info.this, "为了您的账户安全，请重新登录", Toast.LENGTH_SHORT).show();
 							    MyUser.logOut();
-								MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
+				 				MyUser currentUser=BmobUser.getCurrentUser(MyUser.class);
 								Intent intent=new Intent(getApplicationContext(),loginAct.class);
 								startActivity(intent);
 								finish();
