@@ -15,8 +15,15 @@ public class MyUser extends BmobUser {
 	private String guxiang;
 	private String touxiangUrl;
 	private String installationId;     //Éè±¸Âë
-	private boolean canCall;
-
+	private Boolean canCall;
+    private Boolean isQQ;
+	
+	public Boolean isQQ() {
+		return isQQ;
+	}
+	public void setQQ(Boolean isQQ) {
+		this.isQQ = isQQ;
+	}
 	public boolean isCanCall() {
 		return canCall;
 	}

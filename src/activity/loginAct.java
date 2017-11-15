@@ -3,8 +3,15 @@ package activity;
 //一定要精益求精，努力做到最好，为社会创造价值！
 //@author 张圣德大帝
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,9 +43,20 @@ import cn.bmob.v3.listener.ValueEventListener;
 
 
 import com.amap.api.services.a.bu;
+import com.google.gson.JsonObject;
 import com.sharefriend.app.R;
+import com.tencent.connect.UserInfo;
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+import com.tencent.open.utils.HttpUtils.HttpStatusException;
+import com.tencent.open.utils.HttpUtils.NetworkUnavailableException;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
 
 import Util.MD5Util;
+import adapter.qqLoginListener;
+import adapter.userInfoListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
@@ -51,6 +69,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.SyncStateContract.Constants;
 import android.renderscript.Type;
 import android.text.Html;
 import android.text.InputType;
@@ -106,14 +125,24 @@ public class loginAct extends Activity{
     
     private CheckBox checkBox;       //我同意服务条款checkbox
     
-    private ProgressBar progressBar;
+    private  ProgressBar progressBar;
     private RelativeLayout relativeLayout;
     private RelativeLayout relativeRoot;
-    private TextView textView;
+    private  TextView textView;
 
     public static String installationId;
     
     public static BmobIMApplication application;
+    
+    private ImageView qieImage;   //企鹅登录小图案
+    private TextView qieText;   //企鹅登录文字
+    public static  Tencent mTencent;   
+    private qqLoginListener listener;
+    private userInfoListener listener2;  //获取QQ用户信息的接口
+    
+    private SharedPreferences pre;
+    
+
     
     @Override
 	public void onCreate(Bundle savedInstanceState)
@@ -124,22 +153,47 @@ public class loginAct extends Activity{
         
         application=BmobIMApplication.INSTANCE();
 		
-
+        
 	 //   BmobIM.init(this);
-	  
+	    
 	    
 		final MyUser bu=new MyUser();
 	    
         final MyUser userInfo=BmobUser.getCurrentUser(MyUser.class);
 		
-		if(userInfo!=null)
+        
+        pre=PreferenceManager.getDefaultSharedPreferences(this);
+            
+        mTencent=Tencent.createInstance("1106354008",getApplicationContext());//QQ参数初始化
+
+      
+		if(userInfo!=null&&((userInfo.isQQ()==null)||(userInfo.isQQ()!=null&&!userInfo.isQQ())))     //不是QQ账号就直接登录,这里也要提防为空的情况
 		{   
 			installationId=MyBmobInstallation.getInstallationId(loginAct.this);
 			Intent intent=new Intent(loginAct.this,weather_info.class);
 			intent.putExtra("login", 0);
 			startActivity(intent);
 			finish();
+		}else if(userInfo!=null&&userInfo.isQQ()){   //如果是QQ号的话就要判断是否登录过期
+			
+		    	long expires=pre.getLong("expires_in", -1);
+		 
+			    String expire=String.valueOf((expires-System.currentTimeMillis())/1000);
+			    String token=pre.getString("access_token", "-1");
+				String openid=pre.getString("openid", "-1");
+				mTencent.setOpenId(openid);
+				mTencent.setAccessToken(token, expire);
+				doLoginByQQ();
 		}
+		
+		
+		
+	    
+		qieImage=(ImageView)findViewById(R.id.qie);
+		qieText=(TextView)findViewById(R.id.qietext);
+		
+		
+		
 		TextView fuwu=(TextView)findViewById(R.id.fuwu);
 		button1=(Button)findViewById(R.id.login);
 		button2=(Button)findViewById(R.id.shoujidenglu);
@@ -171,7 +225,28 @@ public class loginAct extends Activity{
 	    textView=(TextView)findViewById(R.id.textDeng);
 	    textView.setVisibility(View.GONE);
 	    
+	    listener=new qqLoginListener(this,mTencent,progressBar,relativeLayout,relativeRoot,textView);
+	    
 	    button2.setBackgroundColor(0);
+	    
+    
+	    
+	    qieImage.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				doLoginByQQ();
+			}
+		});
+	    
+	    qieText.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				doLoginByQQ();
+				
+			}
+		});
 	    
 	    fuwu.setOnClickListener(new OnClickListener() {
 			
@@ -425,6 +500,31 @@ public class loginAct extends Activity{
 			super.onBackPressed();
 		}
 	}
-	 
+	private void doLoginByQQ(){     //使用QQ登录
+		
+		 if(!mTencent.isSessionValid()){  //这是它的session无效的时候
+		     mTencent.login(this,"get_simple_userinfo", listener);
+	     }else {                //这是它的session有效的时候
+	    	   installationId=MyBmobInstallation.getInstallationId(loginAct.this);
+			   Intent intent=new Intent(loginAct.this,weather_info.class);
+			   intent.putExtra("login", 0);
+			   startActivity(intent);
+			   finish();
+		}
+		
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode==com.tencent.connect.common.Constants.REQUEST_LOGIN){
+			
+	       Tencent.onActivityResultData(requestCode, resultCode, data, listener);
+	       if(resultCode==com.tencent.connect.common.Constants.ACTIVITY_OK){
+	    	     
+	       }
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 	 
   }

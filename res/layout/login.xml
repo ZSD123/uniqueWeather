@@ -115,10 +115,31 @@
        android:layout_below="@id/shoujidenglu"
        android:text="快速注册"
        />
-
+      <ImageView 
+          android:id="@+id/qie"
+          android:layout_below="@id/register"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentLeft="true"
+          android:layout_marginLeft="30dp"
+          android:layout_marginTop="5dp"
+          android:src="@drawable/qie"
+          />
+       <TextView 
+       android:id="@+id/qietext"
+       android:layout_below="@id/register"
+       android:layout_toRightOf="@id/qie"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="5dp"
+       android:layout_marginLeft="5dp"
+       android:clickable="true"
+       android:text="QQ登录"
+       />
+    
    <TextView 
        android:id="@+id/wangjimima"
-       android:layout_below="@id/register"
+       android:layout_below="@id/qie"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_alignParentLeft="true"

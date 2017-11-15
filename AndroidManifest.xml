@@ -79,9 +79,28 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.tencent.tauth.AuthActivity" 
+            android:noHistory="true" 
+            android:launchMode="singleTask" >
+           <intent-filter>
+           <action android:name="android.intent.action.VIEW" />
+           <category android:name="android.intent.category.DEFAULT" />
+           <category android:name="android.intent.category.BROWSABLE" />
+           <data android:scheme="tencent1106354008" />
+           </intent-filter>
+         </activity>
+         
+         <activity android:name="com.tencent.connect.common.AssistActivity"
+          android:theme="@android:style/Theme.Translucent.NoTitleBar"
+          android:configChanges="orientation|keyboardHidden|screenSize" 
+          />
+         
         <activity 
+            
             android:name="activity.weather_info"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -188,6 +207,7 @@
             android:name="activity.designAct"
             android:screenOrientation="portrait"
             ></activity>
+        
         <service
             android:name="service.autoUqdateService"/>
         <service 

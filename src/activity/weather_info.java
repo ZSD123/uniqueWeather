@@ -23,6 +23,11 @@ import model.UniversalImageLoader;
 import model.UserModel;
 
 import cn.bmob.newim.BmobIM;
+import cn.bmob.newim.bean.BmobIMConversation;
+import cn.bmob.newim.bean.BmobIMMessage;
+import cn.bmob.newim.bean.BmobIMMessageType;
+import cn.bmob.newim.bean.BmobIMUserInfo;
+import cn.bmob.newim.db.BmobIMDBManager;
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobInstallation;
 import cn.bmob.v3.BmobQuery;
@@ -86,11 +91,15 @@ public class weather_info extends baseFragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstance)
 	{    currentUser=BmobUser.getCurrentUser(MyUser.class);
-	     if(currentUser!=null){
+	     int isQQ=getIntent().getIntExtra("isQQ", 0);
+	     
+	     if(currentUser!=null){    
 	    	objectId=currentUser.getObjectId();
-     	 }
+	    }
+	     
 	    zhudongLogin=getIntent().getIntExtra("login", 0);
-		super.onCreate(savedInstance);
+	    
+		super.onCreate(savedInstance); 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 		if(weather_info.this!=null)
@@ -120,6 +129,7 @@ public class weather_info extends baseFragmentActivity {
 							if(e==null){
                                  zhudongLogin=1;
                                  jiaKeFu();
+                                 kefudazhaohu();
                                  checkJuBao();
                                    checkEmailVerify(myUser);
                             }else if(e.getErrorCode()==206){
@@ -149,6 +159,8 @@ public class weather_info extends baseFragmentActivity {
 						public void done(BmobException e) {
 							if(e==null){
 								zhudongLogin=1;
+								if(!weather_info.objectId.equals("e5be088480"))
+								   kefuwelcome();
 								checkJuBao();
 								checkEmailVerify(myUser);
 								update();
@@ -173,6 +185,86 @@ public class weather_info extends baseFragmentActivity {
 
 	  //  BmobIM.registerDefaultMessageHandler(new myMessageHandler(weather_info.this));
 	
+		
+	}
+	
+	private void kefudazhaohu(){   //刚注册的时候客服向消费者自动打招呼
+		BmobIMDBManager dbManager=BmobIMDBManager.getInstance(weather_info.objectId);
+		
+		BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+		bmobIMUserInfo.setUserId("e5be088480");
+		bmobIMUserInfo.setName("客服小秘书");
+		
+		BmobIMConversation conversation=fragmentChat.bmobIM.startPrivateConversation(bmobIMUserInfo, null);
+		conversation.setConversationId("e5be088480");
+		conversation.setIsTransient(false);
+		conversation.setUpdateTime(System.currentTimeMillis());
+		
+		
+		BmobIMMessage message=new BmobIMMessage();
+		message.setFromId("e5be088480");
+		message.setContent("您好，欢迎回家，我是共享交友的客服，有什么问题就和我联系哦，我会尽量在第一时间回复您，祝您玩得愉快");
+		message.setCreateTime(System.currentTimeMillis());
+		message.setUpdateTime(System.currentTimeMillis());
+		message.setConversationId("e5be088480");
+		message.setIsTransient(false);
+		message.setMsgType(BmobIMMessageType.TEXT.getType());
+	    message.setSendStatus(4);
+	    message.setReceiveStatus(0);
+	    message.setToId(weather_info.objectId);
+	    message.setConversationType(0);
+        message.setBmobIMConversation(conversation);
+       
+        dbManager.insertOrReplaceConversation(conversation);
+	    
+	    dbManager.insertOrUpdateMessage(message);
+		
+		fragmentChat.converdb.saveNewContentById("e5be088480",message.getContent());
+	    fragmentChat.converdb.saveTimeById("e5be088480", message.getCreateTime());
+	  
+	   
+         fragmentChat.refreshConversations(0,"e5be088480");
+          
+
+	}
+	
+	private void kefuwelcome(){    //当用户切换手机登录的时候会再次发这个信息
+	    
+		BmobIMDBManager dbManager=BmobIMDBManager.getInstance(weather_info.objectId);
+		
+		BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
+		bmobIMUserInfo.setUserId("e5be088480");
+		bmobIMUserInfo.setName("客服小秘书");
+		
+		BmobIMConversation conversation=fragmentChat.bmobIM.startPrivateConversation(bmobIMUserInfo, null);
+		conversation.setConversationId("e5be088480");
+		conversation.setIsTransient(false);
+		conversation.setUpdateTime(System.currentTimeMillis());
+		
+		
+		BmobIMMessage message=new BmobIMMessage();
+		message.setFromId("e5be088480");
+		message.setContent("您好，欢迎回家，有什么问题就和我联系哦，我会尽量在第一时间回复您，祝您玩得愉快");
+		message.setCreateTime(System.currentTimeMillis());
+		message.setUpdateTime(System.currentTimeMillis());
+		message.setConversationId("e5be088480");
+		message.setIsTransient(false);
+		message.setMsgType(BmobIMMessageType.TEXT.getType());
+	    message.setSendStatus(4);
+	    message.setReceiveStatus(0);
+	    message.setToId(weather_info.objectId);
+	    message.setConversationType(0);
+        message.setBmobIMConversation(conversation);
+       
+        dbManager.insertOrReplaceConversation(conversation);
+	    
+	    dbManager.insertOrUpdateMessage(message);
+		
+		fragmentChat.converdb.saveNewContentById("e5be088480",message.getContent());
+	    fragmentChat.converdb.saveTimeById("e5be088480", message.getCreateTime());
+	  
+	   
+        fragmentChat.refreshConversations(0,"e5be088480");
 		
 	}
 	private void checkEmailVerify(MyUser myUser){
@@ -289,6 +381,8 @@ public class weather_info extends baseFragmentActivity {
     	fragmentChat.converdb.saveTouXiangById("e5be088480","http://bmob-cdn-9223.b0.upaiyun.com/2017/08/12/6e9b816b04374cdf83523a64a6a72bd9.png");
     	
     	fragmentChat.refreshNewFriend();
+    	
+    	
 	}
 	
 	

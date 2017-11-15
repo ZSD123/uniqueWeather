@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import model.Friend;
 import myCustomView.CircleImageView;
@@ -32,6 +34,9 @@ import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,8 +96,7 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 						if(fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||fragmentChat.conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId)){
 					     if(!fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(fragmentChat.conversations.get(i).getMessages().get(0).getToId())){
 					      if(!fragmentChat.conversations.get(i).getMessages().get(0).getMsgType().equals("decline")){
-						count1++;   
-						Log.d("Main", "count1="+count1);
+						count1++;  
 						String id=fragmentChat.conversations.get(i).getConversationId();
 
 					fragmentChat.converdb.saveId(id,0);
@@ -149,6 +153,7 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 			});
     
 				String nickName=fragmentChat.conversations.get(position).getConversationTitle();
+				
 				if(nickName!=null){
                     if(colorNum==1){
                     	((conversationViewHolder)holder).tv_name.setTextColor(Color.parseColor("#A2C0DE"));
@@ -157,7 +162,12 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
                     }
                     
 					((conversationViewHolder)holder).tv_name.setText(nickName);
-				}
+					if(nickName.equals("")){
+						((conversationViewHolder)holder).tv_name.setText(fragmentChat.conversations.get(position).getConversationId());
+					}
+				}else {
+					((conversationViewHolder)holder).tv_name.setText(fragmentChat.conversations.get(position).getConversationId());
+			     	}
 				
 				String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+fragmentChat.conversations.get(position).getConversationId()+".jpg_";
 				File file=new File(path);
@@ -210,12 +220,15 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 		                	 ((conversationViewHolder)holder).imageView.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.userpicture));
 					   }
 					}
+					
 		            if(colorNum==1){
 		            	((conversationViewHolder)holder).tv_message.setTextColor(Color.parseColor("#A2C0DE"));
 		            }else if(colorNum==0){
 		            	((conversationViewHolder)holder).tv_message.setTextColor(Color.parseColor("#000000"));
 		            }
-					((conversationViewHolder)holder).tv_message.setText(fragmentChat.converdb.getNewContentById(fragmentChat.conversations.get(position).getConversationId()));
+		            
+					String content=fragmentChat.converdb.getNewContentById(fragmentChat.conversations.get(position).getConversationId());
+					((conversationViewHolder)holder).tv_message.setText(replace(content));
 		
 				   long time=fragmentChat.conversations.get(position).getUpdateTime();
 				   if(colorNum==1){
@@ -286,6 +299,33 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 			}
 			notifyDataSetChanged();
 		}
-	
+		 private  Pattern buildPattern() {
+				return Pattern.compile("\\\\ue[a-z0-9]{3}", Pattern.CASE_INSENSITIVE);
+			}
+
+			private  CharSequence replace(String text) {
+				try {
+					SpannableString spannableString = new SpannableString(text);
+					int start = 0;
+					Pattern pattern = buildPattern();
+					Matcher matcher = pattern.matcher(text);
+					while (matcher.find()) {
+						String faceText = matcher.group();
+						String key = faceText.substring(1);
+						BitmapFactory.Options options = new BitmapFactory.Options();
+						Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(),
+								mContext.getResources().getIdentifier(key, "drawable",mContext.getPackageName()), options);
+						ImageSpan imageSpan = new ImageSpan(mContext, bitmap);
+						int startIndex = text.indexOf(faceText, start);
+						int endIndex = startIndex + faceText.length();
+						if (startIndex >= 0)
+							spannableString.setSpan(imageSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+						start = (endIndex - 1);
+					}
+					return spannableString;
+				} catch (Exception e) {
+					return text;
+				}
+			}
 
 }

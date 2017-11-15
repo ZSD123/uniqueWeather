@@ -261,14 +261,17 @@ public class xiangxiDataAct extends baseActivity {
  	       editText2.setText(myUser.getAge());
  	     if(myUser.getShengri()!=null)
  	       editText3.setText(myUser.getShengri());
- 	     if(myUser.getConstellation()!=null)
+ 	     
+ 	     if(myUser.getConstellation()!=null){
+ 	    	
  	        editText4.setText(myUser.getConstellation());
-        
+ 	     }
  	       int sel=0;
  	         for (int i = 0; i < arr1.length; i++) {
  	 			if(arr1[i].equals(myUser.getZhiye()))
  	 				sel=i;
  	 		}
+ 	         
  	 	    spinner2.setSelection(sel);
  	 	  if(myUser.getSchool()!=null)
  	 	    editText5.setText(myUser.getSchool());

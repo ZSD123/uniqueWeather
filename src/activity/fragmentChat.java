@@ -220,11 +220,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
             Button button2;//logout Button
             ImageView jia;  //加号按钮
             
-            
-           
-            
-            
-            
+              
             View view3;    //消息界面View
             final messageSwipe sw_refresh1;   //消息界面的refresh
             final SwipeRefreshLayout sw_refresh2;  //联系人列表的refresh
@@ -557,10 +553,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		    if(nick!=null){
 		    	userName.setText(nick);
 		    	Toast.makeText(getActivity(),nick+ ",欢迎回家", Toast.LENGTH_SHORT).show();
-		    }	
-		       else 
+		    } else 
 			{   BmobQuery<MyUser> query=new BmobQuery<MyUser>();
-			    query.getObject((String)MyUser.getObjectByKey("objectId"),new QueryListener<MyUser>() {
+			    query.getObject(weather_info.objectId,new QueryListener<MyUser>() {
 
 					@Override
 					public void done(MyUser myUser, BmobException e) {
@@ -644,31 +639,12 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		    mLocationClient.setLocationOption(mLocationOption);
 		    mLocationClient.startLocation();
 		    
-		    
-		    Bitmap bitmap1;
-		    
-		    String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"头像.png";
+		     String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/"+(String)BmobUser.getObjectByKey("username")+"头像.png";
 		    
              File file=new File(path);
 		      if(file.exists()){
-				   try {
-					InputStream is=new FileInputStream(file);
-					
-					BitmapFactory.Options opts=new BitmapFactory.Options();
-					opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
-					
-					opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
-					opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
-					
-					opts.inSampleSize=2;
-					opts.inInputShareable=true;//设置解码位图的尺寸信息
-					
-					bitmap1=BitmapFactory.decodeStream(is, null, opts);
-					userPicture.setImageBitmap(bitmap1);
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				  userPicture.setImageBitmap(BitmapFactory.decodeFile(path));  //这里不优化加载了，这里优化加载很难看
+			
 				   }else {
 					  refreshUserPicture(null, 1);
 				   }
@@ -814,13 +790,15 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								    MyUser.logOut();
-									BmobUser currentUser=BmobUser.getCurrentUser();
+								    loginAct.mTencent.logout(context);
 									Intent intent=new Intent(getActivity(),loginAct.class);
 									startActivity(intent);
 									bmobIM.removeMessageListHandler(messageListHandler);
 									conversations.clear();
 									friends.clear();
+									mLocationClient.stopLocation();
 									getActivity().finish();
+									
 								
 								  
 							}
@@ -871,44 +849,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 								
 								@Override
 								public void onClick(View v) {
-									BmobIMDBManager dbManager=BmobIMDBManager.getInstance(weather_info.objectId);
-									
-									BmobIMUserInfo bmobIMUserInfo=new BmobIMUserInfo();
-									bmobIMUserInfo.setUserId("e5be088480");
-									bmobIMUserInfo.setName("客服小秘书");
-									
-									BmobIMConversation conversation=bmobIM.startPrivateConversation(bmobIMUserInfo, null);
-									conversation.setConversationId("e5be088480");
-									conversation.setIsTransient(false);
-									conversation.setUpdateTime(System.currentTimeMillis());
-									
-									
-									BmobIMMessage message=new BmobIMMessage();
-									message.setFromId("e5be088480");
-									message.setContent("您好，欢迎回家，我是共享交友的客服，有什么问题就和我联系哦，我会尽量在第一时间回复您，祝您玩得愉快");
-									message.setCreateTime(System.currentTimeMillis());
-									message.setUpdateTime(System.currentTimeMillis());
-									message.setConversationId("e5be088480");
-									message.setIsTransient(false);
-									message.setMsgType(BmobIMMessageType.TEXT.getType());
-								    message.setSendStatus(4);
-								    message.setReceiveStatus(0);
-								    message.setToId(weather_info.objectId);
-								    message.setConversationType(0);
-							        message.setBmobIMConversation(conversation);
-						           
-                                    dbManager.insertOrReplaceConversation(conversation);
-								    
-		  							dbManager.insertOrUpdateMessage(message);
-									
-									 fragmentChat.converdb.saveNewContentById("e5be088480",message.getContent());
-				    			     fragmentChat.converdb.saveTimeById("e5be088480", message.getCreateTime());
-				    			  
-				    			   
-				                     fragmentChat.refreshConversations(0,"e5be088480");
-				                      
-
-									
+								     Intent intent=new Intent(context,searchAct.class);
+									 startActivity(intent);
+									 
 								}
 							});
 					    	
@@ -1054,12 +997,14 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 						  for (int i = 0; i <dbfriends.size(); i++) {
 							int k=checkLocalAndWebFriend(friends, dbfriends.get(i));
 							if(k==2){   //如果k==2表示没有这个朋友
+						     if(dbfriends.get(i).getFriendUser().getObjectId()!=null)
 							   if(converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=2&&converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=3&&!dbfriends.get(i).getFriendUser().getObjectId().equals("e5be088480"))//朋友系统和黑名单系统是分开的，互不触犯
 								   converdb.updateIsFriendI(dbfriends.get(i).getFriendUser().getObjectId(),0);
 						    	}
 						  }
 						}else {     //也要考虑0的情况
 							for (int i = 0; i < dbfriends.size(); i++) {
+						      if(dbfriends.get(i).getFriendUser().getObjectId()!=null)
 						       if(converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=2&&converdb.getIsFriend(dbfriends.get(i).getFriendUser().getObjectId())!=3&&!dbfriends.get(i).getFriendUser().getObjectId().equals("e5be088480"))
 								converdb.updateIsFriendI(dbfriends.get(i).getFriendUser().getObjectId(),0);
 							}
@@ -1201,6 +1146,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	}
 	private static int checkLocalAndWebFriend(List<Friend> Webfriends,Friend friend){   
 		  for (int i = 0; i < Webfriends.size(); i++) {
+			  if(Webfriends.get(i).getFriendUser().getObjectId()!=null&&friend.getFriendUser().getObjectId()!=null)
 			    if(Webfriends.get(i).getFriendUser().getObjectId().equals(friend.getFriendUser().getObjectId())){
 			    	  return 1;
 			     }
@@ -1216,7 +1162,6 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
            	 for (int i = 0; i < conversations.size(); i++) {
                      
 					 if(conversations.get(i).getMessages().size()>0){
-						 Log.d("Main", "i="+i+"message.size="+conversations.get(i).getMessages().size()+"message="+conversations.get(i).getMessages().get(0).getContent());
 						 if(conversations.get(i).getMessages().get(0).getFromId().equals(weather_info.objectId)||fragmentChat.conversations.get(i).getMessages().get(0).getToId().equals(weather_info.objectId))
 							 if(!fragmentChat.conversations.get(i).getMessages().get(0).getFromId().equals(fragmentChat.conversations.get(i).getMessages().get(0).getToId()))
 							   if(!fragmentChat.conversations.get(i).getMessages().get(0).getMsgType().equals("decline"))

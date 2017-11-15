@@ -66,6 +66,8 @@ public class BmobIMApplication extends Application{
 
             //注册消息接收器
             BmobIM.registerDefaultMessageHandler(new myMessageHandler(getApplicationContext()));
+            
+            
         }
         //uil初始化
         UniversalImageLoader.initImageLoader(this);

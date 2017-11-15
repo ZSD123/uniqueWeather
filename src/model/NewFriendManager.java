@@ -33,6 +33,7 @@ public class NewFriendManager {
      */
     public static NewFriendManager getInstance(Context context) {
         MyUser user = BmobUser.getCurrentUser( MyUser.class);
+        if(user!=null){
         String loginId=user.getObjectId();
         if(TextUtils.isEmpty(loginId)){
             throw new RuntimeException("you must login.");
@@ -43,7 +44,10 @@ public class NewFriendManager {
             daoMap.put(loginId, dao);
         }
         
-        return dao;
+           return dao;
+        }else {
+			return null;
+		}
     }
 
     private NewFriendManager(Context context, String uId){

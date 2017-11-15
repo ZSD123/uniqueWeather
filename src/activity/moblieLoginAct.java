@@ -236,6 +236,7 @@ public class moblieLoginAct extends Activity {
 										user.setMobilePhoneNumber(input);
 										user.setMobilePhoneNumberVerified(false);
 										user.setCanCall(false);
+										user.setQQ(false);
 										loginAct.installationId=MyBmobInstallation.getInstallationId(moblieLoginAct.this);
 										user.signOrLogin(passwordString,new SaveListener<MyUser>() {
 

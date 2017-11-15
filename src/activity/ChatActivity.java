@@ -98,6 +98,7 @@ import cn.bmob.newim.bean.BmobIMVideoMessage;
 import cn.bmob.newim.core.BmobIMClient;
 import cn.bmob.newim.core.BmobRecordManager;
 import cn.bmob.newim.core.a.b;
+import cn.bmob.newim.db.BmobIMDBManager;
 import cn.bmob.newim.event.MessageEvent;
 import cn.bmob.newim.listener.MessageListHandler;
 import cn.bmob.newim.listener.MessageSendListener;
@@ -178,6 +179,10 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     
     PopupWindow popupWindow;
     BmobIMUserInfo userInfo;
+    
+    boolean isKeFu=false;
+    boolean once1=true;   //对应着回复“您好”
+    boolean once2=true;   //对应着回复“后期大力推广”
     
     public static MyUser myUser;
     class VoiceTouchListener implements View.OnTouchListener {
@@ -301,7 +306,8 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
             edit_msg.setHint("您有什么问题或需要，尽情写在这里吧");
             tv_video.setVisibility(View.GONE);
             threeCircle.setVisibility(View.INVISIBLE);
-        }
+            isKeFu=true;
+         }
             
         BmobQuery<MyUser> query=new BmobQuery<MyUser>();
         query.getObject(userInfo.getUserId(), new QueryListener<MyUser>() {
@@ -318,6 +324,7 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     		    	  myUser.setSchool(user.getSchool());
     		    	  myUser.setSuozaidi(user.getSuozaidi());
     		    	  myUser.setGuxiang(user.getGuxiang());
+    		    	  myUser.setConstellation(user.getConstellation());
 
     		      }else{
     		    	  Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -420,8 +427,10 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
 			
 			@Override
 			public void onClick(View v) {
-			  if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3)
+			  if(fragmentChat.converdb.getIsFriend(c.getConversationId())!=3){
 				 sendMessage();
+				
+			  }
 			  else {
 				 Toast.makeText(ChatActivity.this,"对方拒绝接收", Toast.LENGTH_SHORT).show();
 			    }
@@ -1184,6 +1193,10 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
         c.sendMessage(msg, listener);
         fragmentChat.converdb.saveNewContentById(c.getConversationId(),text);
         fragmentChat.converdb.saveTimeById(c.getConversationId(),msg.getCreateTime());
+        
+        if(isKeFu){
+        	zidonghuifu(text);
+        }
     }
 
     /**
@@ -1465,6 +1478,113 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
         fragmentChat.refreshConversations(1,c.getConversationId());
         
         super.onDestroy();
+    }
+    private void zidonghuifu(String text){
+    	if(once1){
+    		BmobIMDBManager dbManager=BmobIMDBManager.getInstance(weather_info.objectId);
+    				
+    		BmobIMMessage message=new BmobIMMessage();
+    		message.setFromId("e5be088480");
+    		message.setContent("在的，您好");
+    		message.setCreateTime(System.currentTimeMillis());
+    		message.setUpdateTime(System.currentTimeMillis());
+    		message.setConversationId("e5be088480");
+    		message.setIsTransient(false);
+    		message.setMsgType(BmobIMMessageType.TEXT.getType());
+    	    message.setSendStatus(4);
+    	    message.setReceiveStatus(0);
+    	    message.setToId(weather_info.objectId);
+    	    message.setConversationType(0);
+            message.setBmobIMConversation(c);
+           
+            dbManager.insertOrReplaceConversation(c);
+    	    
+    	    dbManager.insertOrUpdateMessage(message);
+    		
+    		 fragmentChat.converdb.saveNewContentById("e5be088480",message.getContent());
+    	     fragmentChat.converdb.saveTimeById("e5be088480", message.getCreateTime());
+    	      
+    	     if(adapter.findPosition(message)<0){//如果未添加到界面中
+                 adapter.addMessage(message);
+                 //更新该会话下面的已读状态
+                 c.updateReceiveStatus(message);
+
+             }
+    	     
+             scrollToBottom();
+    	   
+             fragmentChat.refreshConversations(0,"e5be088480");
+             
+             once1=false;
+    	}else if(text.contains("没人玩")&&once2){
+    		BmobIMDBManager dbManager=BmobIMDBManager.getInstance(weather_info.objectId);
+			
+    		BmobIMMessage message=new BmobIMMessage();
+    		message.setFromId("e5be088480");
+    		message.setContent("现在确实刚推出来，玩的人少，后期更成熟的时候会大力宣传，玩的人越来越多，真是不好意思");
+    		message.setCreateTime(System.currentTimeMillis());
+    		message.setUpdateTime(System.currentTimeMillis());
+    		message.setConversationId("e5be088480");
+    		message.setIsTransient(false);
+    		message.setMsgType(BmobIMMessageType.TEXT.getType());
+    	    message.setSendStatus(4);
+    	    message.setReceiveStatus(0);
+    	    message.setToId(weather_info.objectId);
+    	    message.setConversationType(0);
+            message.setBmobIMConversation(c);
+           
+            dbManager.insertOrReplaceConversation(c);
+    	    
+    	    dbManager.insertOrUpdateMessage(message);
+    		
+    		 fragmentChat.converdb.saveNewContentById("e5be088480",message.getContent());
+    	     fragmentChat.converdb.saveTimeById("e5be088480", message.getCreateTime());
+    	      
+    	     if(adapter.findPosition(message)<0){//如果未添加到界面中
+                 adapter.addMessage(message);
+                 //更新该会话下面的已读状态
+                 c.updateReceiveStatus(message);
+
+             }
+    	     
+             scrollToBottom();
+    	   
+             fragmentChat.refreshConversations(0,"e5be088480");
+             
+             BmobIMMessage message1=new BmobIMMessage();
+             message1.setFromId("e5be088480");
+     	 	message1.setContent("谢谢您的支持与理解");
+     		message1.setCreateTime(System.currentTimeMillis());
+     		message1.setUpdateTime(System.currentTimeMillis());
+     		message1.setConversationId("e5be088480");
+     		message1.setIsTransient(false);
+     		message1.setMsgType(BmobIMMessageType.TEXT.getType());
+     	    message1.setSendStatus(4);
+     	    message1.setReceiveStatus(0);
+     	    message1.setToId(weather_info.objectId);
+     	    message1.setConversationType(0);
+             message1.setBmobIMConversation(c);
+            
+             dbManager.insertOrReplaceConversation(c);
+     	    
+     	    dbManager.insertOrUpdateMessage(message1);
+     		
+     		 fragmentChat.converdb.saveNewContentById("e5be088480",message1.getContent());
+     	     fragmentChat.converdb.saveTimeById("e5be088480", message1.getCreateTime());
+     	      
+     	     if(adapter.findPosition(message1)<0){//如果未添加到界面中
+                  adapter.addMessage(message1);
+                  //更新该会话下面的已读状态
+                  c.updateReceiveStatus(message1);
+
+              }
+     	     
+              scrollToBottom();
+     	   
+              fragmentChat.refreshConversations(0,"e5be088480");
+             
+              once2=false;
+    	}
     }
 
 }

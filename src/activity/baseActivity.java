@@ -95,8 +95,15 @@ public  class baseActivity extends Activity {
 	}
 	@SuppressWarnings("unused")
 	public void showLogOutDialog(){
-	
-		AlertDialog.Builder builder=new AlertDialog.Builder(baseActivity.this);
+	    
+		Activity activity=baseActivity.this;
+	    if(activity==null){
+	    	activity=getParent();
+	    }
+	    
+		if(isLiving(activity)){
+	    
+		AlertDialog.Builder builder=new AlertDialog.Builder(activity);
 		
 		builder.setMessage("您当前账户在其他设备上登录，即将下线");
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -116,6 +123,7 @@ public  class baseActivity extends Activity {
         dialog=builder.create();
         if(!dialog.isShowing())
 	    	dialog.show();
+		}
 	}
 	@Override
     protected void onDestroy() {
@@ -136,6 +144,20 @@ public  class baseActivity extends Activity {
 	            if (getCurrentFocus() != null)
 	                manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 	        }
+	    }
+	    private boolean isLiving(Activity activity) {
+
+	        if (activity == null) {
+	            Log.d("wisely", "activity == null");
+	            return false;
+	        }
+
+	        if (activity.isFinishing()) {
+	            Log.d("wisely", "activity is finishing");
+	            return false;
+	        }
+
+	        return true;
 	    }
 
 
