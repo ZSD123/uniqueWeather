@@ -1,27 +1,84 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>   
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent" 
 
-  
-    <Button  
+    >
+
+  <LinearLayout 
+      android:id="@+id/lin1"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+       android:background="#333333"   
+            
+      >
+      <ImageView    
+          android:id="@+id/image"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/invite"
+          android:layout_gravity="center_vertical"
+          />
+      <Button  
         android:id="@+id/buttonInvite"  
         android:layout_width="match_parent"  
-        android:layout_height="wrap_content"  
-        android:layout_alignParentLeft="true"  
-        android:background="#333333"
+        android:layout_height="wrap_content"   
         android:textColor="#FFFFFF"
+        android:background="#333333"
         android:text="邀请好友" />  
+  </LinearLayout>
+  
+      <LinearLayout 
+      android:id="@+id/lin2"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:layout_below="@id/lin1"  
+      android:background="#333333"
+      >
+      <ImageView 
+          android:id="@+id/image2"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/weixin43"
+           
+          android:layout_gravity="center_vertical"
+          />
+     <Button  
+        android:id="@+id/buttonShare"  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:textColor="#FFFFFF"
+        android:background="#333333"
+        android:text="分享朋友圈" /> 
+   </LinearLayout> 
+    <LinearLayout 
+      android:id="@+id/lin3"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:layout_below="@id/lin2"  
+      android:background="#333333"
+      >
+      <ImageView 
+          android:id="@+id/image3"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/search"
+           
+          android:layout_gravity="center_vertical"
+          />
    <Button  
         android:id="@+id/buttonSearch"  
         android:layout_width="match_parent"  
         android:layout_height="wrap_content"  
-        android:layout_alignParentLeft="true"  
-        android:layout_below="@id/buttonInvite"  
         android:gravity="center"
         android:background="#333333"
         android:textColor="#FFFFFF"
         android:text="账号搜索" /> 
+    </LinearLayout>
  
  
 </RelativeLayout>

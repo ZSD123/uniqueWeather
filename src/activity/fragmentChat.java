@@ -18,6 +18,7 @@ import myCustomView.messageSwipe;
 
 import myCustomView.myChatPager;
 import service.autoUqdateService;
+import wxapi.WXEntryActivity;
 import Util.Http;
 import Util.HttpCallbackListener;
 
@@ -106,6 +107,12 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.sharefriend.app.R;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX.Req;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXTextObject;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import db.conversationDB;
 
@@ -178,6 +185,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 	public static RelativeLayout leftmenuBack;
 	public static RelativeLayout lin1;
 	public static RelativeLayout weatherLinearLayout;
+	
 	
 	public fragmentChat(){
 	}
@@ -653,6 +661,9 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				weather.setText(pre.getString("weatherInfo", ""));
 				temper.setText(pre.getString("temperature", ""));
 				
+				//微信朋友圈分享功能初始化
+			
+				
 		        weatherLinearLayout.setOnTouchListener(new OnTouchListener() {
 					
 					@Override
@@ -833,6 +844,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 					    	
 					    	Button buttonInvite=(Button)customView.findViewById(R.id.buttonInvite);
 					    	Button buttonSearch=(Button)customView.findViewById(R.id.buttonSearch);
+					    	Button buttonShare=(Button)customView.findViewById(R.id.buttonShare); 
 					    	buttonInvite.setOnClickListener(new OnClickListener() {
 								
 								@Override
@@ -852,6 +864,14 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 								     Intent intent=new Intent(context,searchAct.class);
 									 startActivity(intent);
 									 
+								}
+							});
+					    	buttonShare.setOnClickListener(new OnClickListener() {
+								
+								@Override
+								public void onClick(View v) {
+									Intent intent=new Intent(context,WXEntryActivity.class);
+									startActivity(intent);
 								}
 							});
 					    	
@@ -1250,5 +1270,6 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
     	messageadapter.refreshTextColor(0);
     	friendadapter.refreshTextColor(0);
     }
+    
 	
 }

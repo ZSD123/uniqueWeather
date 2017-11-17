@@ -46,9 +46,6 @@ import com.amap.api.services.a.bu;
 import com.google.gson.JsonObject;
 import com.sharefriend.app.R;
 import com.tencent.connect.UserInfo;
-import com.tencent.mm.opensdk.modelmsg.SendAuth;
-import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.open.utils.HttpUtils.HttpStatusException;
 import com.tencent.open.utils.HttpUtils.NetworkUnavailableException;
 import com.tencent.tauth.IUiListener;
@@ -103,7 +100,7 @@ public class loginAct extends Activity{
     private int heightPixels;
     
     
-    
+  
     private Button button1;  //登录按钮
     private Button button2;  //手机验证登录
     private Button button3;  //快速注册

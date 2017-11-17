@@ -207,6 +207,11 @@
             android:name="activity.designAct"
             android:screenOrientation="portrait"
             ></activity>
+             <activity
+                 android:name="wxapi.WXEntryActivity"
+                 android:label="@string/app_name"
+                 android:exported="true"
+                 ></activity>
         
         <service
             android:name="service.autoUqdateService"/>

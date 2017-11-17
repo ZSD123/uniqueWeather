@@ -24,7 +24,7 @@
 	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/universal-image-loader-1.9.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/Volley.jar"/>
 	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/open_sdk_r5886_lite.jar"/>
-	<classpathentry kind="lib" path="E:/android/shareFriend/libs/wechat-sdk-android-with-mta.jar"/>
-	<classpathentry kind="lib" path="E:/android/shareFriend/libs/wechat-sdk-android-without-mta.jar"/>
+	<classpathentry exported="true" kind="lib" path="E:/android/shareFriend/libs/wechat.jar"/>
+	<classpathentry kind="lib" path="E:/android/shareFriend/libs/wechat1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
