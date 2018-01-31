@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import model.Black;
 import model.Friend;
 import model.UserModel;
@@ -128,8 +130,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
    
     private static ImageView pic;
     public  static TextView userName;
-    public static SharedPreferences.Editor editor;
-    public static SharedPreferences pre;
+    private static SharedPreferences pre;
     
     private static Bitmap bitmap;  //天气bitmap
     
@@ -162,7 +163,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
     public static  List<BmobIMConversation>  conversations;
 
     public static  MyHorizontalView myHorizontalView;
-    private LinearLayoutManager mLinearLayoutManager;
+
     public static boolean canScroll=true;  //设置是否可以滑动
     
 	private static Context context;
@@ -257,8 +258,8 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 			
 			chatPager=(myChatPager)view.findViewById(R.id.chatPager);
             layoutInflater=(LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			view3=layoutInflater.inflate(R.layout.chatlist,null);
-			view4=layoutInflater.inflate(R.layout.contactslist,null);
+			view3=layoutInflater.inflate(R.layout.list_chat,null);
+			view4=layoutInflater.inflate(R.layout.list_contacts,null);
 			
 
 	          
@@ -270,7 +271,6 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
             int num=getCount();
             
 			RecyclerView messageRecyclerView=(RecyclerView)view3.findViewById(R.id.chatList);
-			mLinearLayoutManager=new LinearLayoutManager(context);
 			
 			messageRecyclerView.setLayoutManager(new LinearLayoutManager(context));
 			messageRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -578,7 +578,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 				
 			}
 	
-			editor=PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+
 			pre=PreferenceManager.getDefaultSharedPreferences(getActivity());
 			
 			int designNum=pre.getInt("design", 0);
@@ -1144,7 +1144,7 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 						@Override
 						public void onFinish(String response) {
 							
-						    Utility.handleAreaByXY(response, getActivity());
+						    handleAreaByXY(response, getActivity());
 							queryWeather(getActivity());
 							once=true;
 							
@@ -1269,6 +1269,25 @@ public  class fragmentChat extends Fragment implements AMapLocationListener
 		
     	messageadapter.refreshTextColor(0);
     	friendadapter.refreshTextColor(0);
+    }
+    
+    private void  handleAreaByXY(String response,Context context)
+    {   SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
+   	 try{
+   		 JSONObject jsonObject=new JSONObject(response);
+   		 JSONObject jsonObject2=jsonObject.getJSONObject("showapi_res_body");
+   		 JSONObject jsonObject3=jsonObject2.getJSONObject("addressComponent");
+   		 String locProvince=jsonObject3.getString("province");
+   		 String locCity=jsonObject3.getString("city");
+   		 String locDistrict=jsonObject3.getString("district");
+   		 editor.putString("locProvice", locProvince);
+   		 editor.putString("locCity", locCity);
+   		 editor.putString("locDistrict",locDistrict);
+   		 editor.commit();
+   	 }catch(Exception e)
+   	 {
+   		 e.printStackTrace();
+   	 }
     }
     
 	

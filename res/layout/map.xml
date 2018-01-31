@@ -2,12 +2,105 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/maplayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent">
+    
+ 
+    
  <com.amap.api.maps2d.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+   <LinearLayout  
+        android:id="@+id/searchLin"
+        android:background="#eb4f38"  
+        android:layout_width="match_parent"  
+        android:layout_height="wrap_content"  
+        android:orientation="horizontal"> 
+        
+        <!-- android:drawableLeft:这里表示该edittext左边输出 一个drawable，
+                可以是图片，样式，颜色等。-->
+        
+        <!-- android:drawablePadding:设置edittext与drawable的间距，
+           是与drawableLeft、 drawableRight、drawableTop、drawableBottom一起使用。 -->
+      
+        <!-- android:imeOptions是默认情况下软键盘右下角的按钮为“下一个”
+          设置 android:imeOptions="actionDone" ，软键盘下方变成“完成”，
+          点击后光标保持在原来的输入框上，并且软键盘关闭 -->
+          
+        <FrameLayout  
+            android:layout_weight="1"  
+            android:layout_width="0dp"  
+            android:layout_height="wrap_content">  
+        <EditText  
+                android:id="@+id/search_et_input"  
+                android:layout_margin="10dp"   
+                android:drawableLeft="@drawable/search_icon"  
+                android:drawablePadding="5dp"  
+                android:layout_width="match_parent"  
+                android:layout_height="wrap_content"  
+                android:background="@drawable/search_edittext_shape"  
+                android:textSize="16sp"  
+                android:imeOptions="actionSearch"  
+                android:inputType="text"  
+                android:hint="请输入地点"/>  
+       
+            <ImageView  
+                android:visibility="gone"
+                android:layout_marginRight="20dp"  
+                android:src="@drawable/iv_delete_bg"  
+                android:id="@+id/search_iv_delete"  
+                android:layout_gravity="right|center_vertical"  
+                android:layout_width="wrap_content"  
+                android:layout_height="wrap_content"/>  
+                
+       </FrameLayout>
+        <Button  
+            android:id="@+id/search_btn_back"  
+            android:layout_marginRight="10dp"  
+            android:layout_marginTop="10dp"  
+            android:layout_marginBottom="10dp"  
+            android:layout_gravity="center_vertical"  
+            android:layout_width="wrap_content"  
+            android:layout_height="wrap_content"  
+            android:text="搜索"  
+            android:textColor="#FFFFFF"/>  
+      </LinearLayout>
+      <HorizontalScrollView 
+          android:id="@+id/searchHor"
+          android:layout_below="@id/searchLin"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          >
+          <LinearLayout 
+              android:id="@+id/showShareObject"
+              android:layout_width="wrap_content"  
+              android:layout_height="wrap_content"  
+              android:layout_gravity="center_vertical"  
+              android:background="#FFFFFF"
+              android:orientation="horizontal" >  
+              
+              </LinearLayout>
+      </HorizontalScrollView>
+      <Button 
+          android:id="@+id/iwantshare"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_below="@id/searchHor"
+          android:text="我要共享"
+          android:layout_margin="10dp"
+          android:layout_alignParentRight="true"
+          />
+      <ImageButton 
+          android:id="@+id/myuser_btn"
+          android:layout_below="@id/iwantshare"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="10dp"
+          android:layout_marginTop="5dp"
+          android:background="@drawable/myuser"
+          android:layout_alignParentRight="true"
+          />
+ 
 <ImageButton 
     android:id="@+id/locationButton"
     android:layout_width="wrap_content"
@@ -17,6 +110,7 @@
     android:layout_marginLeft="20dp"
     android:layout_marginBottom="20dp"
     android:background="@drawable/location"
+    
     />
  <TextView 
      android:id="@+id/yonghuString"
@@ -45,7 +139,8 @@
      android:layout_marginLeft="20dp"
      android:background="@drawable/refresh1"
      android:layout_width="wrap_content"
-     android:layout_height="wrap_content"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+     android:layout_height="wrap_content"     
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
      /> 
  <ImageButton   
      android:id="@+id/renren"

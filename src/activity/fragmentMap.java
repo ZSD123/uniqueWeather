@@ -1,7 +1,10 @@
 package activity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +12,16 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.json.JSONObject;
+
+import mapAct.iwantShareAct;
+import mapAct.shareObject_UserXiang;
+import mapAct.shareObject_XiangXiDataAct;
 import message.AddFriendMessage;
 import model.Jubao;
 import model.location;
+import model.shareObject;
+import myCustomView.CircleImageView;
 import myCustomView.MapCircleImageView;
 
 import cn.bmob.newim.BmobIM;
@@ -56,6 +66,13 @@ import com.amap.api.maps2d.model.MarkerOptions;
 import com.amap.api.services.a.am;
 import com.amap.api.services.a.ca;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.core.PoiItem;
+import com.amap.api.services.geocoder.GeocodeQuery;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.GeocodeSearch.OnGeocodeSearchListener;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
 import com.amap.api.services.nearby.NearbySearch;
 import com.amap.api.services.nearby.NearbySearch.NearbyListener;
 import com.amap.api.services.nearby.NearbyInfo;
@@ -63,6 +80,10 @@ import com.amap.api.services.nearby.NearbySearchResult;
 import com.amap.api.services.nearby.UploadInfo;
 import com.amap.api.services.nearby.UploadInfoCallback;
 import com.amap.api.services.nearby.NearbySearch.NearbyQuery;
+import com.amap.api.services.poisearch.PoiResult;
+import com.amap.api.services.poisearch.PoiSearch;
+import com.amap.api.services.poisearch.PoiSearch.OnPoiSearchListener;
+import com.amap.api.services.poisearch.PoiSearch.SearchBound;
 import com.sharefriend.app.R;
 
 import db.yonghuDB;
@@ -82,12 +103,17 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.location.Location;
 import android.net.Uri;
+import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -97,18 +123,23 @@ import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class fragmentMap extends Fragment implements AMapLocationListener,LocationSource, OnCameraChangeListener, OnMarkerClickListener, NearbyListener {
+public class fragmentMap extends Fragment implements AMapLocationListener,LocationSource, OnCameraChangeListener, OnMarkerClickListener, NearbyListener,OnGeocodeSearchListener,OnPoiSearchListener {
 	private volatile int zmarkNum=0;//直接添加用户头像的Marker个数
     public static RelativeLayout fuzhiMap;
     private ImageButton zujiBtn;
@@ -118,11 +149,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
     public double lat;
     public double lon;
     
-    public static SharedPreferences.Editor editor;
-    public static SharedPreferences pre;
     
     public float zoom;
-    private LatLng latLng1;
+    private LatLng latLng1;   //这个也是表示定位
     public static MapView mMapView;
     
 	private Marker mLocMarker;    //定位Marker
@@ -154,12 +183,64 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
       private boolean zuji=true;
       public AMapLocationClient mLocationClient;
       private Marker mLoveMarker;    //当前Marker
-      public static View  yonghuDataView;  //附近用户资料卡View
+      
+      
+      private View  yonghuDataView;  //附近用户资料卡View
+      private View addressDataView;   //定位地址资料卡View
+      private View shareObjectDataView;  //分享物品资料卡View
+      public static RelativeLayout fujinData;
+      public static RelativeLayout addressData;
+      public static RelativeLayout shareObjectData;  //
+      
       private List<Marker> mFujinMarker=new ArrayList<Marker>(); //没有设置头像直接添加头像的附近用户Marker
       private Bitmap bitmap11;
       private boolean flag;
       private AlertDialog.Builder builder;
-      private AlertDialog dialog;
+      private AlertDialog dialog;     //进入提醒dialog
+      private AlertDialog dialog1;    //我要共享手机号验证提醒
+      
+      private EditText searchEditText;        	//地图搜索框
+      private ImageView searchImage;          //搜索删除键
+      private Button searchButton;            //搜索按钮
+      
+      private SharedPreferences.Editor editor;
+      private SharedPreferences pre;   //不要想着把这里删除，然后用fragmentChat.pre代替
+      
+      private GeocodeSearch geocodeSearch;
+      private GeocodeQuery geocodeQuery;
+      
+      private PoiSearch.Query queryPoi;
+      private PoiSearch poiSearch;
+      
+      private List<Marker> searchMarkers;
+      private List<Marker> shareMarkers;  //共享物品markers
+      
+      
+      private LinearLayout mShowLayout;
+      
+      private String [] mShareObject;
+      
+      private Button iwantShare;   //我要共享按钮
+      
+      private MyUser currentUser;   //当前用户
+      
+      private List<View> views;  //这是horizontalview要加载的view
+      private List<TextView> textViews;  //这是相应的textView
+      
+      private int chooseNum;   //选择的共享物品的编号
+      private String shareObjectAddress;//共享物品的位置
+      private TextView shareObject_data_address;
+      
+      
+      private String shareObject_user_image;
+      private String shareObject_user_nickName;  //昵称
+      private String shareObject_user_sex;    //性别
+      private String shareObject_user_age;   //年龄
+      private Integer shareObject_credit;    //共享信用
+      
+      private int screenWidth;
+      private int screenHeight;
+      
   	  public fragmentMap(){
 	 	 context=getContext();
 	  }
@@ -170,19 +251,56 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		View view=null;
 		
 		view=inflater.inflate(R.layout.map,container,false);
+		
+		WindowManager wm=(WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics outmMetrics=new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(outmMetrics);
+		screenHeight=outmMetrics.heightPixels;
+		screenWidth=outmMetrics.widthPixels;
+		
+		views=new ArrayList<View>();
+		textViews=new ArrayList<TextView>();
+		
+		currentUser=MyUser.getCurrentUser(MyUser.class);
+		
 		ImageButton locButton;
 		ImageButton renButton;
+		ImageButton myuserBtn;    //我的用户情况按钮
+		
+		myuserBtn=(ImageButton)view.findViewById(R.id.myuser_btn);
+		
+		iwantShare=(Button)view.findViewById(R.id.iwantshare);
 		
 		fuzhiMap=(RelativeLayout)view;
 		
+		mShowLayout=(LinearLayout)view.findViewById(R.id.showShareObject);
+		
+		initData();
+		initView(inflater);
+		
+		searchEditText=(EditText)view.findViewById(R.id.search_et_input);
+		searchImage=(ImageView)view.findViewById(R.id.search_iv_delete);
+		searchButton=(Button)view.findViewById(R.id.search_btn_back);
 		
 		zujiBtn=(ImageButton)view.findViewById(R.id.zujibtn);
+		
+		
+		searchMarkers=new ArrayList<Marker>();
+		shareMarkers=new ArrayList<Marker>();
+		
+		
 		if(context==null)
 			context=getActivity();
-		editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
-		pre=PreferenceManager.getDefaultSharedPreferences(context);
+		
+		
+		geocodeSearch=new GeocodeSearch(context);
+		geocodeSearch.setOnGeocodeSearchListener(this);
+		
+		pre=PreferenceManager.getDefaultSharedPreferences(getActivity());
+		editor=PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
 		
 		flag=pre.getBoolean("flag", true);    //表示要弹出提示窗口
+		
 		if(flag){
 			builder=new AlertDialog.Builder(context);
 			
@@ -218,6 +336,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		lat=pre.getFloat("lat", 39);
 		lon=pre.getFloat("lon",116);
 		
+		if(lat>=90||lat<=-90){
+			lat=39;
+		}
 		
 		zoom=pre.getFloat("zoom", 18);
 		
@@ -228,7 +349,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		point=new BmobGeoPoint(lon, lat);
 		
 		BmobQuery<location> bmobQuery=new BmobQuery<location>();
-	 	bmobQuery.addWhereEqualTo("myUser", weather_info.currentUser);
+	 	bmobQuery.addWhereEqualTo("myUser",currentUser);
 		bmobQuery.findObjects(new FindListener<location>() {
 
 		  @Override
@@ -253,7 +374,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 					location lo1=new location();
 					
 					lo1.setMyLocation(point);
-					lo1.setMyUser(weather_info.currentUser);
+					lo1.setMyUser(currentUser);
 					lo1.save(new SaveListener<String>() {
 
 						@Override
@@ -377,6 +498,124 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	 		}
 	 	};
 	   timer.schedule(task, 1000,1000);
+	   //////////////////////////////////////////////////////
+	   
+	
+	   myuserBtn.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			Intent intent=new Intent(context,map_mine.class);
+			startActivity(intent);
+			
+		}
+	  });
+	   
+	  
+	  
+	   
+	   iwantShare.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			  
+			
+			
+			 if(currentUser.getMobilePhoneNumberVerified()!=null&&currentUser.getMobilePhoneNumberVerified()){   //如果经过验证就直接进入，不然先验证
+				   
+				   Intent intent=new Intent(context,iwantShareAct.class);
+				   startActivity(intent);
+				   
+			   }else {
+				   
+				    AlertDialog.Builder builder=new AlertDialog.Builder(context);
+					
+					builder.setMessage("您当前账户手机号未被验证，根据《网络安全法》，为了有力地保障共享双方合法利益，请先验证手机号");
+					builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialoginterface, int which) {
+							Intent intent=new Intent(context,mobileVerifyAct.class);
+							startActivity(intent);
+							if(dialog1!=null){
+								dialog1.dismiss();
+							}
+							
+						}
+					});
+					
+			        dialog1=builder.create();
+			        if(!dialog1.isShowing())
+				    	dialog1.show();
+				   
+				   
+			   }
+			
+		}
+	   });
+	   
+	   searchImage.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			searchEditText.setText("");
+			
+		}
+	});
+	   
+	   
+	   
+	  
+	   
+	   searchButton.setOnClickListener(new OnClickListener() {    //点击搜索按钮
+		
+		@Override
+		public void onClick(View v) {
+		
+			  beignSearch();
+			
+		}
+	   });
+	   
+	  
+	   searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		
+		@Override
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			if(actionId==EditorInfo.IME_ACTION_SEARCH){
+				beignSearch();
+			}
+			return false;
+		}
+	});
+	   
+	   searchEditText.addTextChangedListener(new TextWatcher() {   //搜索框
+		
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			   if(s.length()>0){
+				   searchImage.setVisibility(View.VISIBLE);
+			   }else if(s.length()==0){
+				   searchImage.setVisibility(View.GONE);
+			   }
+			
+		}
+		
+		
+		
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void afterTextChanged(Editable s) {
+			
+			
+		}
+	});
         
 	    zujiBtn.setOnClickListener(new OnClickListener() {
 			
@@ -395,7 +634,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
                       }
 					
 					BmobQuery<location> query=new BmobQuery<location>();   //删除表格当中的
-					query.addWhereEqualTo("myUser", weather_info.currentUser);
+					query.addWhereEqualTo("myUser",currentUser);
 					query.findObjects(new FindListener<location>() {
 
 						@Override
@@ -543,13 +782,53 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	@Override
 	public boolean onMarkerClick(Marker marker) {
 		
-		if(yonghuDataView==null){
-		    addYonghuDataView(marker);
+
+		
+		if(marker.getObject() instanceof PoiItem){   //如果是PoiItem的话
+	
+			if(addressData==null){       //添加地理数据View
+			addAddressDataView(marker);
+	
 			}else {
-			    fuzhiMap.removeView(yonghuDataView);
-			    addYonghuDataView(marker);
+				fuzhiMap.removeView(addressData);
+				addAddressDataView(marker);
+	
 			}
-			return false; 
+			return false;
+			
+		}else if(marker.getObject() instanceof String ){ //如果是String          //添加用户数据View
+
+			if(fujinData==null){
+			    addYonghuDataView(marker);
+				}else {
+				    fuzhiMap.removeView(fujinData);
+				    addYonghuDataView(marker);
+				}
+				return false; 
+				
+		}else if(marker.getObject() instanceof shareObject){  //添加分享物品点击事件
+          
+			
+			if(shareObjectData==null){
+				
+		
+			    addShareObjectDataView(marker);
+			    
+			    
+				}else {
+		
+				    fuzhiMap.removeView(shareObjectData);
+				    addShareObjectDataView(marker);
+				    
+				}
+				return false; 
+				
+		}
+	   
+		return false;
+	
+	
+		
 	}
 	
 	private boolean cunzai=false;
@@ -640,10 +919,10 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			   {
 			    lat=amaplocation.getLatitude();
 			    lon=amaplocation.getLongitude();	
-				editor.putFloat("lat",(float) lat);
-				editor.putFloat("lon", (float)lon);
-				editor.putFloat("zoom", aMap.getCameraPosition().zoom);
-				editor.commit();
+			    editor.putFloat("lat",(float) lat);
+			    editor.putFloat("lon", (float)lon);
+			    editor.putFloat("zoom", aMap.getCameraPosition().zoom);
+			    editor.commit();
 				
 				latlng.setLatitude(lat);
 				latlng.setLongitude(lon);
@@ -688,7 +967,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 	private void addMarker(LatLng latlng) {
 		if(mLocMarker!=null){
 			mLocMarker.setPosition(latlng);
-		}
+		}else{
 
 		BitmapFactory.Options options1=new BitmapFactory.Options();
 		options1.inSampleSize=2;
@@ -700,12 +979,13 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		options.anchor(0.5f, 0.5f);
 		options.position(latlng);
 		mLocMarker = aMap.addMarker(options);
+		}
 	}
 	private void addLoveding(CameraPosition cameraPosition){
 		if(mLoveMarker!=null){
 			mLoveMarker.setPosition(cameraPosition.target);
-		}
-		else {
+		}else{
+	
 		BitmapFactory.Options options1=new BitmapFactory.Options();
 		options1.inSampleSize=2;
 		Bitmap bitmap=BitmapFactory.decodeResource(context.getResources(), R.drawable.loveding, options1);
@@ -715,17 +995,18 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		options.anchor(0.5f, 1f);
 		options.position(cameraPosition.target);
 		mLoveMarker=aMap.addMarker(options);
-		}
+	   }
 	}
 	String nizhen;
 	String touXiang;
 	String userName;
 	boolean canCall;
+	
 	private void addYonghuDataView(final Marker marker){
 	      
-	      RelativeLayout fujinData;
+	    
           yonghuDataView=LayoutInflater.from(context).inflate(R.layout.fujin_yonghu_data, null);
-		  fujinData=(RelativeLayout)yonghuDataView.findViewById(R.id.fujin_relative);
+		  fujinData=(RelativeLayout)yonghuDataView;
 		  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
 		  layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
 	      layoutParams.addRule(RelativeLayout.ABOVE, R.id.refreshbtn);
@@ -749,7 +1030,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			  touXiang=bundle.getString("touxiangUrl");
 			  userName=bundle.getString("userName");
 			  canCall=bundle.getBoolean("canCall");
-			  Log.d("Main", "canCall="+canCall);
+	
 			  TextView nizhenText=(TextView)fujinData.findViewById(R.id.yonghu_data_nick);
 			  TextView sexText=(TextView)fujinData.findViewById(R.id.yonghu_data_sex);
 			  TextView ageText=(TextView)fujinData.findViewById(R.id.yonghu_data_age);
@@ -764,9 +1045,9 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			
 			@Override
 			public void onClick(View v) {
-				if(yonghuDataView!=null){
-					fuzhiMap.removeView(yonghuDataView);
-					yonghuDataView=null;
+				if(fujinData!=null){
+					fuzhiMap.removeView(fujinData);
+					fujinData=null;
 				}
 				
 			}
@@ -860,7 +1141,172 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 		});
 		  fuzhiMap.addView(fujinData);
     }
+   
+	private void addAddressDataView(Marker marker){
+		
+          addressDataView=LayoutInflater.from(context).inflate(R.layout.fujin_address_data, null);
+		  addressData=(RelativeLayout)addressDataView;
+		  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,Utility.dip2px(context, 160));
+		  layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+	      addressData.setLayoutParams(layoutParams);
+	      
+		  TextView address_name=(TextView)addressData.findViewById(R.id.address_name);
+		  TextView address_des=(TextView)addressData.findViewById(R.id.address_des);
+		  TextView address_dis=(TextView)addressData.findViewById(R.id.address_dis);
+		  ImageView imageCha=(ImageView)addressData.findViewById(R.id.cha);
+		  
+		  address_name.setText(((PoiItem)marker.getObject()).getTitle());
+		  address_des.setText(((PoiItem)marker.getObject()).getSnippet());
+		  address_dis.setText(((PoiItem)marker.getObject()).getDistance()+"m");
+		  imageCha.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(addressData!=null){
+					fuzhiMap.removeView(addressData);
+					addressData=null;
+				}
+				
+			}
+		});
+		  
+		  fuzhiMap.addView(addressData);
+	}
+	
+	//****************添加共享物品资料卡View*******************************
+	
+	private void addShareObjectDataView(final Marker marker){
 
+          shareObjectDataView=LayoutInflater.from(context).inflate(R.layout.fujin_shareobject_data, null);
+		  shareObjectData=(RelativeLayout)shareObjectDataView;
+		  RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		  layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+	      layoutParams.addRule(RelativeLayout.ABOVE, R.id.refreshbtn);
+	      layoutParams.setMarginStart(Utility.dip2px(context, 15));
+	      layoutParams.setMarginEnd(Utility.dip2px(context, 15));
+	      shareObjectData.setLayoutParams(layoutParams);
+
+	      
+		  final CircleImageView shareObjectDataImage=(CircleImageView)shareObjectData.findViewById(R.id.shareObject_data_image);
+		  TextView shareObject_data_nick=(TextView)shareObjectData.findViewById(R.id.shareObject_data_nick);
+		  ImageView right42=(ImageView)shareObjectData.findViewById(R.id.right42);
+          ImageView cha=(ImageView)shareObjectData.findViewById(R.id.cha);
+		  
+          shareObject_data_nick.setText(((shareObject)marker.getObject()).getTitle());
+          
+          
+		  float width=getCharacterWidth(shareObject_data_nick);  //每个字符宽度
+          
+          final TextView shareObject_myUser=(TextView)shareObjectData.findViewById(R.id.shareObject_myUser);
+		  ImageView right43=(ImageView)shareObjectData.findViewById(R.id.right43);
+		  
+		  shareObject_data_address=(TextView)shareObjectData.findViewById(R.id.shareObject_data_address);
+		  TextView useView=(TextView)shareObjectData.findViewById(R.id.use);
+		  TextView sendMsgView=(TextView)shareObjectData.findViewById(R.id.sendMsg);
+		  TextView callTo=(TextView)shareObjectData.findViewById(R.id.calltu);
+		  
+		  shareObject_data_address.setWidth(screenWidth-2*Utility.dip2px(context, 15)-Utility.dip2px(context, 100)-Utility.dip2px(context, 100));//get得到的是px
+		  
+		  
+		  new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					 final Bitmap bitmap= Utility.getPicture(((shareObject)marker.getObject()).getImageUrl());
+	                 ((Activity)context).runOnUiThread(new Runnable() {
+				 		
+						@Override
+						public void run() {
+							if(bitmap!=null){
+						     	shareObjectDataImage.setImageBitmap(bitmap);
+						     
+							} 
+						}
+	                 }
+				
+		      	);
+				}
+		  }).start();
+				
+		  
+		 
+		  
+		  BmobQuery<MyUser> query1=new BmobQuery<MyUser>();
+		  query1.addWhereEqualTo("objectId", ((shareObject)marker.getObject()).getMyUser().getObjectId());
+		  query1.findObjects(new FindListener<MyUser>() {
+
+			@Override
+			public void done(List<MyUser> list, BmobException e) {
+				if(e==null){
+					
+					String nickName=list.get(0).getNick();
+					shareObject_myUser.setText(nickName);
+					shareObject_credit=list.get(0).getCredit();
+					shareObject_user_age=list.get(0).getAge();
+					shareObject_user_nickName=nickName;
+					shareObject_user_sex=list.get(0).getSex();
+					shareObject_user_image=list.get(0).getTouXiangUrl();
+					
+				}else {
+					Toast.makeText(context, "不好意思，"+e.getMessage(),Toast.LENGTH_SHORT).show();
+				}
+				
+			}
+		});
+		  
+		  RegeocodeQuery query=new RegeocodeQuery(new LatLonPoint(((shareObject)marker.getObject()).getObjectionPoint().getLatitude(), ((shareObject)marker.getObject()).getObjectionPoint().getLongitude()), 200,GeocodeSearch.AMAP);
+		  geocodeSearch.getFromLocationAsyn(query);
+		  
+		  fuzhiMap.addView(shareObjectData);
+		  
+		  cha.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			   
+				if(shareObjectData!=null){
+					fuzhiMap.removeView(shareObjectData);
+					shareObjectData=null;
+				}
+				
+				
+			}
+		});
+		  
+		  right42.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent=new Intent(context,shareObject_XiangXiDataAct.class);
+				intent.putExtra("imageUrl", ((shareObject)marker.getObject()).getImageUrl());
+				intent.putExtra("title",((shareObject)marker.getObject()).getTitle());
+				intent.putExtra("description", ((shareObject)marker.getObject()).getDescription());
+				intent.putExtra("address",shareObject_data_address.getText().toString());
+				startActivity(intent);
+			}
+		});
+		  
+		  right43.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent=new Intent(context,shareObject_UserXiang.class);
+				intent.putExtra("imageUrl", shareObject_user_image);
+				intent.putExtra("nick",shareObject_user_nickName);
+				intent.putExtra("age", shareObject_user_age);
+				intent.putExtra("sex",shareObject_user_sex);
+				intent.putExtra("credit", shareObject_credit);
+				intent.putExtra("objectId", ((shareObject)marker.getObject()).getMyUser().getObjectId());
+				startActivity(intent);
+				  
+			}
+		});
+		  
+	}
+	
+	
+	
+	
     private void sendAddFriendMessage(BmobIMUserInfo bmobIMUserInfo){    //发送添加好友请求
    	 BmobIMConversation c=BmobIM.getInstance().startPrivateConversation(bmobIMUserInfo, true,new ConversationListener() {
 			
@@ -900,6 +1346,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			}
 		});
     }
+    
+    
     private int benyonghucunzai(List<NearbyInfo> list){   //返回1的时候表示有本用户
    	 for (int i = 0; i < list.size(); i++) {
 			   if(list.get(i).getUserID().equals((String)MyUser.getCurrentUser().getObjectId())){
@@ -910,6 +1358,8 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
    	  return 0;     //返回0的时候表示没有本用户
    	 
     }
+    
+    
 	private  void addSanMarker1() 
 	{    
 		
@@ -1016,7 +1466,7 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			    	double [] yonghuLatlon=new double [2];
 			    	yonghuLatlon=yongbDb.loadLatbyId(objectId);
 			    	options.position(new LatLng(yonghuLatlon[0], yonghuLatlon[1]));
-			    	mFujinMarker.add(zmarkNum, aMap.addMarker(options));
+			    	mFujinMarker.add(zmarkNum, aMap.addMarker(options));   //后一部分就是aMap添加Marker到地图上
 			    	mFujinMarker.get(zmarkNum).setObject(objectId);
 			    	yongbDb.updateJiaZai1(objectId);
 			    	zmarkNum++;
@@ -1154,6 +1604,299 @@ public class fragmentMap extends Fragment implements AMapLocationListener,Locati
 			  mMapView.onSaveInstanceState(outState);
 		}
 	
-	      
+	@Override
+	public void onGeocodeSearched(GeocodeResult result, int num) {
+		double lat=result.getGeocodeAddressList().get(0).getLatLonPoint().getLatitude();
+		double lon=result.getGeocodeAddressList().get(0).getLatLonPoint().getLongitude();
+		aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(lat, lon), zoom, 0, 0)));
+		aMap.invalidate();
+	}
+	@Override
+	public void onRegeocodeSearched(RegeocodeResult result, int code) {
+		
+		if(code==1000){
+			shareObjectAddress=result.getRegeocodeAddress().getFormatAddress();
+		    shareObject_data_address.setText(shareObjectAddress);
+		}
+		
+	}
+	@Override
+	public void onPoiItemSearched(PoiItem item, int code) {
+		
+		
+	} 
+	@Override
+	public void onPoiSearched(PoiResult result, int code) {
+		
+		
+		
+	  if(code==1000){
+		  
+		  for (int i = 0; i < searchMarkers.size(); i++) {
+			  searchMarkers.get(i).remove();
+			  searchMarkers.get(i).destroy();
+			  searchMarkers.clear();
+			 
+			  
+		}
+		  
+		  aMap.clear();
+		  mLocMarker=null;
+		  mLoveMarker=null;
+		  addMarker(latLng1);
+		  addLoveding(aMap.getCameraPosition());
+		
+		for (int i = 0; i < result.getPois().size(); i++) {
+			MarkerOptions options=null;
+			switch (i) {
+				case 0:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding1)));
+					break;
+				case 1:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding2)));
+					break;
+				case 2:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding3)));
+					break;
+				case 3:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding4)));
+					break;
+				case 4:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding5)));
+					break;
+				case 5:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding6)));
+					break;
+				case 6:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding7)));
+					break;
+				case 7:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding8)));
+					break;
+				case 8:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding9)));
+					break;
+				case 9:
+					options=new MarkerOptions().position(new LatLng(result.getPois().get(i).getLatLonPoint().getLatitude(), result.getPois().get(i).getLatLonPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ding10)));
+					break;
+				default :
+					break;
+			}
+            
+			double lathere=result.getPois().get(i).getLatLonPoint().getLatitude();
+			double lonhere=result.getPois().get(i).getLatLonPoint().getLongitude();
+			float distance=AMapUtils.calculateLineDistance(latLng1, new LatLng(lathere, lonhere));
+			result.getPois().get(i).setDistance((int) distance);
+			
+		    int j=min1(result);
+		   
+		   
+			double lat=result.getPois().get(j).getLatLonPoint().getLatitude();
+			double lon=result.getPois().get(j).getLatLonPoint().getLongitude();
+			aMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(lat, lon), zoom, 0, 0)));
+			aMap.invalidate();
+			
+			Marker marker= aMap.addMarker(options);
+			marker.setObject(result.getPois().get(i));
+			searchMarkers.add(marker);
+		}
+		
+	  }else {
+		  Toast.makeText(context, "当前出现错误，请稍后再试",Toast.LENGTH_SHORT).show();
+	   }
+		
+		   
+	}
+	private int min1(PoiResult result){  
+        int minValue = result.getPois().get(0).getDistance(); 
+        int j=0;
+        for (int i = 0; i<result.getPois().size();i++){  
+            if (result.getPois().get(i).getDistance()<minValue)  {
+                minValue = result.getPois().get(i).getDistance(); 
+                j=i;
+                }
+        }  
+        return j;  
+  
+    } 
+	private void beignSearch(){
+		   geocodeSearch.getFromLocationNameAsyn(geocodeQuery);
+		   
+		   String content=searchEditText.getText().toString();
+		   String city=pre.getString("locCity", "北京");
+		   queryPoi=new PoiSearch.Query(content,"", city);
+		   queryPoi.setPageSize(10);
+		   queryPoi.setPageNum(1);
+		   
+		   
+		   poiSearch=new PoiSearch(context, queryPoi);
+		   		   
+		   poiSearch.setOnPoiSearchListener(fragmentMap.this);
+		   
+		   poiSearch.searchPOIAsyn();
+	}
+	
+	private void initData(){
+		mShareObject=new String []{"全部","雨伞","衣服","食物","汽车","书籍","摄像机","电脑","手机","卡券"};
+	}
+	
+	//********************加载共享物品horizontalView以及点击出现Marker事件*****************************//
+	
+	private void initView(LayoutInflater inflater){
+		 for (int i = 0; i < mShareObject.length; i++) {
+			    views.add(inflater.inflate(R.layout.share_view, mShowLayout, false));
+			    textViews.add((TextView)views.get(i).findViewById(R.id.text));
+			    textViews.get(i).setText(mShareObject[i]);
+			    
+			    final int k=i;
+			    
+                views.get(i).setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						
+						if(chooseNum!=k){
+							
+							  aMap.clear();
+							  mLocMarker=null;
+							  mLoveMarker=null;
+							  addMarker(latLng1);
+							  addLoveding(aMap.getCameraPosition());
+							  
+							  shareMarkers.clear();
+							
+						}
+						 
+							
+		                chooseNum=k;
+							
+						for (int j = 0; j < textViews.size(); j++) {
+							textViews.get(j).setBackgroundColor(Color.parseColor("#FFFFFF"));
+						}
+						
+			  			textViews.get(k).setBackgroundColor(Color.parseColor("#999999"));
+						
+						BmobQuery<shareObject> query=new BmobQuery<shareObject>();
+						query.addWhereEqualTo("isWorking", false);
+						query.addWhereNotEqualTo("myUser", MyUser.getCurrentUser(MyUser.class));
+						if(!textViews.get(k).getText().toString().equals("全部")){
+							query.addWhereEqualTo("title", textViews.get(k).getText().toString());
+						}
+						query.addWhereNear("objectPoint", new BmobGeoPoint(lon, lat));
+						query.setLimit(10);
+						query.findObjects(new FindListener<shareObject>() {
+
+							@Override
+							public void done(List<shareObject> list,
+									BmobException e) {
+								if(e==null){
+									
+									    MarkerOptions options=null;
+									    if(textViews.get(k).getText().toString().equals("全部")){  //根据title显示
+									    	
+									    	for (int j = 0; j < list.size(); j++) {
+									    		
+									    		if(list.get(j).getTitle().equals("雨伞")){
+									    		options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.san)));
+										     	}else if(list.get(j).getTitle().equals("衣服")){
+										     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.fu)));
+										     	}else if(list.get(j).getTitle().equals("食物")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.food)));
+											    }else if(list.get(j).getTitle().equals("汽车")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.car)));
+											    }else if(list.get(j).getTitle().equals("书籍")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.book)));
+											    }else if(list.get(j).getTitle().equals("摄影机")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.camera)));
+											    }else if(list.get(j).getTitle().equals("电脑")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.computer)));
+											    }else if(list.get(j).getTitle().equals("手机")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.mobile)));
+											    }else if(list.get(j).getTitle().equals("卡券")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.quan)));
+											    }
+									    		
+									    		Marker marker= aMap.addMarker(options);
+												marker.setObject(list.get(j));
+									    		
+												shareMarkers.add(marker);
+									    	}
+									   	
+									    
+									    }else {
+											
+									    	for (int j = 0; j < list.size(); j++) {
+												
+									    		    if(list.get(j).getTitle().equals("雨伞")){
+										    		options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.san)));
+											     	}else if(list.get(j).getTitle().equals("衣服")){
+											     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.fu)));
+											     	}else if(list.get(j).getTitle().equals("食物")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.food)));
+												    }else if(list.get(j).getTitle().equals("汽车")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.car)));
+												    }else if(list.get(j).getTitle().equals("书籍")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.book)));
+												    }else if(list.get(j).getTitle().equals("摄影机")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.camera)));
+												    }else if(list.get(j).getTitle().equals("电脑")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.computer)));
+												    }else if(list.get(j).getTitle().equals("手机")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.mobile)));
+												    }else if(list.get(j).getTitle().equals("卡券")){
+												     	options=new MarkerOptions().position(new LatLng(list.get(j).getObjectionPoint().getLatitude(), list.get(j).getObjectionPoint().getLongitude())).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.quan)));
+												    }
+										    		
+										    		Marker marker= aMap.addMarker(options);
+													marker.setObject(list.get(j));
+										    		
+													shareMarkers.add(marker);
+									    		
+									    		
+											}
+									    	
+									    	
+									    	
+										}
+									
+								}else {
+									 Toast.makeText(context, "当前出现错误，请稍后再试",Toast.LENGTH_SHORT).show();
+								}
+								
+							}
+						});
+					}
+				});
+			    
+			    mShowLayout.addView(views.get(i));
+			    
+			    
+		}
+		 
+		 
+		 
+	}
+	
+	//方法入口
+	public float getCharacterWidth(TextView tv){
+	if(null == tv) 
+		return 0f;
+	
+	return getCharacterWidth(tv.getText().toString(),tv.getTextSize()) * tv.getScaleX();
+	}
+	
+	
+	//获取每个字符的宽度主方法：
+	public float getCharacterWidth(String text, float size){
+	if(null == text || "".equals(text))
+	return 0;
+	float width = 0;
+	Paint paint = new Paint();
+	paint.setTextSize(size);
+	float text_width = paint.measureText(text);//得到总体长度
+	width = text_width/text.length();//每一个字符的长度
+	return width;
+	}
+	
 	
 }

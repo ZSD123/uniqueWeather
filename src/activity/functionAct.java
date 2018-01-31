@@ -3,19 +3,27 @@ package activity;
 import com.sharefriend.app.R;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class functionAct extends baseActivity {
     
+	 private SharedPreferences pre;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.function);
+		
+		
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
 		LinearLayout lin=(LinearLayout)findViewById(R.id.lin);
 		TextView text1=(TextView)findViewById(R.id.text1);
 		TextView text2=(TextView)findViewById(R.id.text2);
@@ -23,7 +31,7 @@ public class functionAct extends baseActivity {
 		TextView text4=(TextView)findViewById(R.id.text4);
 		TextView text5=(TextView)findViewById(R.id.text5);
 		
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			lin.setBackgroundColor(Color.parseColor("#051C3D"));
 			text1.setTextColor(Color.parseColor("#A2C0DE"));

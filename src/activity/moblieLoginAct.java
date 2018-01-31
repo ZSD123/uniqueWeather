@@ -230,6 +230,7 @@ public class moblieLoginAct extends Activity {
 									}else {
 										MyUser user=new MyUser();
 										user.setMobilePhoneNumber(input);
+										user.setCredit(100);
 										user.setUsername(input);
 										user.setNick(input);
 										user.setPassword(MD5Util.getMD5String(input));

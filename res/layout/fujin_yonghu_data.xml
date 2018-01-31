@@ -33,8 +33,7 @@
       android:layout_height="100dp"/>
   <TableLayout 
       android:layout_toRightOf="@id/yonghu_data_image"
-      android:layout_marginLeft="20dp"
-      android:layout_marginStart="20dp"
+      android:layout_marginLeft="5dp"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       >

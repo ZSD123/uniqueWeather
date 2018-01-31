@@ -36,11 +36,13 @@ import Util.Utility;
 import Util.download;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -57,12 +59,16 @@ public class searchResultAct extends Activity {
     private TextView textView2;
     private boolean flag=false;  //判断是否有问题
     
+    private SharedPreferences pre;
+    
     private String city;
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.searchresult);
+		
+		 pre=PreferenceManager.getDefaultSharedPreferences(this);
 		
 		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
 		CustomFontTextView textView1=(CustomFontTextView)findViewById(R.id.account);
@@ -74,7 +80,7 @@ public class searchResultAct extends Activity {
 		
 		final TextView textCity=(TextView)findViewById(R.id.textCity);
 	    
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			relative.setBackgroundColor(Color.parseColor("#051C3D"));
 			textView1.setTextColor(Color.parseColor("#A2C0DE"));

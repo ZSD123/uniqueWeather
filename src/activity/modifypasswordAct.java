@@ -9,8 +9,10 @@ import com.sharefriend.app.R;
 
 import Util.MD5Util;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +36,9 @@ public class modifypasswordAct extends baseActivity {
     private boolean eye2=false;  
     private boolean eye3=false;
     private Button button;   
+    
+    private SharedPreferences pre;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,8 +55,10 @@ public class modifypasswordAct extends baseActivity {
 		password2=(EditText)findViewById(R.id.password2);
 		password3=(EditText)findViewById(R.id.password3);
 		
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
 		
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			lin.setBackgroundColor(Color.parseColor("#051C3D"));
 			textView.setTextColor(Color.parseColor("#A2C0DE"));

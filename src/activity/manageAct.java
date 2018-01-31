@@ -13,8 +13,10 @@ import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.util.Pools.Pool;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,18 +39,23 @@ public class manageAct extends baseActivity {
     }
     ViewHolder viewHolder;
     private MyUser currentUser;
+    
+    private SharedPreferences pre;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.manage);
 		
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
 		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.account);
 		TextView tView=(TextView)findViewById(R.id.text);
 		
 		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
 		
-		final int designNum=fragmentChat.pre.getInt("design", 0);
+		final int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			relative.setBackgroundColor(Color.parseColor("#051C3D"));
 			textView.setTextColor(Color.parseColor("#A2C0DE"));

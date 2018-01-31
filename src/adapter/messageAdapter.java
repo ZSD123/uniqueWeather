@@ -50,6 +50,8 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 	    private Context mContext;
 	    private int mCount;
 	    private int colorNum=0;
+		private OnRecyclerViewListener onRecyclerViewListener;
+	    
 		public messageAdapter(Context mContext,int count) {
 			this.mContext=mContext;
 			this.mCount=count;
@@ -62,7 +64,7 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 		
 		}
 		
-		private OnRecyclerViewListener onRecyclerViewListener;
+	
 
 	    public void setOnRecyclerViewListener(OnRecyclerViewListener onRecyclerViewListener) {
 	        this.onRecyclerViewListener = onRecyclerViewListener;
@@ -255,12 +257,14 @@ public class messageAdapter extends Adapter<RecyclerView.ViewHolder> {
 					
 			}
 		}
+		
 		@Override
 		public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		    
 		    	return new conversationViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_conversation, parent,false));
 		  
 		}
+		
 		class conversationViewHolder extends ViewHolder implements View.OnClickListener,View.OnLongClickListener{
 	        CircleImageView imageView;
 	        TextView tv_name;

@@ -4,9 +4,11 @@ import com.sharefriend.app.R;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,6 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class fankuiAct extends baseActivity {
+	
+	 private SharedPreferences pre;
+	
     @Override
     public void onCreate(Bundle savedInstanceState){
     	super.onCreate(savedInstanceState);
@@ -30,7 +35,9 @@ public class fankuiAct extends baseActivity {
 		TextView textView6=(TextView)findViewById(R.id.text6);
 		TextView textView7=(TextView)findViewById(R.id.text7);
 		
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			relativeLayout.setBackgroundColor(Color.parseColor("#051C3D"));
 			textView1.setTextColor(Color.parseColor("#A2C0DE"));

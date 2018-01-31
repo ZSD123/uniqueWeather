@@ -8,8 +8,10 @@ import com.sharefriend.app.R;
 import activity.manageAct.ViewHolder;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -28,17 +30,23 @@ public class guanYuAct extends baseActivity {
     	
     }
     ViewHolder viewHolder;
+    
+    
+    private SharedPreferences pre;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.guanyu);
 		
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
+		
 		LinearLayout lin=(LinearLayout)findViewById(R.id.lin);
 		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.text_EndRain);
 		TextView v1=(TextView)findViewById(R.id.v1);
 		
-		final int designNum=fragmentChat.pre.getInt("design", 0);
+		final int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			lin.setBackgroundColor(Color.parseColor("#051C3D"));
 			textView.setTextColor(Color.parseColor("#A2C0DE"));

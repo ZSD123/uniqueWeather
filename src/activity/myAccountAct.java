@@ -92,6 +92,10 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 	private int year;
 	private int month;
 	private int day;
+	
+
+    private SharedPreferences pre;
+	
 	@Override
      public void onCreate(Bundle savedInstanceState)
 	 { 
@@ -99,8 +103,10 @@ public class myAccountAct extends baseActivity implements AMapLocationListener,O
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.mydata);  
 		
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 		
 		ScrollView scrollView=(ScrollView)findViewById(R.id.scrollview);
 	

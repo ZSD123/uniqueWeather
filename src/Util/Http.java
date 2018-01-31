@@ -86,7 +86,7 @@ public class Http {
 		
 	}  
 	public static void queryAreaByXY(final double lat,final double lon,final String address,final HttpCallbackListener listener)
-	{
+	{    //由经纬度查询地区
 		new Thread(new Runnable()
 		{
 			@Override
@@ -104,6 +104,26 @@ public class Http {
 		}
 		).start();
 	}
+	
+	public static void queryXYByArea(final String address,final String city,final HttpCallbackListener listener)
+	{    //由经纬度查询地区
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run(){
+				 String appid="26715";
+                 String secret="bbd0cdd1a7b94310a4e66baf37c9ce0d";
+                 final String res=new ShowApiRequest("http://route.showapi.com/238-1",appid,secret)
+                                   .addTextPara("address",address)
+                                   .addTextPara("city",city)
+                                   .post();
+                 if(listener!=null)
+                	 listener.onFinish(res);
+			}
+		}
+		).start();
+	}
+	
    public static void queryFunjin(final String center)
    {
 	   new Thread(new Runnable() {

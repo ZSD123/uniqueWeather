@@ -9,10 +9,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 
+import mapAct.shareObject_UserXiang;
 import myCustomView.CircleImageView;
 import myCustomView.TouchImageView;
 
 import cn.bmob.v3.datatype.BmobFile;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.DownloadFileListener;
 
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -26,6 +29,7 @@ import adapter.ImageLoaderFactory;
 import android.R.integer;
 import android.app.Activity;
 import android.app.ActionBar.LayoutParams;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -33,6 +37,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -68,11 +73,16 @@ public class xiangxiDataAct extends baseActivity {
 	private TextView textView;
 	private ArrayAdapter<String> arrayAdapter;
 	private ArrayAdapter<String> arrayAdapter2;
+	
+	private SharedPreferences pre;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.xiangxidata);
+		
+		 pre=PreferenceManager.getDefaultSharedPreferences(this);
 		
 		ScrollView scrollView=(ScrollView)findViewById(R.id.scrollview);
 		
@@ -97,7 +107,7 @@ public class xiangxiDataAct extends baseActivity {
 		editText6=(EditText)findViewById(R.id.suozaidi);
 		editText7=(EditText)findViewById(R.id.guxiang);
 		
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			scrollView.setBackgroundColor(Color.parseColor("#051C3D"));
 			editText2.setTextColor(Color.parseColor("#A2C0DE"));
@@ -129,91 +139,9 @@ public class xiangxiDataAct extends baseActivity {
 
         final MyUser myUser=(MyUser) getIntent().getBundleExtra("bundle").getSerializable("myUser");        
         
-        final String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/"+myUser.getObjectId()+".jpg_";
-        final File file=new File(path);
+        final String path=Environment.getExternalStorageDirectory()+"/sharefriend/"+(String)MyUser.getObjectByKey("username")+"/head/";
         
-        if(file.exists()){
-        	try {
-    			InputStream is=new FileInputStream(file);
-    			
-    			BitmapFactory.Options opts=new BitmapFactory.Options();
-    			opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
-    			
-    			opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
-    			opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
-    			
-    			opts.inSampleSize=2;
-    			opts.inInputShareable=true;//设置解码位图的尺寸信息
-    			
-    			Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
-    			circleImageView.setImageBitmap(bitmap2);
-    		} catch (FileNotFoundException e1) {
-    			// TODO Auto-generated catch block
-    			e1.printStackTrace();
-    		}
-
-        }
-        
-        if(myUser.getTouXiangUrl()!=null)
-        new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				 final Bitmap bitmap= Utility.getPicture(myUser.getTouXiangUrl());
-                 runOnUiThread(new Runnable() {
-			 		
-					@Override
-					public void run() {
-						if(bitmap!=null){
-					     	circleImageView.setImageBitmap(bitmap);
-					     	download.saveYonghuPic(bitmap, myUser.getObjectId());
-						} else if(file.exists()){
-				        	try {
-				    			InputStream is=new FileInputStream(file);
-				    			
-				    			BitmapFactory.Options opts=new BitmapFactory.Options();
-				    			opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
-				    			
-				    			opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
-				    			opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
-				    			
-				    			opts.inSampleSize=2;
-				    			opts.inInputShareable=true;//设置解码位图的尺寸信息
-				    			
-				    			Bitmap bitmap2=BitmapFactory.decodeStream(is, null, opts);
-				    			circleImageView.setImageBitmap(bitmap2);
-				    		} catch (FileNotFoundException e1) {
-				    			// TODO Auto-generated catch block
-				    			e1.printStackTrace();
-				    		}
-
-						}else {
-							 try {
-									InputStream is=new FileInputStream(file);
-									
-									BitmapFactory.Options opts=new BitmapFactory.Options();
-									opts.inTempStorage=new byte[100*1024];   //为位图设置100K的缓存
-									
-									opts.inPreferredConfig=Bitmap.Config.RGB_565;//设置位图颜色显示优化方式
-									opts.inPurgeable=true;//.设置图片可以被回收，创建Bitmap用于存储Pixel的内存空间在系统内存不足时可以被回收
-									
-									opts.inSampleSize=2;
-									opts.inInputShareable=true;//设置解码位图的尺寸信息
-									
-									Bitmap bitmap2=BitmapFactory.decodeResource(getResources(),R.drawable.userpicture, opts);
-									circleImageView.setImageBitmap(bitmap2);
-								} catch (FileNotFoundException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-						  }
-						
-						
-					}
-				});
-			
-			}
-		}).start();
+    
        
         final String arr[]=new String[]{
     	    	"男",
@@ -280,6 +208,27 @@ public class xiangxiDataAct extends baseActivity {
  	 	  if(myUser.getGuxiang()!=null)
  	 	    editText7.setText(myUser.getGuxiang());
  	     
+         new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				 final Bitmap bitmap= Utility.getPicture(myUser.getTouXiangUrl());
+                 runOnUiThread(new Runnable() {
+			 		
+					@Override
+					public void run() {
+						if(bitmap!=null){
+					     	circleImageView.setImageBitmap(bitmap);
+					     
+						} 
+					}
+                 }
+			
+	      	); 
+			}
+	     }).start();
+ 	 	  
+ 	 	  
  	 	    circleImageView.setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -365,8 +314,27 @@ public class xiangxiDataAct extends baseActivity {
 					    	  Date curDate=new Date(System.currentTimeMillis());
 					    	  String str=format.format(curDate);  
 							
-							  BmobFile bmobFile=new BmobFile(str+".png",null,path);//确定文件名字（头像.png）和网络地址
-							  download.downloadFile1(bmobFile,xiangxiDataAct.this);//进行下载操作
+							  BmobFile bmobFile=new BmobFile(myUser.getObjectId()+".jpg",null,myUser.getTouXiangUrl());//确定文件名字（头像.png）和网络地址
+							  File saveFile=new File(path,bmobFile.getFilename());
+							  bmobFile.download(saveFile,new DownloadFileListener() {
+								
+								@Override
+								public void onProgress(Integer arg0, long arg1) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void done(String savePath, BmobException e) {
+									 if(e==null){
+										 Toast.makeText(xiangxiDataAct.this,"下载成功，保存路径："+savePath, Toast.LENGTH_SHORT).show();
+									 }else {
+										 Toast.makeText(xiangxiDataAct.this,"失败，"+e.getMessage(), Toast.LENGTH_SHORT).show();
+									}
+									
+									
+								}
+							});
 						    }
 			 			}
 			 		});

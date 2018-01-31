@@ -1,6 +1,7 @@
 package Util;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,10 +23,12 @@ import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
 
 public class Utility {
+	
 	public static int dip2px(Context context, float dpValue) {  
         final float scale = context.getResources().getDisplayMetrics().density;  
         return (int) (dpValue * scale + 0.5f);  
     }  
+	
 	  public static int px2dip(Context context, float pxValue) {  
 	        final float scale = context.getResources().getDisplayMetrics().density;  
 	        return (int) (pxValue / scale + 0.5f);  
@@ -120,23 +123,12 @@ public class Utility {
 	}
  
    
-     public static void handleAreaByXY(String response,Context context)
-     {   SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
-    	 try{
-    		 JSONObject jsonObject=new JSONObject(response);
-    		 JSONObject jsonObject2=jsonObject.getJSONObject("showapi_res_body");
-    		 JSONObject jsonObject3=jsonObject2.getJSONObject("addressComponent");
-    		 String locProvince=jsonObject3.getString("province");
-    		 String locCity=jsonObject3.getString("city");
-    		 String locDistrict=jsonObject3.getString("district");
-    		 editor.putString("locProvice", locProvince);
-    		 editor.putString("locCity", locCity);
-    		 editor.putString("locDistrict",locDistrict);
-    		 editor.commit();
-    	 }catch(Exception e)
-    	 {
-    		 e.printStackTrace();
-    	 }
+    
+     
+     public static byte[] Bitmap2Bytes(Bitmap bm){
+    	 ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    	 bm.compress(Bitmap.CompressFormat.PNG,100, baos);
+    	 return baos.toByteArray();
      }
      
 }

@@ -1,18 +1,25 @@
 package wxapi;
 
+import rx.internal.util.UtilityFunctions;
+
+import com.koushikdutta.async.Util;
 import com.sharefriend.app.R;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
+import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+import Util.Utility;
 import activity.fragmentChat;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -37,17 +44,21 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 		api.handleIntent(getIntent(), this);
 		
 		
-		WXTextObject textObject=new WXTextObject();
-		textObject.text="这里有个好玩的app，一起来玩吧";
+		WXWebpageObject webpage=new WXWebpageObject();
+		webpage.webpageUrl="http://sharefriend.bmob.site/";
 		
-		WXMediaMessage msg=new WXMediaMessage();
-		msg.mediaObject=textObject;
+		WXMediaMessage msg=new WXMediaMessage(webpage);
+		msg.title="朋友，我在等你哦";
 		msg.description="这里有个好玩的app，一起来玩吧";
+		Bitmap thumb=BitmapFactory.decodeResource(getResources(), R.drawable.log);
+		msg.thumbData=Utility.Bitmap2Bytes(thumb);
+		
 		
 		SendMessageToWX.Req req=new SendMessageToWX.Req();
-		req.transaction=buildTransaction("text");
+		req.transaction=buildTransaction("webpage");
 		req.message=msg;
-		req.scene=SendMessageToWX.Req.WXSceneSession;
+		
+		req.scene=SendMessageToWX.Req.WXSceneTimeline;
 		
 		api.sendReq(req);
 		finish();

@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,6 +23,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.ContactsContract.Contacts.Data;
 import android.support.v4.view.PagerAdapter;
@@ -180,6 +182,8 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     PopupWindow popupWindow;
     BmobIMUserInfo userInfo;
     
+    private SharedPreferences pre;
+    
     boolean isKeFu=false;
     boolean once1=true;   //对应着回复“您好”
     boolean once2=true;   //对应着回复“后期大力推广”
@@ -278,7 +282,9 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
         user89=(ImageView)findViewById(R.id.user89);  //对方用户头标
         threeCircle=(ImageView)findViewById(R.id.threeCircle);
         
-        int designNum=fragmentChat.pre.getInt("design", 0);
+    	pre=PreferenceManager.getDefaultSharedPreferences(this);
+        
+        int designNum=pre.getInt("design", 0);
 		
 		if(designNum==4){
 			ll_chat.setBackgroundColor(Color.parseColor("#051C3D"));
@@ -945,6 +951,7 @@ public class ChatActivity extends baseActivity implements ObseverListener,Messag
     	  Toast.makeText(ChatActivity.this,"sdcard不可用",Toast.LENGTH_SHORT).show();
     	 }
     	}
+    
     private void initSwipeLayout(){
         sw_refresh.setEnabled(true);
         layoutManager = new LinearLayoutManager(this);

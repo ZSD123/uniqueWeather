@@ -85,17 +85,18 @@ public class weather_info extends baseFragmentActivity {
 	 public static myUserDB myUserdb;
      public static String objectId;      //统一调用的objectId
      private AlertDialog dialog1;
-     public static MyUser currentUser;
+     private  MyUser currentUser;
      private java.util.Date date;
      private AlertDialog dialog2;
 	@Override
 	public void onCreate(Bundle savedInstance)
-	{    currentUser=BmobUser.getCurrentUser(MyUser.class);
-	     int isQQ=getIntent().getIntExtra("isQQ", 0);
+	
+	{    
+		currentUser=BmobUser.getCurrentUser(MyUser.class);
 	     
 	     if(currentUser!=null){    
 	    	objectId=currentUser.getObjectId();
-	    }
+	     }
 	     
 	    zhudongLogin=getIntent().getIntExtra("login", 0);
 	    
@@ -706,13 +707,6 @@ public class weather_info extends baseFragmentActivity {
         Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);//把ByteArrayInputStream数据生成图片
         return bitmap;
     }
-	private int checkLocalAndWebFriend(List<Friend> Webfriends,Friend friend){   
-		  for (int i = 0; i < Webfriends.size(); i++) {
-			    if(Webfriends.get(i).getFriendUser().getObjectId().equals(friend.getFriendUser().getObjectId())){
-			    	  return 1;
-			     }
-	    	}
-		  return 2;
-	 }
+	
 	
 }

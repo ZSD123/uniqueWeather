@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fujin_relative"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    
+    >
+  <RelativeLayout 
+     android:id="@+id/re"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:background="#FFFFF0"
+     >
+     <ImageView 
+         android:id="@+id/cha"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:src="@drawable/icon_close"
+         android:layout_alignParentRight="true"
+         />
+ </RelativeLayout>
+<RelativeLayout
+    android:id="@+id/fujin_sha"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/re"
+    android:background="#FFFFFF" >
+
+  <myCustomView.CircleImageView
+      android:id="@+id/shareObject_data_image"
+      android:src="@drawable/ic_launcher"
+      android:layout_width="100dp"
+      android:layout_height="100dp"/>
+  <TableLayout 
+      android:layout_toRightOf="@id/shareObject_data_image"
+      android:layout_marginLeft="5dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      >
+      <TableRow >
+     <TextView 
+      android:id="@+id/yonghu_data_nicktext"
+      android:text="物品:"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textSize="20sp"
+      />
+        <TextView 
+        android:id="@+id/shareObject_data_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        
+      />
+        <ImageView 
+            android:id="@+id/right42"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/right42"
+            />
+   
+      </TableRow>
+  
+   <TableRow >
+     <TextView 
+  
+      android:id="@+id/yonghu_data_sextext"
+      android:text="持有者:"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textSize="20sp"
+      />
+        <TextView 
+        android:id="@+id/shareObject_myUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+      />
+            <ImageView 
+            android:id="@+id/right43"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/right42"
+            />
+        
+   
+      </TableRow>
+      
+   
+   
+    <TableRow >
+     <TextView 
+  
+      android:id="@+id/yonghu_data_agetext"
+      android:text="地址:"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      />
+        <TextView 
+        android:id="@+id/shareObject_data_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+      />
+     </TableRow>
+     
+     </TableLayout>
+    
+ 
+  
+  </RelativeLayout>
+  
+
+
+  <LinearLayout 
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:layout_below="@id/fujin_sha"
+      android:background="#F0FFFF"
+      android:padding="5dp"
+      >
+      <TextView
+          android:id="@+id/use"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:gravity="center"
+          android:textSize="20sp"
+          android:text="使用"/>
+      <TextView
+          android:id="@+id/sendMsg"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:gravity="center"
+          android:textSize="20sp"
+          android:text="发信息"/>
+
+         <TextView
+          android:id="@+id/calltu"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:gravity="center"
+          android:textSize="20sp"
+          android:text="打电话"/>
+      
+  </LinearLayout>
+</RelativeLayout>

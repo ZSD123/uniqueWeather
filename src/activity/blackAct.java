@@ -16,11 +16,13 @@ import activity.manageAct.ViewHolder;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +55,8 @@ public class blackAct extends baseActivity {
     ViewHolder viewHolder;
     List<Black> blackUsers;
     
+    private SharedPreferences pre;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -61,7 +65,9 @@ public class blackAct extends baseActivity {
 		RelativeLayout relativeLayout=(RelativeLayout)findViewById(R.id.relative);
 		CustomFontTextView textView=(CustomFontTextView)findViewById(R.id.account);
 		
-		final int designNum=fragmentChat.pre.getInt("design", 0);
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
+		final int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			relativeLayout.setBackgroundColor(Color.parseColor("#051C3D"));
 			textView.setTextColor(Color.parseColor("#A2C0DE"));

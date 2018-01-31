@@ -207,6 +207,36 @@
             android:name="activity.designAct"
             android:screenOrientation="portrait"
             ></activity>
+              <activity
+                android:name="activity.map_mine"
+                android:screenOrientation="portrait"
+                  >
+                  
+              </activity>
+               <activity 
+                   android:name="mapAct.share_historyAct"
+                   android:screenOrientation="portrait"
+                   ></activity>
+                  
+             <activity 
+                 android:name="activity.mobileVerifyAct"
+                 android:screenOrientation="portrait"
+                 ></activity>
+             <activity 
+                 android:name="mapAct.iwantShareAct"
+                 android:screenOrientation="portrait"
+                 ></activity>
+             
+               <activity 
+                 android:name="mapAct.shareObject_XiangXiDataAct"
+                 android:screenOrientation="portrait"
+                 ></activity>
+               
+                 <activity 
+                 android:name="mapAct.shareObject_UserXiang"
+                 android:screenOrientation="portrait"
+                 ></activity>
+                  
              <activity
                  android:name="wxapi.WXEntryActivity"
                  android:label="@string/app_name"

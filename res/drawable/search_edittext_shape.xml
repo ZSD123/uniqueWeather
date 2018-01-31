@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- corners表示定义圆角，android:radius表示圆角半径 -->
+    
+	<corners android:radius="14dp"/>
+	
+	<!-- stroke表示描边属性，可以定义描边的宽度、颜色、虚实线等 -->
+	
+	<stroke android:width="2dp" android:color="@color/darkgray"/>
+	
+	<!-- solid表示内部填充色-->
+	
+	<solid android:color="@color/base_color_text_white"/>
+	
+	<!--padding：用来定义内部边距 -->
+	
+	<padding android:top="8dp" android:bottom="8dp" android:left="5dp"/>
+</shape>

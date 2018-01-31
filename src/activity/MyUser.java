@@ -17,7 +17,14 @@ public class MyUser extends BmobUser {
 	private String installationId;     //设备码
 	private Boolean canCall;
     private Boolean isQQ;
-	
+	private Integer credit;    //共享信用
+    
+	public Integer getCredit() {
+		return credit;
+	}
+	public void setCredit(Integer credit) {
+		this.credit = credit;
+	}
 	public Boolean isQQ() {
 		return isQQ;
 	}

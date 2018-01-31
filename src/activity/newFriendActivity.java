@@ -50,12 +50,14 @@ import android.app.AlertDialog;
 import android.app.DownloadManager.Query;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,12 +80,19 @@ public class newFriendActivity extends baseActivity {
    private NewFriendManager newFriendManager;
    private List<NewFriend> newFriends=new ArrayList<NewFriend>();  //要删除的添加朋友信息
    public static newFriendAdapter bAdapter;
+   
+   private SharedPreferences pre;
+   
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.new_friend_list);
 	
+		
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		
+		
 		TextView newfriendtext=(TextView)findViewById(R.id.newfriendtext);
 		LinearLayout lin=(LinearLayout)findViewById(R.id.lin);
 		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
@@ -98,7 +107,7 @@ public class newFriendActivity extends baseActivity {
 	    buttonGuan=(Button)findViewById(R.id.btnGuan);
 	    
 	    
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			relative.setBackgroundColor(Color.parseColor("#122950"));
 			lin.setBackgroundColor(Color.parseColor("#051C3D"));

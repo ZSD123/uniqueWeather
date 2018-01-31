@@ -57,9 +57,12 @@ public class mapActivity extends FragmentActivity {
 
 	@Override
 	public void onBackPressed() {
-		if(fragmentMap.yonghuDataView!=null){
-			fragmentMap.fuzhiMap.removeView(fragmentMap.yonghuDataView);
-			fragmentMap.yonghuDataView=null;
+		if(fragmentMap.fujinData!=null){
+			fragmentMap.fuzhiMap.removeView(fragmentMap.fujinData);
+			fragmentMap.fujinData=null;
+		}else if(fragmentMap.addressData!=null){
+			fragmentMap.fuzhiMap.removeView(fragmentMap.addressData);
+			fragmentMap.addressData=null;
 		}else {
 			super.onBackPressed();
 		}

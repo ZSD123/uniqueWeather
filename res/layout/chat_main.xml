@@ -58,11 +58,12 @@
 
      >
      <Button
-
+          
          android:id="@+id/chat_mes"
          android:layout_width="0dp"
          android:layout_height="40dp"
-          android:gravity="center_horizontal"
+         android:gravity="center_horizontal"
+         android:padding="5dp"
          android:text="消息"
          android:textSize="20sp"
          android:textColor="#68B4FF"
@@ -78,6 +79,7 @@
          android:gravity="center_horizontal"
          android:layout_weight="1"
          android:textSize="20sp"
+         android:padding="5dp"
          android:background="@drawable/white0"
           android:text="联系人"/>
     <ImageView

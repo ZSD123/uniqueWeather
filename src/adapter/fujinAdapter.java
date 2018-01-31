@@ -25,10 +25,12 @@ import adapter.friendAdapter.friendViewHolder;
 import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -45,12 +47,13 @@ public class fujinAdapter extends Adapter<RecyclerView.ViewHolder> {
     private int count;
     private List<MyUser> list;
     private Context mContext;
+    private SharedPreferences pre;
     public fujinAdapter(int count,Context mContext,List<MyUser> list){
   
     	this.count=count;
     	this.mContext=mContext;
     	this.list=list;
-   
+    	pre=PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 	@Override
 	public int getItemCount() {
@@ -144,7 +147,7 @@ public class fujinAdapter extends Adapter<RecyclerView.ViewHolder> {
 				}
 		}
 
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 		if(designNum==4){
 			((fujinrenViewHolder)holder).tv_name.setTextColor(Color.parseColor("#A2C0DE"));
 			((fujinrenViewHolder)holder).tv_distance.setTextColor(Color.parseColor("#A2C0DE"));
@@ -166,8 +169,8 @@ public class fujinAdapter extends Adapter<RecyclerView.ViewHolder> {
 	
 		int distanceofAbs=fujinlieAct.fujinliedb.getDistanceById(list.get(position).getObjectId());
 		
-		if(distanceofAbs>10000){
-			((fujinrenViewHolder)holder).tv_distance.setText(">10km");
+		if(distanceofAbs>1000000){
+			((fujinrenViewHolder)holder).tv_distance.setText(">1000km");
 		}else if(distanceofAbs<100){
 			((fujinrenViewHolder)holder).tv_distance.setText("<100m");
 		}else {

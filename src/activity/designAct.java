@@ -42,6 +42,8 @@ public class designAct extends baseActivity {
     private int designNum;
     private int yuanNum;   //原来的Num
     
+    private SharedPreferences pre;
+    private SharedPreferences.Editor editor;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,9 +56,12 @@ public class designAct extends baseActivity {
 	
 		
 		gridView=(GridView)findViewById(R.id.gridview);
-
+      
+		pre=PreferenceManager.getDefaultSharedPreferences(this);
+		editor=PreferenceManager.getDefaultSharedPreferences(this).edit();
 		
-		designNum=fragmentChat.pre.getInt("design", 0);
+		
+		designNum=pre.getInt("design", 0);
 		
 		if(designNum==4){
 			rLayout.setBackgroundColor(Color.parseColor("#051C3D"));
@@ -89,8 +94,8 @@ public class designAct extends baseActivity {
 				designNum=position;
 				sim_adapter.notifyDataSetChanged();
 				
-				fragmentChat.editor.putInt("design", position);
-				fragmentChat.editor.commit();
+				editor.putInt("design", position);
+				editor.commit();
 				
 				if(position!=yuanNum){
 			    	Toast.makeText(designAct.this, "正在加载请稍后",Toast.LENGTH_SHORT).show();

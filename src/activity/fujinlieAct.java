@@ -67,12 +67,16 @@ public class fujinlieAct extends baseActivity {
     public static  fujinlieDB fujinliedb;
     
     private int num;  //查询的次数
+    
+    private MyUser currentUser;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.fujin_yonghu_lie);
+		
+		currentUser=MyUser.getCurrentUser(MyUser.class);
 		
 		RelativeLayout relative=(RelativeLayout)findViewById(R.id.relative);
 		CustomFontTextView textView1=(CustomFontTextView)findViewById(R.id.text);
@@ -98,11 +102,11 @@ public class fujinlieAct extends baseActivity {
 			
 		}
 	    
-		lat=fragmentMap.pre.getFloat("lat", 39);
-		lon=fragmentMap.pre.getFloat("lon",116);
+		lat=pre.getFloat("lat", 39);
+		lon=pre.getFloat("lon",116);
 		
 		BmobQuery<location> bmobQuery=new BmobQuery<location>();
-		bmobQuery.addWhereNotEqualTo("myUser", weather_info.currentUser);
+		bmobQuery.addWhereNotEqualTo("myUser",currentUser);
 		bmobQuery.setLimit(50);
 		bmobQuery.order("-updateAt");
 		bmobQuery.findObjects(new FindListener<location>() {

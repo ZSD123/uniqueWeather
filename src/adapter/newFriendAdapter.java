@@ -40,10 +40,12 @@ import activity.newFriendActivity;
 import android.R.integer;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,10 +69,15 @@ public class newFriendAdapter extends BaseAdapter {
 	private List<NewFriend> newFriends=new ArrayList<NewFriend>();
     public  int state=8;
    private  List<Integer> intlist=new ArrayList<Integer>();
+   
+   private SharedPreferences pre;
+   
 	public newFriendAdapter(Context context,NewFriendManager manager){
 		mContext=context;
 		newFriends=manager.getAllNewFriend();
 		this.manager=manager;
+		pre=PreferenceManager.getDefaultSharedPreferences(mContext);
+		
 	}
     class ViewHolder{
     	TextView newFriendBeizhu;
@@ -104,7 +111,7 @@ public class newFriendAdapter extends BaseAdapter {
 	@Override
 	public View getView(  final int position, View convertView, ViewGroup parent) {
 		
-		int designNum=fragmentChat.pre.getInt("design", 0);
+		int designNum=pre.getInt("design", 0);
 
 		
         final ViewHolder viewHolder;
